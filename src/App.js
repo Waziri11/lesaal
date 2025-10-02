@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { ThemeProvider, useTheme } from './ThemeContext';
+import ServicesPage from './ServicesPage';
 
 function AppContent() {
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [currentPage, setCurrentPage] = useState('home');
   const { isDarkMode, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -22,6 +24,37 @@ function AppContent() {
     });
   };
 
+  if (currentPage === 'services') {
+    return (
+      <div className="App">
+        {/* Header */}
+        <header className="header">
+          <div className="container">
+            <div className="nav">
+              <div className="logo" onClick={() => setCurrentPage('home')} style={{cursor: 'pointer'}}>
+                <span className="logo-arrow">&gt;</span>
+                <span className="logo-main">LESAAL</span>
+                <span className="logo-sub">MARKETING</span>
+              </div>
+              <nav className="nav-links">
+                <button 
+                  className="nav-link-button" 
+                  onClick={() => setCurrentPage('home')}
+                >
+                  ← BACK TO HOME
+                </button>
+              </nav>
+              <button className="theme-toggle" onClick={toggleTheme}>
+                {isDarkMode ? '☀️' : '🌙'}
+              </button>
+            </div>
+          </div>
+        </header>
+        <ServicesPage />
+      </div>
+    );
+  }
+
   return (
     <div className="App">
       {/* Header */}
@@ -29,13 +62,18 @@ function AppContent() {
         <div className="container">
           <div className="nav">
             <div className="logo">
-              <span className="logo-arrow">></span>
+              <span className="logo-arrow">&gt;</span>
               <span className="logo-main">LESAAL</span>
               <span className="logo-sub">MARKETING</span>
             </div>
             <nav className="nav-links">
               <a href="#work">OUR WORK</a>
-              <a href="#services">ALL SERVICES</a>
+              <button 
+                className="nav-link-button" 
+                onClick={() => setCurrentPage('services')}
+              >
+                ALL SERVICES
+              </button>
               <a href="#social">SOCIAL MEDIA</a>
               <a href="#website">WEBSITE & SEO</a>
               <a href="#linkedin">LINKEDIN</a>

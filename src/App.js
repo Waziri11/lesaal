@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import { ThemeProvider, useTheme } from './ThemeContext';
 
-function App() {
+function AppContent() {
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,6 +41,9 @@ function App() {
               <a href="#linkedin">LINKEDIN</a>
               <a href="#blogs">BLOGS ↓</a>
             </nav>
+            <button className="theme-toggle" onClick={toggleTheme}>
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
             <button className="cta-button">LET'S TALK</button>
           </div>
         </div>
@@ -320,6 +325,14 @@ function App() {
         </button>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

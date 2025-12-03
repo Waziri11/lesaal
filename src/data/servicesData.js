@@ -6,7 +6,7 @@ export const servicesData = [
     shortDescription: "Complete brand identity and visual design",
     price: "TZS 100,000",
     image: "🎨",
-    realImage: "https://images.unsplash.com/photo-1558655146-d09347e92766?w=800&h=600&fit=crop",
+    realImage: "/src/images/services/brand-design.jpg",
     fullDescription: "We create comprehensive brand identities that resonate with your target audience. Our brand design service includes logo design, color palette development, typography selection, and brand guidelines that ensure consistency across all touchpoints.",
     features: ["Logo Design", "Brand Guidelines", "Color Palette", "Typography Selection", "Brand Strategy"],
     testimonials: [
@@ -14,14 +14,14 @@ export const servicesData = [
         name: "Sarah Johnson",
         company: "TechStart Solutions",
         role: "CEO",
-        image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+        image: "/src/images/testimonials/sarah-johnson.jpg",
         quote: "Amazing brand transformation! Lesaal Marketing completely rebranded our company and we've seen a 200% increase in brand recognition."
       },
       {
         name: "Michael Chen",
         company: "GrowthCo",
         role: "Founder",
-        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+        image: "/src/images/testimonials/michael-chen.jpg",
         quote: "Professional and creative team. They understood our vision and delivered beyond our expectations."
       },
       {
@@ -39,7 +39,7 @@ export const servicesData = [
     shortDescription: "Complete social media strategy and management",
     price: "TZS 200,000",
     image: "📱",
-    realImage: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop",
+    realImage: "/src/images/services/social-media-management.jpg",
     fullDescription: "Our social media management service helps you build a strong online presence across all platforms. We create engaging content, manage your accounts, and grow your following with strategic campaigns.",
     features: ["Content Creation", "Account Management", "Community Engagement", "Analytics & Reporting", "Growth Strategy"],
     testimonials: [
@@ -72,7 +72,7 @@ export const servicesData = [
     shortDescription: "High-quality content for all your marketing needs",
     price: "TZS 200,000",
     image: "✍️",
-    realImage: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop",
+    realImage: "/src/images/services/content-creation.jpg",
     fullDescription: "We create compelling content that drives engagement and conversions. From blog posts to video content, our team produces high-quality materials that align with your brand voice and marketing goals.",
     features: ["Blog Writing", "Video Production", "Graphic Design", "Copywriting", "Content Strategy"],
     testimonials: [
@@ -105,7 +105,7 @@ export const servicesData = [
     shortDescription: "Client and competitor data collection and analysis",
     price: "TZS 325,000",
     image: "📊",
-    realImage: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+    realImage: "/src/images/services/data-analysis.jpg",
     fullDescription: "Gain valuable insights with our data scraping and analysis services. We collect and analyze client and competitor data to help you make informed business decisions and stay ahead of the competition.",
     features: ["Competitor Analysis", "Market Research", "Data Collection", "Insights & Reports", "Strategic Recommendations"],
     testimonials: [

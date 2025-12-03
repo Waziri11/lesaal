@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import './styles/App.css';
+import { ConfigProvider, Layout, Typography, Button, Card, Row, Col, Space, Avatar, FloatButton, theme } from 'antd';
+import { BulbOutlined, SunOutlined, ArrowUpOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { ThemeProvider, useTheme } from './ThemeContext';
 import ServicesPage from './ServicesPage';
+import './styles/App.css';
+
+const { Header, Content } = Layout;
+const { Title, Paragraph, Text } = Typography;
+const { darkAlgorithm } = theme;
 
 function AppContent() {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -26,343 +32,662 @@ function AppContent() {
 
   if (currentPage === 'services') {
     return (
-      <div className="App">
-        {/* Header */}
-        <header className="header">
-          <div className="container">
-            <div className="nav">
-              <div className="logo" onClick={() => setCurrentPage('home')} style={{cursor: 'pointer'}}>
-                <span className="logo-arrow">&gt;</span>
-                <span className="logo-main">LESAAL</span>
-                <span className="logo-sub">MARKETING</span>
-              </div>
-              <nav className="nav-links">
-                <button 
-                  className="nav-link-button" 
-                  onClick={() => setCurrentPage('home')}
-                >
-                  ← BACK TO HOME
-                </button>
-              </nav>
-              <button className="theme-toggle" onClick={toggleTheme}>
-                {isDarkMode ? '☀️' : '🌙'}
-              </button>
-            </div>
-          </div>
-        </header>
-        <ServicesPage />
-      </div>
+      <ConfigProvider theme={isDarkMode ? { algorithm: darkAlgorithm } : {}}>
+        <Layout className="App" style={{ minHeight: '100vh' }}>
+          <Header style={{ 
+            position: 'fixed', 
+            top: 0, 
+            width: '100%', 
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 24px',
+            background: isDarkMode ? '#141414' : '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          }}>
+            <Space>
+              <Text 
+                strong 
+                style={{ fontSize: '20px', cursor: 'pointer' }}
+                onClick={() => setCurrentPage('home')}
+              >
+                <Text style={{ color: '#f59e0b' }}>&gt;</Text>
+                <Text>LESAAL</Text>
+                <Text type="secondary" style={{ fontSize: '14px', marginLeft: '4px' }}>MARKETING</Text>
+              </Text>
+            </Space>
+            <Space>
+              <Button type="text" onClick={() => setCurrentPage('home')}>
+                ← BACK TO HOME
+              </Button>
+              <Button 
+                type="text" 
+                icon={isDarkMode ? <SunOutlined /> : <BulbOutlined />}
+                onClick={toggleTheme}
+              />
+            </Space>
+          </Header>
+          <Content style={{ marginTop: 64 }}>
+            <ServicesPage />
+          </Content>
+        </Layout>
+      </ConfigProvider>
     );
   }
 
   return (
-    <div className="App">
-      {/* Header */}
-      <header className="header">
-        <div className="container">
-          <div className="nav">
-            <div className="logo">
-              <span className="logo-arrow">&gt;</span>
-              <span className="logo-main">LESAAL</span>
-              <span className="logo-sub">MARKETING</span>
+    <ConfigProvider theme={isDarkMode ? { algorithm: darkAlgorithm } : {}}>
+      <Layout className="App" style={{ minHeight: '100vh' }}>
+        <Header style={{ 
+          position: 'fixed', 
+          top: 0, 
+          width: '100%', 
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 24px',
+          background: isDarkMode ? '#141414' : '#fff',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <Space>
+            <Text strong style={{ fontSize: '20px' }}>
+              <Text style={{ color: '#f59e0b' }}>&gt;</Text>
+              <Text>LESAAL</Text>
+              <Text type="secondary" style={{ fontSize: '14px', marginLeft: '4px' }}>MARKETING</Text>
+            </Text>
+          </Space>
+          <Space>
+            <Button type="text" href="#work">OUR WORK</Button>
+            <Button type="text" onClick={() => setCurrentPage('services')}>ALL SERVICES</Button>
+            <Button type="text" href="#social">SOCIAL MEDIA</Button>
+            <Button type="text" href="#website">WEBSITE & SEO</Button>
+            <Button type="text" href="#linkedin">LINKEDIN</Button>
+            <Button type="text" href="#blogs">BLOGS ↓</Button>
+            <Button 
+              type="text" 
+              icon={isDarkMode ? <SunOutlined /> : <BulbOutlined />}
+              onClick={toggleTheme}
+            />
+            <Button type="primary" style={{ background: '#f59e0b', borderColor: '#f59e0b' }}>LET'S TALK</Button>
+          </Space>
+        </Header>
+        <Content style={{ marginTop: 64 }}>
+
+          {/* Hero Section */}
+          <div style={{ padding: '120px 24px 80px', background: isDarkMode ? '#141414' : '#fff' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <Row gutter={[48, 48]} align="middle">
+                <Col xs={24} lg={12}>
+                  <Title level={1} style={{ fontSize: '56px', lineHeight: 1.2, marginBottom: 24 }}>
+                    Turning <Text style={{ color: '#f59e0b' }}>online</Text> attention into paying <Text style={{ color: '#f59e0b' }}>customers</Text>
+                  </Title>
+                  <Paragraph style={{ fontSize: '20px', marginBottom: 32, opacity: 0.9 }}>
+                    Likes don't pay the bills. Opportunities do. We help your business turn its online presence into a client magnet. 
+                    No corporate red tape. No hype marketing. Just real momentum.
+                  </Paragraph>
+                  <Space direction="vertical" size="middle" style={{ marginBottom: 32, width: '100%' }}>
+                    <Space>
+                      <Text style={{ color: '#f59e0b', fontSize: '20px', fontWeight: 'bold' }}>✓</Text>
+                      <Text style={{ fontSize: '18px' }}>Turn social reach into qualified leads</Text>
+                    </Space>
+                    <Space>
+                      <Text style={{ color: '#f59e0b', fontSize: '20px', fontWeight: 'bold' }}>✓</Text>
+                      <Text style={{ fontSize: '18px' }}>Get a website that works as hard as you do</Text>
+                    </Space>
+                    <Space>
+                      <Text style={{ color: '#f59e0b', fontSize: '20px', fontWeight: 'bold' }}>✓</Text>
+                      <Text style={{ fontSize: '18px' }}>Earn authority in your market</Text>
+                    </Space>
+                  </Space>
+                  <Button 
+                    type="primary" 
+                    size="large"
+                    style={{ 
+                      background: '#0ea5e9', 
+                      borderColor: '#0ea5e9',
+                      height: '48px',
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      padding: '0 32px'
+                    }}
+                  >
+                    Work with Us <ArrowRightOutlined />
+                  </Button>
+                </Col>
+                <Col xs={24} lg={12}>
+                  <div style={{ 
+                    height: 400, 
+                    position: 'relative',
+                    background: isDarkMode ? '#1f1f1f' : '#f0f9ff',
+                    borderRadius: '12px',
+                    padding: '20px'
+                  }}>
+                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                      <div style={{
+                        position: 'absolute',
+                        left: '20%',
+                        top: '20%',
+                        width: 60,
+                        height: 80,
+                        background: isDarkMode ? '#fff' : '#000',
+                        borderRadius: '30px 30px 0 0',
+                        transform: 'rotate(-15deg)'
+                      }}></div>
+                      <div style={{
+                        position: 'absolute',
+                        right: '30%',
+                        top: '10%',
+                        width: 120,
+                        height: 60,
+                        background: isDarkMode ? '#fff' : '#000',
+                        borderRadius: '50px',
+                        opacity: 0.8
+                      }}></div>
+                      <div style={{
+                        position: 'absolute',
+                        right: '20%',
+                        bottom: '20%',
+                        width: 40,
+                        height: 60,
+                        background: isDarkMode ? '#141414' : '#fff',
+                        borderRadius: '20px 20px 0 0'
+                      }}></div>
+                      <Space style={{ position: 'absolute', top: '10%', left: '10%' }}>
+                        <Avatar style={{ background: '#0ea5e9' }}>f</Avatar>
+                        <Avatar style={{ background: '#f59e0b' }}>P</Avatar>
+                        <Avatar style={{ background: '#0ea5e9' }}>in</Avatar>
+                        <Avatar style={{ background: '#f59e0b' }}>📷</Avatar>
+                        <Avatar style={{ background: '#0ea5e9' }}>🐦</Avatar>
+                      </Space>
+                    </div>
+                  </div>
+                </Col>
+              </Row>
             </div>
-            <nav className="nav-links">
-              <a href="#work">OUR WORK</a>
-              <button 
-                className="nav-link-button" 
-                onClick={() => setCurrentPage('services')}
+          </div>
+
+          {/* Problems Section */}
+          <div id="problems" style={{ padding: '80px 24px', background: isDarkMode ? '#141414' : '#fff' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <Title level={2} style={{ textAlign: 'center', fontSize: '40px', marginBottom: 16 }}>
+                What <Text style={{ color: '#f59e0b' }}>problems</Text> do we <Text style={{ color: '#f59e0b' }}>solve</Text>?
+              </Title>
+              <Paragraph style={{ textAlign: 'center', fontSize: '20px', marginBottom: 48 }}>
+                We fix marketing problems that <strong>cost you</strong> a name, sales, and customers online.
+              </Paragraph>
+              
+              <Row gutter={[24, 24]}>
+                <Col xs={24} md={8}>
+                  <Card 
+                    style={{ 
+                      textAlign: 'center',
+                      background: '#f59e0b',
+                      border: 'none',
+                      height: '100%'
+                    }}
+                    bodyStyle={{ padding: '32px' }}
+                  >
+                    <div style={{ fontSize: '48px', marginBottom: 16 }}>📱</div>
+                    <Title level={3} style={{ color: '#fff', marginBottom: 16 }}>Your social media feels like a ghost town</Title>
+                    <Paragraph style={{ color: '#fff', textAlign: 'left' }}>
+                      Your posts get ignored, and engagement is dead. We fix that with smart, persuasive content that grabs attention and sparks conversations.
+                    </Paragraph>
+                  </Card>
+                </Col>
+                
+                <Col xs={24} md={8}>
+                  <Card 
+                    style={{ 
+                      textAlign: 'center',
+                      background: isDarkMode ? '#1f1f1f' : '#f0f9ff',
+                      border: '2px solid #0ea5e9',
+                      height: '100%'
+                    }}
+                    bodyStyle={{ padding: '32px' }}
+                  >
+                    <div style={{ fontSize: '48px', marginBottom: 16 }}>🧲</div>
+                    <Title level={3} style={{ marginBottom: 16 }}>Leads aren't consistently flowing in</Title>
+                    <Paragraph style={{ textAlign: 'left' }}>
+                      Relying on referrals is risky. We help you create an online presence that attracts the right customers—so you're no longer waiting and hoping.
+                    </Paragraph>
+                  </Card>
+                </Col>
+                
+                <Col xs={24} md={8}>
+                  <Card 
+                    style={{ 
+                      textAlign: 'center',
+                      background: '#f59e0b',
+                      border: 'none',
+                      height: '100%'
+                    }}
+                    bodyStyle={{ padding: '32px' }}
+                  >
+                    <div style={{ fontSize: '48px', marginBottom: 16 }}>📊</div>
+                    <Title level={3} style={{ color: '#fff', marginBottom: 16 }}>Marketing feels like a full-time job</Title>
+                    <Paragraph style={{ color: '#fff', textAlign: 'left' }}>
+                      Digital marketing is a daily game—you pause, you lose! Don't let time or lack of expertise hold you back. Outsource to us, and we'll keep you consistent.
+                    </Paragraph>
+                  </Card>
+                </Col>
+              </Row>
+            </div>
+          </div>
+
+          {/* Solutions Section */}
+          <div id="solutions" style={{ padding: '80px 24px', background: isDarkMode ? '#1f1f1f' : '#f8fafc' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <Title level={2} style={{ textAlign: 'center', fontSize: '40px', marginBottom: 16 }}>
+                What we <Text style={{ color: '#f59e0b' }}>make happen</Text>
+              </Title>
+              <Paragraph style={{ textAlign: 'center', fontSize: '20px', marginBottom: 48 }}>
+                We don't sell tactics. We move the numbers that matter.
+              </Paragraph>
+              
+              <Row gutter={[24, 24]}>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card 
+                    hoverable
+                    style={{ textAlign: 'center', border: 'none' }}
+                    bodyStyle={{ padding: 0 }}
+                  >
+                    <div style={{
+                      height: 200,
+                      background: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '32px',
+                      marginBottom: 16
+                    }}>
+                      📱 💬 ❤️ ⭐
+                    </div>
+                    <Title level={3} style={{ marginBottom: 0 }}>Get More Leads</Title>
+                  </Card>
+                </Col>
+                
+                <Col xs={24} sm={12} lg={6}>
+                  <Card 
+                    hoverable
+                    style={{ textAlign: 'center', border: 'none' }}
+                    bodyStyle={{ padding: 0 }}
+                  >
+                    <div style={{
+                      height: 200,
+                      background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '32px',
+                      marginBottom: 16
+                    }}>
+                      💻 📱 💰
+                    </div>
+                    <Title level={3} style={{ marginBottom: 0 }}>Sell More Online</Title>
+                  </Card>
+                </Col>
+                
+                <Col xs={24} sm={12} lg={6}>
+                  <Card 
+                    hoverable
+                    style={{ textAlign: 'center', border: 'none' }}
+                    bodyStyle={{ padding: 0 }}
+                  >
+                    <div style={{
+                      height: 200,
+                      background: 'linear-gradient(135deg, #38bdf8 0%, #f59e0b 100%)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '32px',
+                      marginBottom: 16
+                    }}>
+                      👑 🎯
+                    </div>
+                    <Title level={3} style={{ marginBottom: 0 }}>Build a Personal Brand</Title>
+                  </Card>
+                </Col>
+                
+                <Col xs={24} sm={12} lg={6}>
+                  <Card 
+                    hoverable
+                    style={{ textAlign: 'center', border: 'none' }}
+                    bodyStyle={{ padding: 0 }}
+                  >
+                    <div style={{
+                      height: 200,
+                      background: 'linear-gradient(135deg, #fbbf24 0%, #0ea5e9 100%)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '32px',
+                      marginBottom: 16
+                    }}>
+                      🎯 📊
+                    </div>
+                    <Title level={3} style={{ marginBottom: 0 }}>Gain Strategic Clarity</Title>
+                  </Card>
+                </Col>
+              </Row>
+            </div>
+          </div>
+
+          {/* Testimonials Section */}
+          <div id="testimonials" style={{ padding: '80px 24px', background: isDarkMode ? '#1f1f1f' : '#f8fafc' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <Title level={2} style={{ textAlign: 'center', fontSize: '40px', marginBottom: 16 }}>
+                Real businesses. <Text style={{ color: '#f59e0b' }}>Real results</Text>
+              </Title>
+              <Paragraph style={{ textAlign: 'center', fontSize: '20px', marginBottom: 48 }}>
+                We've helped 30+ SMEs and 100s of Personal Brands.
+              </Paragraph>
+              
+              <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 48 }}>
+                <Col><Card size="small">Client 1</Card></Col>
+                <Col><Card size="small">Client 2</Card></Col>
+                <Col><Card size="small">Client 3</Card></Col>
+                <Col><Card size="small">Client 4</Card></Col>
+                <Col><Card size="small">Client 5</Card></Col>
+                <Col><Card size="small">Client 6</Card></Col>
+                <Col><Card size="small">Client 7</Card></Col>
+              </Row>
+
+              <Row gutter={[24, 24]} style={{ marginBottom: 48 }}>
+                <Col xs={24} lg={12}>
+                  <Card hoverable>
+                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                      <Space>
+                        <Avatar size={50} style={{ background: '#f59e0b' }}>SJ</Avatar>
+                        <Space direction="vertical" size={0}>
+                          <Text strong>Sarah Johnson</Text>
+                          <Text type="secondary">CEO, TechStart Solutions</Text>
+                          <Text type="secondary" style={{ fontSize: '12px' }}>2 weeks ago</Text>
+                        </Space>
+                      </Space>
+                      <Paragraph>
+                        "Lesaal Marketing transformed our online presence completely. Our lead generation increased by 300% in just 3 months. Their strategic approach and consistent execution made all the difference."
+                      </Paragraph>
+                      <Text type="secondary" italic style={{ fontSize: '14px' }}>As seen on LinkedIn</Text>
+                    </Space>
+                  </Card>
+                </Col>
+
+                <Col xs={24} lg={12}>
+                  <Card hoverable>
+                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                      <Space>
+                        <Avatar size={50} style={{ background: '#0ea5e9' }}>MC</Avatar>
+                        <Space direction="vertical" size={0}>
+                          <Text strong>Michael Chen</Text>
+                          <Text type="secondary">Founder, GrowthCo</Text>
+                          <Text type="secondary" style={{ fontSize: '12px' }}>1 month ago</Text>
+                        </Space>
+                      </Space>
+                      <Paragraph>
+                        "Working with Lesaal Marketing was a game-changer. They understood our business goals and delivered results that exceeded our expectations. Highly recommend their services!"
+                      </Paragraph>
+                      <Text type="secondary" italic style={{ fontSize: '14px' }}>As seen on LinkedIn</Text>
+                    </Space>
+                  </Card>
+                </Col>
+              </Row>
+
+              <Row gutter={[24, 24]}>
+                <Col xs={24} md={8}>
+                  <Card style={{ textAlign: 'center', border: 'none' }}>
+                    <Text style={{ fontSize: '64px', color: '#f59e0b', display: 'block', marginBottom: 16 }}>„</Text>
+                    <Title level={3} style={{ marginBottom: 16 }}>Took the burden off</Title>
+                    <Paragraph>
+                      Lesaal took over our content and made sure we consistently delivered value to our audience.
+                    </Paragraph>
+                  </Card>
+                </Col>
+                
+                <Col xs={24} md={8}>
+                  <Card style={{ textAlign: 'center', border: 'none' }}>
+                    <Text style={{ fontSize: '64px', color: '#f59e0b', display: 'block', marginBottom: 16 }}>„</Text>
+                    <Title level={3} style={{ marginBottom: 16 }}>Worth every penny</Title>
+                    <Paragraph>
+                      I was one of Lesaal's early clients. They redesigned my website and transformed my online presence completely.
+                    </Paragraph>
+                  </Card>
+                </Col>
+                
+                <Col xs={24} md={8}>
+                  <Card style={{ textAlign: 'center', border: 'none' }}>
+                    <Text style={{ fontSize: '64px', color: '#f59e0b', display: 'block', marginBottom: 16 }}>„</Text>
+                    <Title level={3} style={{ marginBottom: 16 }}>Highly recommend</Title>
+                    <Paragraph>
+                      Hear it from me, Lesaal Marketing gets how to sell online. No "sales pitch" - just real results.
+                    </Paragraph>
+                  </Card>
+                </Col>
+              </Row>
+            </div>
+          </div>
+
+          {/* Success Stories Section */}
+          <div id="work" style={{ padding: '80px 24px', background: isDarkMode ? '#141414' : '#fff' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <Space direction="vertical" size="small" style={{ marginBottom: 48, width: '100%' }}>
+                <Text type="secondary" style={{ fontSize: '20px' }}>Our Work</Text>
+                <Title level={2} style={{ fontSize: '40px', marginBottom: 0 }}>Success Stories</Title>
+              </Space>
+              
+              <Row gutter={[24, 24]}>
+                <Col xs={24} md={8}>
+                  <Card
+                    hoverable
+                    style={{ overflow: 'hidden', padding: 0 }}
+                    cover={
+                      <div style={{
+                        height: 200,
+                        background: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)'
+                      }}></div>
+                    }
+                  >
+                    <div style={{ background: '#f59e0b', padding: '24px', color: '#fff' }}>
+                      <Text strong style={{ color: '#fff', fontSize: '16px' }}>
+                        We revamped the Foundation's website for speed & SEO
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+                
+                <Col xs={24} md={8}>
+                  <Card
+                    hoverable
+                    style={{ overflow: 'hidden', padding: 0 }}
+                    cover={
+                      <div style={{
+                        height: 200,
+                        background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)'
+                      }}></div>
+                    }
+                  >
+                    <div style={{ background: '#f59e0b', padding: '24px', color: '#fff' }}>
+                      <Text strong style={{ color: '#fff', fontSize: '16px' }}>
+                        How Lesaal grew Company's social media by 95,000+ reach
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+                
+                <Col xs={24} md={8}>
+                  <Card
+                    hoverable
+                    style={{ overflow: 'hidden', padding: 0 }}
+                    cover={
+                      <div style={{
+                        height: 200,
+                        background: 'linear-gradient(135deg, #38bdf8 0%, #f59e0b 100%)'
+                      }}></div>
+                    }
+                  >
+                    <div style={{ background: '#f59e0b', padding: '24px', color: '#fff' }}>
+                      <Text strong style={{ color: '#fff', fontSize: '16px' }}>
+                        Boosted Client's engagement with a new content strategy
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+              </Row>
+            </div>
+          </div>
+
+          {/* Why Us Section */}
+          <div id="how" style={{ padding: '80px 24px', background: isDarkMode ? '#1f1f1f' : '#f8fafc' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <Row gutter={[48, 48]} align="middle">
+                <Col xs={24} lg={12}>
+                  <Title level={2} style={{ fontSize: '40px', marginBottom: 24 }}>
+                    How we work to get you up and <Text style={{ color: '#f59e0b' }}>attracting customers</Text>
+                  </Title>
+                  <Paragraph style={{ fontSize: '18px', marginBottom: 32 }}>
+                    We start by understanding your business. Your problem, your dream customers, and what sets you apart. 
+                    Then, we craft a content strategy designed to increase your chances of being the first choice when your service is needed. 
+                    We track results, refine strategies, and keep building momentum.
+                  </Paragraph>
+                  <Button 
+                    type="primary" 
+                    size="large"
+                    style={{ 
+                      background: '#0ea5e9', 
+                      borderColor: '#0ea5e9',
+                      height: '48px',
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      padding: '0 32px'
+                    }}
+                  >
+                    Work with Us <ArrowRightOutlined />
+                  </Button>
+                </Col>
+                <Col xs={24} lg={12}>
+                  <div style={{ 
+                    height: 300, 
+                    position: 'relative',
+                    background: isDarkMode ? '#141414' : '#f0f9ff',
+                    borderRadius: '12px',
+                    padding: '20px'
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      right: '20%',
+                      bottom: '20%',
+                      width: 40,
+                      height: 60,
+                      background: '#f59e0b',
+                      borderRadius: '20px 20px 0 0'
+                    }}></div>
+                    <div style={{
+                      position: 'absolute',
+                      right: '10%',
+                      bottom: '30%',
+                      width: 80,
+                      height: 40,
+                      background: isDarkMode ? '#fff' : '#000',
+                      borderRadius: '8px'
+                    }}></div>
+                    <div style={{
+                      position: 'absolute',
+                      right: '5%',
+                      bottom: '40%',
+                      fontSize: '32px',
+                      color: '#f59e0b',
+                      fontWeight: 'bold'
+                    }}>→</div>
+                  </div>
+                </Col>
+              </Row>
+            </div>
+          </div>
+
+          {/* Why Lesaal Section */}
+          <div id="why" style={{ padding: '80px 24px', background: isDarkMode ? '#141414' : '#fff' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <Title level={2} style={{ textAlign: 'center', fontSize: '40px', marginBottom: 16 }}>
+                Why <Text style={{ color: '#f59e0b' }}>Lesaal Marketing</Text>?
+              </Title>
+              <Paragraph style={{ textAlign: 'center', fontSize: '20px', marginBottom: 48 }}>
+                We're not a bloated agency chasing big-name clients. We're built for hands-on business owners who want real results without corporate nonsense.
+              </Paragraph>
+              
+              <Space direction="vertical" size="large" style={{ width: '100%', maxWidth: 800, margin: '0 auto' }}>
+                <Space size="middle">
+                  <Text style={{ color: '#f59e0b', fontSize: '20px', fontWeight: 'bold' }}>✓</Text>
+                  <Text style={{ fontSize: '18px' }}>
+                    We cut through the noise – No jargon, no buzzwords—just marketing that works.
+                  </Text>
+                </Space>
+                <Space size="middle">
+                  <Text style={{ color: '#f59e0b', fontSize: '20px', fontWeight: 'bold' }}>✓</Text>
+                  <Text style={{ fontSize: '18px' }}>
+                    You work directly with decision-makers – No middle managers. No layers of approvals. Just fast, effective execution.
+                  </Text>
+                </Space>
+                <Space size="middle">
+                  <Text style={{ color: '#f59e0b', fontSize: '20px', fontWeight: 'bold' }}>✓</Text>
+                  <Text style={{ fontSize: '18px' }}>
+                    We walk the talk – Ranked on Google. Dominating social media. Building real authority.
+                  </Text>
+                </Space>
+              </Space>
+            </div>
+          </div>
+
+          {/* Final CTA Section */}
+          <div id="contact" style={{ 
+            padding: '80px 24px', 
+            background: 'linear-gradient(135deg, #fff 0%, #0ea5e9 50%, #f59e0b 100%)',
+            textAlign: 'center'
+          }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <Title level={2} style={{ fontSize: '40px', color: '#fff', marginBottom: 16 }}>
+                Stop losing business to bad marketing
+              </Title>
+              <Paragraph style={{ fontSize: '20px', color: '#fff', marginBottom: 32, opacity: 0.9 }}>
+                If you're not investing in digital marketing, you're already paying for it—in lost customers and missed opportunities. Let's fix that.
+              </Paragraph>
+              <Button 
+                type="primary" 
+                size="large"
+                href="mailto:hello@lesaalmarketing.com"
+                style={{ 
+                  background: '#f59e0b', 
+                  borderColor: '#f59e0b',
+                  height: '48px',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  padding: '0 32px'
+                }}
               >
-                ALL SERVICES
-              </button>
-              <a href="#social">SOCIAL MEDIA</a>
-              <a href="#website">WEBSITE & SEO</a>
-              <a href="#linkedin">LINKEDIN</a>
-              <a href="#blogs">BLOGS ↓</a>
-            </nav>
-            <button className="theme-toggle" onClick={toggleTheme}>
-              {isDarkMode ? '☀️' : '🌙'}
-            </button>
-            <button className="cta-button">LET'S TALK</button>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="container">
-          <div className="hero-content">
-            <div className="hero-text">
-              <h1>
-                Turning <span className="highlight">online</span> attention into paying <span className="highlight">customers</span>
-              </h1>
-              <p>
-                Likes don't pay the bills. Opportunities do. We help your business turn its online presence into a client magnet. 
-                No corporate red tape. No hype marketing. Just real momentum.
-              </p>
-              <div className="benefits-list">
-                <div className="benefit-item">
-                  <span className="checkmark">✓</span>
-                  <span>Turn social reach into qualified leads</span>
-                </div>
-                <div className="benefit-item">
-                  <span className="checkmark">✓</span>
-                  <span>Get a website that works as hard as you do</span>
-                </div>
-                <div className="benefit-item">
-                  <span className="checkmark">✓</span>
-                  <span>Earn authority in your market</span>
-                </div>
-              </div>
-              <button className="hero-cta">
-                Work with Us <span className="arrow">↗</span>
-              </button>
-            </div>
-            <div className="hero-illustration">
-              <div className="illustration-elements">
-                <div className="tree"></div>
-                <div className="cloud"></div>
-                <div className="person"></div>
-                <div className="social-icons">
-                  <div className="social-icon facebook">f</div>
-                  <div className="social-icon pinterest">P</div>
-                  <div className="social-icon linkedin">in</div>
-                  <div className="social-icon instagram">📷</div>
-                  <div className="social-icon twitter">🐦</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Problems Section */}
-      <section className="problems-section" id="problems">
-        <div className="container">
-          <h2>What <span className="highlight">problems</span> do we <span className="highlight">solve</span>?</h2>
-          <p>We fix marketing problems that <strong>cost you</strong> a name, sales, and customers online.</p>
-          
-          <div className="problems-grid">
-            <div className="problem-card green">
-              <div className="problem-icon">📱</div>
-              <h3>Your social media feels like a ghost town</h3>
-              <p>Your posts get ignored, and engagement is dead. We fix that with smart, persuasive content that grabs attention and sparks conversations.</p>
-            </div>
-            
-            <div className="problem-card blue">
-              <div className="problem-icon">🧲</div>
-              <h3>Leads aren't consistently flowing in</h3>
-              <p>Relying on referrals is risky. We help you create an online presence that attracts the right customers—so you're no longer waiting and hoping.</p>
-            </div>
-            
-            <div className="problem-card green">
-              <div className="problem-icon">📊</div>
-              <h3>Marketing feels like a full-time job</h3>
-              <p>Digital marketing is a daily game—you pause, you lose! Don't let time or lack of expertise hold you back. Outsource to us, and we'll keep you consistent.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Solutions Section */}
-      <section className="solutions-section" id="solutions">
-        <div className="container">
-          <h2>What we <span className="highlight">make happen</span></h2>
-          <p>We don't sell tactics. We move the numbers that matter.</p>
-          
-          <div className="solutions-grid">
-            <div className="solution-card">
-              <div className="solution-image leads"></div>
-              <h3>Get More Leads</h3>
-            </div>
-            
-            <div className="solution-card">
-              <div className="solution-image sales"></div>
-              <h3>Sell More Online</h3>
-            </div>
-            
-            <div className="solution-card">
-              <div className="solution-image brand"></div>
-              <h3>Build a Personal Brand</h3>
-            </div>
-            
-            <div className="solution-card">
-              <div className="solution-image clarity"></div>
-              <h3>Gain Strategic Clarity</h3>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="testimonials-section" id="testimonials">
-        <div className="container">
-          <h2>Real businesses. <span className="highlight">Real results</span></h2>
-          <p>We've helped 30+ SMEs and 100s of Personal Brands.</p>
-          
-          <div className="client-logos">
-            <div className="logo-item">Client 1</div>
-            <div className="logo-item">Client 2</div>
-            <div className="logo-item">Client 3</div>
-            <div className="logo-item">Client 4</div>
-            <div className="logo-item">Client 5</div>
-            <div className="logo-item">Client 6</div>
-            <div className="logo-item">Client 7</div>
-          </div>
-
-          <div className="testimonials-grid">
-            <div className="testimonial-card">
-              <div className="testimonial-header">
-                <div className="testimonial-avatar"></div>
-                <div className="testimonial-info">
-                  <h4>Sarah Johnson</h4>
-                  <p>CEO, TechStart Solutions</p>
-                  <span className="testimonial-date">2 weeks ago</span>
-                </div>
-              </div>
-              <div className="testimonial-content">
-                <p>"Lesaal Marketing transformed our online presence completely. Our lead generation increased by 300% in just 3 months. Their strategic approach and consistent execution made all the difference."</p>
-              </div>
-              <div className="testimonial-source">As seen on LinkedIn</div>
-            </div>
-
-            <div className="testimonial-card">
-              <div className="testimonial-header">
-                <div className="testimonial-avatar"></div>
-                <div className="testimonial-info">
-                  <h4>Michael Chen</h4>
-                  <p>Founder, GrowthCo</p>
-                  <span className="testimonial-date">1 month ago</span>
-                </div>
-              </div>
-              <div className="testimonial-content">
-                <p>"Working with Lesaal Marketing was a game-changer. They understood our business goals and delivered results that exceeded our expectations. Highly recommend their services!"</p>
-              </div>
-              <div className="testimonial-source">As seen on LinkedIn</div>
+                Work With Us <ArrowRightOutlined />
+              </Button>
             </div>
           </div>
 
-          <div className="testimonial-quotes">
-            <div className="quote-item">
-              <div className="quote-icon">„</div>
-              <h3>Took the burden off</h3>
-              <p>Lesaal took over our content and made sure we consistently delivered value to our audience.</p>
-            </div>
-            
-            <div className="quote-item">
-              <div className="quote-icon">„</div>
-              <h3>Worth every penny</h3>
-              <p>I was one of Lesaal's early clients. They redesigned my website and transformed my online presence completely.</p>
-            </div>
-            
-            <div className="quote-item">
-              <div className="quote-icon">„</div>
-              <h3>Highly recommend</h3>
-              <p>Hear it from me, Lesaal Marketing gets how to sell online. No "sales pitch" - just real results.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Success Stories Section */}
-      <section className="success-stories" id="work">
-        <div className="container">
-          <div className="section-header">
-            <h3>Our Work</h3>
-            <h2>Success Stories</h2>
-          </div>
-          
-          <div className="stories-grid">
-            <div className="story-card">
-              <div className="story-image team"></div>
-              <div className="story-content">
-                <p>We revamped the Foundation's website for speed & SEO</p>
-              </div>
-            </div>
-            
-            <div className="story-card">
-              <div className="story-image growth"></div>
-              <div className="story-content">
-                <p>How Lesaal grew Company's social media by 95,000+ reach</p>
-              </div>
-            </div>
-            
-            <div className="story-card">
-              <div className="story-image engagement"></div>
-              <div className="story-content">
-                <p>Boosted Client's engagement with a new content strategy</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Us Section */}
-      <section className="why-us" id="how">
-        <div className="container">
-          <div className="why-content">
-            <div className="why-text">
-              <h2>How we work to get you up and <span className="highlight">attracting customers</span></h2>
-              <p>
-                We start by understanding your business. Your problem, your dream customers, and what sets you apart. 
-                Then, we craft a content strategy designed to increase your chances of being the first choice when your service is needed. 
-                We track results, refine strategies, and keep building momentum.
-              </p>
-              <button className="why-cta">
-                Work with Us <span className="arrow">↗</span>
-              </button>
-            </div>
-            <div className="why-illustration">
-              <div className="illustration-person"></div>
-              <div className="illustration-block"></div>
-              <div className="illustration-arrow">→</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Lesaal Section */}
-      <section className="why-lesaal" id="why">
-        <div className="container">
-          <h2>Why <span className="highlight">Lesaal Marketing</span>?</h2>
-          <p>We're not a bloated agency chasing big-name clients. We're built for hands-on business owners who want real results without corporate nonsense.</p>
-          
-          <div className="benefits-list">
-            <div className="benefit-item">
-              <span className="checkmark">✓</span>
-              <span>We cut through the noise – No jargon, no buzzwords—just marketing that works.</span>
-            </div>
-            <div className="benefit-item">
-              <span className="checkmark">✓</span>
-              <span>You work directly with decision-makers – No middle managers. No layers of approvals. Just fast, effective execution.</span>
-            </div>
-            <div className="benefit-item">
-              <span className="checkmark">✓</span>
-              <span>We walk the talk – Ranked on Google. Dominating social media. Building real authority.</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA Section */}
-      <section className="final-cta" id="contact">
-        <div className="container">
-          <div className="cta-content">
-            <h2>Stop losing business to bad marketing</h2>
-            <p>If you're not investing in digital marketing, you're already paying for it—in lost customers and missed opportunities. Let's fix that.</p>
-            <a href="mailto:hello@lesaalmarketing.com" className="final-cta-button">
-              Work With Us →
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Scroll to Top Button */}
-      {showScrollTop && (
-        <button className="scroll-top" onClick={scrollToTop}>
-          ↑
-        </button>
-      )}
-    </div>
+          {/* Scroll to Top Button */}
+          {showScrollTop && (
+            <FloatButton
+              icon={<ArrowUpOutlined />}
+              onClick={scrollToTop}
+              type="primary"
+              style={{
+                background: '#f59e0b',
+                borderColor: '#f59e0b'
+              }}
+            />
+          )}
+        </Content>
+      </Layout>
+    </ConfigProvider>
   );
 }
 

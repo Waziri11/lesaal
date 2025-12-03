@@ -68,3 +68,61 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+---
+
+## 📁 Required Images
+
+The following images need to be added to the project for full functionality:
+
+### 🎨 Service Images (`src/images/services/`)
+- `brand-design.jpg` - Brand identity and visual design service
+- `social-media-management.jpg` - Social media strategy and management
+- `content-creation.jpg` - Content creation and marketing materials
+- `data-analysis.jpg` - Data scraping and analysis service
+- `web-development.jpg` - Website development and design
+- `seo-optimization.jpg` - SEO and search optimization
+- `email-marketing.jpg` - Email marketing campaigns
+- `ppc-advertising.jpg` - Pay-per-click advertising
+- `influencer-marketing.jpg` - Influencer partnerships
+- `video-production.jpg` - Video content creation
+- `graphic-design.jpg` - Graphic design services
+- `marketing-automation.jpg` - Marketing automation setup
+- `analytics-reporting.jpg` - Analytics and reporting
+- `lead-generation.jpg` - Lead generation strategies
+- `conversion-optimization.jpg` - Conversion rate optimization
+- `market-research.jpg` - Market research and analysis
+- `brand-strategy.jpg` - Brand strategy development
+- `digital-transformation.jpg` - Digital transformation consulting
+
+### 👥 Testimonial Images (`src/images/testimonials/`)
+- `sarah-johnson.jpg` - CEO, TechStart Solutions
+- `michael-chen.jpg` - Founder, GrowthCo
+- `emily-rodriguez.jpg` - Marketing Director, InnovateLab
+- `david-thompson.jpg` - Digital Marketing Manager, RetailMax
+- `lisa-wang.jpg` - Social Media Manager, FashionForward
+- `james-miller.jpg` - Content Manager, TechGiant
+- `maria-garcia.jpg` - Marketing Coordinator, CreativeStudio
+- `robert-taylor.jpg` - Business Owner, LocalBiz
+- `jennifer-lee.jpg` - Research Director, DataInsights
+- `alex-kim.jpg` - Marketing Manager, StartupHub
+- `sophie-brown.jpg` - Brand Manager, EcoProducts
+- `marcus-davis.jpg` - Digital Director, MediaCorp
+- `anna-wilson.jpg` - Marketing Lead, HealthTech
+- `carlos-martinez.jpg` - CEO, FinancePro
+- `rachel-green.jpg` - Marketing Specialist, EduTech
+- `tom-anderson.jpg` - Business Development, RetailChain
+- `nina-patel.jpg` - Marketing Head, FoodBrand
+- `kevin-oconnor.jpg` - Digital Manager, TravelAgency
+
+### 🎯 Recommended Image Specifications:
+- **Service Images**: 800x600px, JPG format, high quality
+- **Testimonial Images**: 150x150px, JPG format, professional headshots
+- **File Naming**: Use kebab-case (lowercase with hyphens)
+- **Optimization**: Compress images for web performance
+
+### 📝 Notes:
+- All images should be professional and high-quality
+- Service images should represent the specific service being offered
+- Testimonial images should be professional headshots of the clients
+- Ensure all images are properly licensed for commercial use

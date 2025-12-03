@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import { ConfigProvider, Layout, Typography, Button, Card, Row, Col, Space, Avatar, FloatButton, theme, Badge, Statistic, Divider } from 'antd';
 import { BulbOutlined, SunOutlined, ArrowUpOutlined, ArrowRightOutlined, CheckCircleOutlined, RocketOutlined, TrophyOutlined, TeamOutlined, ThunderboltOutlined, StarOutlined } from '@ant-design/icons';
 import { ThemeProvider, useTheme } from './ThemeContext';
@@ -133,6 +134,22 @@ function AppContent() {
             position: 'relative',
             overflow: 'hidden'
           }}>
+            {/* Background card on the right */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              right: 0,
+              transform: 'translateY(-50%)',
+              width: '50%',
+              height: '600px',
+              background: isDarkMode 
+                ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+                : 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+              borderRadius: '24px 0 0 24px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+              zIndex: 0
+            }}></div>
+            
             <div style={{
               position: 'absolute',
               top: 0,
@@ -141,7 +158,8 @@ function AppContent() {
               height: '600px',
               background: 'radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 70%)',
               borderRadius: '50%',
-              transform: 'translate(30%, -30%)'
+              transform: 'translate(30%, -30%)',
+              zIndex: 0
             }}></div>
             <div style={{
               position: 'absolute',
@@ -151,7 +169,8 @@ function AppContent() {
               height: '500px',
               background: 'radial-gradient(circle, rgba(245, 158, 11, 0.1) 0%, transparent 70%)',
               borderRadius: '50%',
-              transform: 'translate(-30%, 30%)'
+              transform: 'translate(-30%, 30%)',
+              zIndex: 0
             }}></div>
             
             <div style={{ maxWidth: 1400, margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -168,7 +187,7 @@ function AppContent() {
                       }}>
                         Turn Visitors Into Customers
                       </Text>
-          </div>
+                    </div>
                   </Badge.Ribbon>
                   
                   <Title level={1} style={{ 
@@ -193,8 +212,8 @@ function AppContent() {
                     color: isDarkMode ? '#cbd5e1' : '#64748b',
                     maxWidth: '90%'
                   }}>
-                Likes don't pay the bills. Opportunities do. We help your business turn its online presence into a client magnet. 
-                No corporate red tape. No hype marketing. Just real momentum.
+                    Likes don't pay the bills. Opportunities do. We help your business turn its online presence into a client magnet. 
+                    No corporate red tape. No hype marketing. Just real momentum.
                   </Paragraph>
                   
                   <Space direction="vertical" size="large" style={{ marginBottom: 48, width: '100%' }}>
@@ -245,51 +264,60 @@ function AppContent() {
                 <Col xs={24} lg={12}>
                   <div style={{ 
                     position: 'relative',
-                    height: '500px'
+                    height: '600px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    paddingRight: '48px'
                   }}>
-                    <Card
-                      style={{
-                        height: '100%',
-                        background: isDarkMode 
-                          ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
-                          : 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-                        border: 'none',
-                        borderRadius: '24px',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
-                      }}
-                      bodyStyle={{ padding: '40px', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >
-                      <Space direction="vertical" size="large" align="center" style={{ width: '100%' }}>
-                        <Row gutter={[16, 16]} justify="center" style={{ width: '100%' }}>
-                          {['📱', '💬', '❤️', '⭐', '📊', '🎯'].map((emoji, idx) => (
-                            <Col key={idx}>
-                              <Avatar 
-                                size={64}
-                                style={{
-                                  background: idx % 2 === 0 
-                                    ? 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)'
-                                    : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
-                                  fontSize: '32px',
-                                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                                }}
-                              >
-                                {emoji}
-                              </Avatar>
-                            </Col>
-                          ))}
-                        </Row>
-                        <Statistic
-                          title={<Text type="secondary">Average Growth</Text>}
-                          value={300}
-                          suffix="%"
-                          valueStyle={{ color: '#f59e0b', fontSize: '48px', fontWeight: 700 }}
-                        />
-                        <Text type="secondary" style={{ textAlign: 'center', display: 'block' }}>
+                    <Space direction="vertical" size="large" align="end" style={{ position: 'relative', zIndex: 2 }}>
+                      <Row gutter={[16, 16]} justify="end" style={{ width: '100%' }}>
+                        {['📱', '💬', '❤️', '⭐', '📊', '🎯'].map((emoji, idx) => (
+                          <Col key={idx}>
+                            <Avatar 
+                              size={64}
+                              style={{
+                                background: idx % 2 === 0 
+                                  ? 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)'
+                                  : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+                                fontSize: '32px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                              }}
+                            >
+                              {emoji}
+                            </Avatar>
+                          </Col>
+                        ))}
+                      </Row>
+                      <div style={{ textAlign: 'right' }}>
+                        <Text type="secondary" style={{ 
+                          display: 'block', 
+                          marginBottom: 8,
+                          color: isDarkMode ? '#94a3b8' : '#64748b',
+                          fontSize: '14px'
+                        }}>
+                          Average Growth
+                        </Text>
+                        <Text style={{ 
+                          color: '#f59e0b', 
+                          fontSize: '64px', 
+                          fontWeight: 700,
+                          lineHeight: 1,
+                          display: 'block'
+                        }}>
+                          300%
+                        </Text>
+                        <Text type="secondary" style={{ 
+                          display: 'block', 
+                          marginTop: 12, 
+                          color: isDarkMode ? '#94a3b8' : '#64748b',
+                          fontSize: '14px'
+                        }}>
                           Lead generation increase in first 3 months
                         </Text>
-                      </Space>
-                    </Card>
-                </div>
+                      </div>
+                    </Space>
+                  </div>
                 </Col>
               </Row>
             </div>

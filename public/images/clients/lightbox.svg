@@ -1,0 +1,6 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='240' height='84' viewBox='0 0 240 84'>
+  <rect width='240' height='84' rx='12' fill='#ffffff'/>
+  <rect x='18' y='26' width='32' height='32' rx='8' fill='#133879'/>
+  <rect x='25' y='33' width='18' height='18' rx='4' fill='#ffd47a'/>
+  <text x='62' y='49' fill='#10254e' font-family='Arial, sans-serif' font-size='24' font-weight='700'>Lightbox</text>
+</svg>

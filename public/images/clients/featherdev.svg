@@ -1,0 +1,5 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='240' height='84' viewBox='0 0 240 84'>
+  <rect width='240' height='84' rx='12' fill='#ffffff'/>
+  <path d='M22 52c14 0 22-8 26-20-8 1-16 6-20 13 7-1 12-5 17-10-3 11-10 21-23 25z' fill='#1f7a4e'/>
+  <text x='62' y='49' fill='#10254e' font-family='Arial, sans-serif' font-size='24' font-weight='700'>FeatherDev</text>
+</svg>

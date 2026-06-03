@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum SectionType {
+  HERO
+  STATS_BAND
+  CLIENT_LOGOS
+  SERVICES_GRID
+  COMMENTARY
+  PRICING
+  FAQ
+  FOOTER
+  // Legacy section types retained for safe migration/reads.
+  SERVICES
+  CLIENTS_TESTIMONY
+  CAMPAIGN_FORM
+  CARDS
+  LIST
+  TABLE
+  RICH_TEXT
+  CTA
+  FORM
+}
+
+enum ComponentVariant {
+  DEFAULT
+  CARD
+  LIST
+  TABLE
+  GRID
+}
+
+enum TextAnimationPreset {
+  NONE
+  FADE_UP
+  SLIDE_IN
+  ZOOM_IN
+  TYPEWRITER
+}
+
+enum SectionAnimationPreset {
+  NONE
+  FADE_IN
+  SCALE_IN
+  SLIDE_UP
+}
+
+enum ScrollAnimationPreset {
+  NONE
+  PARALLAX
+  STICKY
+  REVEAL
+}
+
+model AdminUser {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AdminSession[]
+  otpCodes     EmailOtpCode[]
+  mediaAssets  MediaAsset[]
+}
+
+model AdminSession {
+  id        String    @id @default(cuid())
+  adminId   String
+  tokenHash String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([expiresAt])
+}
+
+model LandingPageConfig {
+  id          String              @id @default(cuid())
+  siteTitle   String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  sections    LandingSection[]
+  formFields  CampaignFormField[]
+  submissions CampaignSubmission[]
+}
+
+model LandingSection {
+  id                String                 @id @default(cuid())
+  configId          String
+  type              SectionType
+  title             String
+  isVisible         Boolean                @default(true)
+  order             Int
+  componentVariant  ComponentVariant       @default(DEFAULT)
+  textAnimation     TextAnimationPreset    @default(FADE_UP)
+  sectionAnimation  SectionAnimationPreset @default(FADE_IN)
+  scrollAnimation   ScrollAnimationPreset  @default(NONE)
+  settings          Json?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  config            LandingPageConfig      @relation(fields: [configId], references: [id], onDelete: Cascade)
+  items             SectionItem[]
+
+  @@index([configId])
+  @@index([order])
+}
+
+model SectionItem {
+  id          String         @id @default(cuid())
+  sectionId   String
+  order       Int
+  label       String?
+  title       String?
+  description String?
+  imageUrl    String?
+  value       String?
+  extra       Json?
+  section     LandingSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId])
+  @@index([order])
+}
+
+model CampaignFormField {
+  id          String            @id @default(cuid())
+  configId    String
+  key         String
+  label       String
+  type        String
+  required    Boolean           @default(false)
+  placeholder String?
+  options     Json?
+  order       Int
+  isVisible   Boolean           @default(true)
+  config      LandingPageConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@index([configId])
+  @@index([order])
+}
+
+model CampaignSubmission {
+  id          String            @id @default(cuid())
+  configId    String
+  data        Json
+  submittedAt DateTime          @default(now())
+  config      LandingPageConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@index([configId])
+  @@index([submittedAt])
+}
+
+model EmailOtpCode {
+  id          String    @id @default(cuid())
+  adminId     String
+  email       String
+  codeHash    String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5)
+  createdAt   DateTime  @default(now())
+  admin       AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([email])
+  @@index([expiresAt])
+}
+
+model MediaAsset {
+  id           String    @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  uploadedById String?
+  createdAt    DateTime  @default(now())
+  uploadedBy   AdminUser? @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([uploadedById])
+  @@index([createdAt])
+}

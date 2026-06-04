@@ -1,10 +1,5 @@
-import UnderDevelopmentCard from "../../../../components/admin/UnderDevelopmentCard";
+import CampaignsManager from "../../../../components/admin/CampaignsManager";
 
 export default function CampaignsPage() {
-  return (
-    <UnderDevelopmentCard
-      title="Campaigns"
-      description="Campaign pipelines and analytics are under active development."
-    />
-  );
+  return <CampaignsManager />;
 }

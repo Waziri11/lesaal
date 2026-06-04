@@ -1,0 +1,52 @@
+import { NextResponse } from "next/server";
+import { getAdminFromApiRequest } from "../../../../lib/auth";
+import { createCampaign, getAdminCampaigns, isCampaignTableMissingError } from "../../../../lib/campaigns";
+
+export async function GET(request) {
+  try {
+    const admin = await getAdminFromApiRequest(request);
+
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const campaigns = await getAdminCampaigns();
+    return NextResponse.json({ campaigns });
+  } catch (error) {
+    console.error("Failed to list campaigns", error);
+
+    if (isCampaignTableMissingError(error)) {
+      return NextResponse.json({ campaigns: [], warning: "Campaign tables are not initialized yet." });
+    }
+
+    return NextResponse.json({ error: "Unable to load campaigns." }, { status: 500 });
+  }
+}
+
+export async function POST(request) {
+  try {
+    const admin = await getAdminFromApiRequest(request);
+
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const campaign = await createCampaign(body);
+
+    return NextResponse.json({ success: true, campaign });
+  } catch (error) {
+    console.error("Failed to create campaign", error);
+
+    if (isCampaignTableMissingError(error)) {
+      return NextResponse.json(
+        { error: "Campaign tables are not initialized. Run database migrations and retry." },
+        { status: 500 }
+      );
+    }
+
+    const message = error?.message || "Unable to create campaign.";
+    const status = /required|invalid|not found/i.test(message) ? 400 : 500;
+    return NextResponse.json({ error: message }, { status });
+  }
+}

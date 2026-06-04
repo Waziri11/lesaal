@@ -391,6 +391,10 @@ export const ModelName = {
   SectionItem: 'SectionItem',
   CampaignFormField: 'CampaignFormField',
   CampaignSubmission: 'CampaignSubmission',
+  Campaign: 'Campaign',
+  CampaignQuestion: 'CampaignQuestion',
+  CampaignResponse: 'CampaignResponse',
+  AdminNotification: 'AdminNotification',
   EmailOtpCode: 'EmailOtpCode',
   MediaAsset: 'MediaAsset'
 } as const
@@ -408,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "emailOtpCode" | "mediaAsset"
+    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -930,6 +934,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Campaign: {
+      payload: Prisma.$CampaignPayload<ExtArgs>
+      fields: Prisma.CampaignFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CampaignFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CampaignFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload>
+        }
+        findFirst: {
+          args: Prisma.CampaignFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CampaignFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload>
+        }
+        findMany: {
+          args: Prisma.CampaignFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload>[]
+        }
+        create: {
+          args: Prisma.CampaignCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload>
+        }
+        createMany: {
+          args: Prisma.CampaignCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CampaignCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload>[]
+        }
+        delete: {
+          args: Prisma.CampaignDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload>
+        }
+        update: {
+          args: Prisma.CampaignUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload>
+        }
+        deleteMany: {
+          args: Prisma.CampaignDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CampaignUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CampaignUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload>[]
+        }
+        upsert: {
+          args: Prisma.CampaignUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignPayload>
+        }
+        aggregate: {
+          args: Prisma.CampaignAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCampaign>
+        }
+        groupBy: {
+          args: Prisma.CampaignGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CampaignGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CampaignCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CampaignCountAggregateOutputType> | number
+        }
+      }
+    }
+    CampaignQuestion: {
+      payload: Prisma.$CampaignQuestionPayload<ExtArgs>
+      fields: Prisma.CampaignQuestionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CampaignQuestionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CampaignQuestionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload>
+        }
+        findFirst: {
+          args: Prisma.CampaignQuestionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CampaignQuestionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload>
+        }
+        findMany: {
+          args: Prisma.CampaignQuestionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload>[]
+        }
+        create: {
+          args: Prisma.CampaignQuestionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload>
+        }
+        createMany: {
+          args: Prisma.CampaignQuestionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CampaignQuestionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload>[]
+        }
+        delete: {
+          args: Prisma.CampaignQuestionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload>
+        }
+        update: {
+          args: Prisma.CampaignQuestionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload>
+        }
+        deleteMany: {
+          args: Prisma.CampaignQuestionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CampaignQuestionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CampaignQuestionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload>[]
+        }
+        upsert: {
+          args: Prisma.CampaignQuestionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignQuestionPayload>
+        }
+        aggregate: {
+          args: Prisma.CampaignQuestionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCampaignQuestion>
+        }
+        groupBy: {
+          args: Prisma.CampaignQuestionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CampaignQuestionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CampaignQuestionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CampaignQuestionCountAggregateOutputType> | number
+        }
+      }
+    }
+    CampaignResponse: {
+      payload: Prisma.$CampaignResponsePayload<ExtArgs>
+      fields: Prisma.CampaignResponseFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CampaignResponseFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CampaignResponseFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload>
+        }
+        findFirst: {
+          args: Prisma.CampaignResponseFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CampaignResponseFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload>
+        }
+        findMany: {
+          args: Prisma.CampaignResponseFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload>[]
+        }
+        create: {
+          args: Prisma.CampaignResponseCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload>
+        }
+        createMany: {
+          args: Prisma.CampaignResponseCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CampaignResponseCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload>[]
+        }
+        delete: {
+          args: Prisma.CampaignResponseDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload>
+        }
+        update: {
+          args: Prisma.CampaignResponseUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload>
+        }
+        deleteMany: {
+          args: Prisma.CampaignResponseDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CampaignResponseUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CampaignResponseUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload>[]
+        }
+        upsert: {
+          args: Prisma.CampaignResponseUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CampaignResponsePayload>
+        }
+        aggregate: {
+          args: Prisma.CampaignResponseAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCampaignResponse>
+        }
+        groupBy: {
+          args: Prisma.CampaignResponseGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CampaignResponseGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CampaignResponseCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CampaignResponseCountAggregateOutputType> | number
+        }
+      }
+    }
+    AdminNotification: {
+      payload: Prisma.$AdminNotificationPayload<ExtArgs>
+      fields: Prisma.AdminNotificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminNotificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminNotificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload>
+        }
+        findFirst: {
+          args: Prisma.AdminNotificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminNotificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload>
+        }
+        findMany: {
+          args: Prisma.AdminNotificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload>[]
+        }
+        create: {
+          args: Prisma.AdminNotificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload>
+        }
+        createMany: {
+          args: Prisma.AdminNotificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminNotificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload>[]
+        }
+        delete: {
+          args: Prisma.AdminNotificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload>
+        }
+        update: {
+          args: Prisma.AdminNotificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminNotificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminNotificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminNotificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminNotificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotificationPayload>
+        }
+        aggregate: {
+          args: Prisma.AdminNotificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminNotification>
+        }
+        groupBy: {
+          args: Prisma.AdminNotificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminNotificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminNotificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminNotificationCountAggregateOutputType> | number
+        }
+      }
+    }
     EmailOtpCode: {
       payload: Prisma.$EmailOtpCodePayload<ExtArgs>
       fields: Prisma.EmailOtpCodeFieldRefs
@@ -1207,6 +1507,63 @@ export const CampaignSubmissionScalarFieldEnum = {
 } as const
 
 export type CampaignSubmissionScalarFieldEnum = (typeof CampaignSubmissionScalarFieldEnum)[keyof typeof CampaignSubmissionScalarFieldEnum]
+
+
+export const CampaignScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  imageUrl: 'imageUrl',
+  isPublished: 'isPublished',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CampaignScalarFieldEnum = (typeof CampaignScalarFieldEnum)[keyof typeof CampaignScalarFieldEnum]
+
+
+export const CampaignQuestionScalarFieldEnum = {
+  id: 'id',
+  campaignId: 'campaignId',
+  key: 'key',
+  label: 'label',
+  type: 'type',
+  required: 'required',
+  placeholder: 'placeholder',
+  options: 'options',
+  order: 'order',
+  isVisible: 'isVisible'
+} as const
+
+export type CampaignQuestionScalarFieldEnum = (typeof CampaignQuestionScalarFieldEnum)[keyof typeof CampaignQuestionScalarFieldEnum]
+
+
+export const CampaignResponseScalarFieldEnum = {
+  id: 'id',
+  campaignId: 'campaignId',
+  data: 'data',
+  submittedAt: 'submittedAt'
+} as const
+
+export type CampaignResponseScalarFieldEnum = (typeof CampaignResponseScalarFieldEnum)[keyof typeof CampaignResponseScalarFieldEnum]
+
+
+export const AdminNotificationScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  title: 'title',
+  message: 'message',
+  isRead: 'isRead',
+  readAt: 'readAt',
+  payload: 'payload',
+  campaignId: 'campaignId',
+  campaignResponseId: 'campaignResponseId',
+  createdAt: 'createdAt'
+} as const
+
+export type AdminNotificationScalarFieldEnum = (typeof AdminNotificationScalarFieldEnum)[keyof typeof AdminNotificationScalarFieldEnum]
 
 
 export const EmailOtpCodeScalarFieldEnum = {
@@ -1555,6 +1912,10 @@ export type GlobalOmitConfig = {
   sectionItem?: Prisma.SectionItemOmit
   campaignFormField?: Prisma.CampaignFormFieldOmit
   campaignSubmission?: Prisma.CampaignSubmissionOmit
+  campaign?: Prisma.CampaignOmit
+  campaignQuestion?: Prisma.CampaignQuestionOmit
+  campaignResponse?: Prisma.CampaignResponseOmit
+  adminNotification?: Prisma.AdminNotificationOmit
   emailOtpCode?: Prisma.EmailOtpCodeOmit
   mediaAsset?: Prisma.MediaAssetOmit
 }

@@ -160,6 +160,73 @@ model CampaignSubmission {
   @@index([submittedAt])
 }
 
+model Campaign {
+  id          String             @id @default(cuid())
+  title       String
+  slug        String             @unique
+  description String
+  imageUrl    String?
+  isPublished Boolean            @default(true)
+  order       Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  questions   CampaignQuestion[]
+  responses   CampaignResponse[]
+  notifications AdminNotification[]
+
+  @@index([order])
+  @@index([isPublished])
+}
+
+model CampaignQuestion {
+  id          String   @id @default(cuid())
+  campaignId  String
+  key         String
+  label       String
+  type        String
+  required    Boolean  @default(false)
+  placeholder String?
+  options     Json?
+  order       Int
+  isVisible   Boolean  @default(true)
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([order])
+}
+
+model CampaignResponse {
+  id            String              @id @default(cuid())
+  campaignId    String
+  data          Json
+  submittedAt   DateTime            @default(now())
+  campaign      Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  notifications AdminNotification[]
+
+  @@index([campaignId])
+  @@index([submittedAt])
+}
+
+model AdminNotification {
+  id                String           @id @default(cuid())
+  type              String
+  title             String
+  message           String
+  isRead            Boolean          @default(false)
+  readAt            DateTime?
+  payload           Json?
+  campaignId        String?
+  campaignResponseId String?
+  createdAt         DateTime         @default(now())
+  campaign          Campaign?        @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  campaignResponse  CampaignResponse? @relation(fields: [campaignResponseId], references: [id], onDelete: SetNull)
+
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([campaignId])
+  @@index([campaignResponseId])
+}
+
 model EmailOtpCode {
   id          String    @id @default(cuid())
   adminId     String

@@ -58,6 +58,10 @@ export const ModelName = {
   SectionItem: 'SectionItem',
   CampaignFormField: 'CampaignFormField',
   CampaignSubmission: 'CampaignSubmission',
+  Campaign: 'Campaign',
+  CampaignQuestion: 'CampaignQuestion',
+  CampaignResponse: 'CampaignResponse',
+  AdminNotification: 'AdminNotification',
   EmailOtpCode: 'EmailOtpCode',
   MediaAsset: 'MediaAsset'
 } as const
@@ -168,6 +172,63 @@ export const CampaignSubmissionScalarFieldEnum = {
 } as const
 
 export type CampaignSubmissionScalarFieldEnum = (typeof CampaignSubmissionScalarFieldEnum)[keyof typeof CampaignSubmissionScalarFieldEnum]
+
+
+export const CampaignScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  imageUrl: 'imageUrl',
+  isPublished: 'isPublished',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CampaignScalarFieldEnum = (typeof CampaignScalarFieldEnum)[keyof typeof CampaignScalarFieldEnum]
+
+
+export const CampaignQuestionScalarFieldEnum = {
+  id: 'id',
+  campaignId: 'campaignId',
+  key: 'key',
+  label: 'label',
+  type: 'type',
+  required: 'required',
+  placeholder: 'placeholder',
+  options: 'options',
+  order: 'order',
+  isVisible: 'isVisible'
+} as const
+
+export type CampaignQuestionScalarFieldEnum = (typeof CampaignQuestionScalarFieldEnum)[keyof typeof CampaignQuestionScalarFieldEnum]
+
+
+export const CampaignResponseScalarFieldEnum = {
+  id: 'id',
+  campaignId: 'campaignId',
+  data: 'data',
+  submittedAt: 'submittedAt'
+} as const
+
+export type CampaignResponseScalarFieldEnum = (typeof CampaignResponseScalarFieldEnum)[keyof typeof CampaignResponseScalarFieldEnum]
+
+
+export const AdminNotificationScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  title: 'title',
+  message: 'message',
+  isRead: 'isRead',
+  readAt: 'readAt',
+  payload: 'payload',
+  campaignId: 'campaignId',
+  campaignResponseId: 'campaignResponseId',
+  createdAt: 'createdAt'
+} as const
+
+export type AdminNotificationScalarFieldEnum = (typeof AdminNotificationScalarFieldEnum)[keyof typeof AdminNotificationScalarFieldEnum]
 
 
 export const EmailOtpCodeScalarFieldEnum = {

@@ -2976,52 +2976,64 @@ body {
   box-shadow: 0 10px 28px rgba(16, 37, 78, 0.08);
 }
 
-.lp-campaign-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 1rem;
-  align-items: start;
+.lp-campaign-carousel {
+  margin-top: 0.85rem;
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  scroll-snap-type: x mandatory;
 }
 
-.lp-campaign-copy h3,
-.lp-campaign-copy p {
+.lp-campaign-slide {
+  min-width: min(420px, 92vw);
+  max-width: 460px;
+  border: 1px solid rgba(16, 37, 78, 0.12);
+  border-radius: 0.95rem;
+  background: #f8fbff;
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+
+.lp-campaign-slide-empty {
+  background: #fff;
+  display: grid;
+  place-items: center;
+}
+
+.lp-campaign-slide-media {
+  height: 220px;
+  background: #eef4ff;
+}
+
+.lp-campaign-slide-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lp-campaign-slide-content {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.9rem;
+}
+
+.lp-campaign-slide-content h3,
+.lp-campaign-slide-content p {
   margin: 0;
 }
 
-.lp-campaign-copy h3 {
-  font-family: var(--font-display);
+.lp-campaign-slide-content h3 {
   color: #10254e;
-  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
 }
 
-.lp-campaign-copy p {
-  margin-top: 0.55rem;
+.lp-campaign-slide-content p {
   color: #56709a;
 }
 
-.lp-campaign-form {
-  max-width: 100%;
-  border: 1px solid rgba(16, 37, 78, 0.11);
-  border-radius: 0.85rem;
-  padding: 0.9rem;
-  background: #f9fbff;
-}
-
-.lp-campaign-form button {
-  width: fit-content;
-}
-
-.lp-campaign-form label span {
-  color: #10254e;
-  font-weight: 600;
-}
-
-.lp-campaign-form input,
-.lp-campaign-form textarea,
-.lp-campaign-form select {
-  background: #fff;
-  color: #10254e;
-  border: 1px solid rgba(16, 37, 78, 0.18);
+.lp-campaign-cta-row {
+  margin-top: 0.75rem;
 }
 
 .lp-footer-wrap {
@@ -3104,7 +3116,7 @@ body {
 .is-editor-preview .lp-stat-card,
 .is-editor-preview .lp-faq-item,
 .is-editor-preview .lp-footer-link,
-.is-editor-preview .lp-campaign-form label {
+.is-editor-preview .lp-campaign-slide {
   position: relative;
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
@@ -3116,7 +3128,7 @@ body {
 .is-editor-preview .lp-plan-card:hover,
 .is-editor-preview .lp-stat-card:hover,
 .is-editor-preview .lp-faq-item:hover,
-.is-editor-preview .lp-campaign-form label:hover {
+.is-editor-preview .lp-campaign-slide:hover {
   border-color: rgba(85, 144, 224, 0.66);
 }
 
@@ -3126,7 +3138,7 @@ body {
 .is-editor-preview .lp-plan-card.is-editor-selected,
 .is-editor-preview .lp-stat-card.is-editor-selected,
 .is-editor-preview .lp-faq-item.is-editor-selected,
-.is-editor-preview .lp-campaign-form label.is-editor-selected {
+.is-editor-preview .lp-campaign-slide.is-editor-selected {
   border-color: rgba(85, 144, 224, 0.95);
   box-shadow: 0 0 0 2px rgba(85, 144, 224, 0.32);
 }
@@ -3194,6 +3206,231 @@ body {
   color: #10254e;
 }
 
+.campaigns-page-shell,
+.campaign-detail-shell {
+  width: min(1100px, calc(100% - 2rem));
+  margin: 1rem auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.campaigns-page-head,
+.campaign-detail-head,
+.campaign-form-card,
+.campaign-detail-media,
+.campaign-public-card {
+  border: 1px solid rgba(16, 37, 78, 0.12);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(16, 37, 78, 0.08);
+}
+
+.campaigns-page-head,
+.campaign-detail-head,
+.campaign-form-card {
+  padding: 1rem;
+}
+
+.campaigns-page-head h1,
+.campaigns-page-head p,
+.campaign-detail-head h1,
+.campaign-detail-head p,
+.campaign-form-card h2,
+.campaign-form-card p {
+  margin: 0;
+  color: #10254e;
+}
+
+.campaigns-page-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.campaign-public-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.campaign-public-media {
+  height: 220px;
+  background: #eef4ff;
+}
+
+.campaign-public-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.campaign-public-content {
+  padding: 0.95rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.campaign-public-content h3,
+.campaign-public-content p {
+  margin: 0;
+  color: #10254e;
+}
+
+.campaign-public-content p {
+  color: #56709a;
+}
+
+.campaign-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.campaign-detail-media {
+  min-height: 340px;
+  overflow: hidden;
+  background: #eef4ff;
+}
+
+.campaign-detail-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.campaign-form-grid {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.campaign-form-grid label {
+  display: grid;
+  gap: 0.35rem;
+  color: #10254e;
+  font-weight: 600;
+}
+
+.campaign-form-grid input,
+.campaign-form-grid textarea,
+.campaign-form-grid select {
+  border: 1px solid rgba(16, 37, 78, 0.2);
+  border-radius: 0.7rem;
+  background: #fff;
+  color: #10254e;
+}
+
+.campaign-form-grid button {
+  width: fit-content;
+}
+
+.campaign-admin-shell,
+.notification-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.campaign-admin-layout {
+  display: grid;
+  grid-template-columns: 310px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.campaign-admin-sidebar {
+  position: sticky;
+  top: 1rem;
+}
+
+.campaign-admin-sidebar-head,
+.campaign-admin-editor-head,
+.campaign-admin-responses-head,
+.notification-item-head,
+.notification-head-actions,
+.notification-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.campaign-admin-list,
+.campaign-admin-question-list,
+.notification-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.campaign-admin-item {
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  border: 1px solid rgba(168, 192, 232, 0.24);
+  border-radius: 0.7rem;
+  background: rgba(2, 10, 30, 0.2);
+  color: var(--ink-050);
+  padding: 0.68rem 0.75rem;
+}
+
+.campaign-admin-item.is-active {
+  border-color: rgba(85, 144, 224, 0.75);
+  box-shadow: 0 0 0 2px rgba(85, 144, 224, 0.25);
+}
+
+.campaign-admin-item span,
+.campaign-admin-item small {
+  color: var(--ink-200);
+}
+
+.campaign-admin-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.campaign-admin-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.campaign-admin-questions-head,
+.campaign-admin-question-top,
+.campaign-admin-question-actions,
+.campaign-admin-question-flags,
+.campaign-admin-form-actions,
+.campaign-admin-responses-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.campaign-admin-question-item {
+  border: 1px solid rgba(168, 192, 232, 0.22);
+  border-radius: 0.8rem;
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.7rem;
+  background: rgba(2, 10, 30, 0.2);
+}
+
+.campaign-admin-table-wrap {
+  overflow-x: auto;
+}
+
+.notification-item.is-unread {
+  border-color: rgba(85, 144, 224, 0.75);
+  box-shadow: 0 0 0 1px rgba(85, 144, 224, 0.28);
+}
+
+.notification-item-meta span,
+.notification-item-meta a {
+  color: var(--ink-200);
+}
+
 @keyframes recommendedGlow {
   0%, 100% {
     box-shadow:
@@ -3251,7 +3488,8 @@ body {
 
   .lp-services-grid,
   .lp-pricing-grid,
-  .services-page-grid {
+  .services-page-grid,
+  .campaigns-page-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -3280,8 +3518,16 @@ body {
   }
 
   .lp-footer-main,
-  .lp-campaign-grid {
+  .campaign-detail-grid {
     grid-template-columns: 1fr;
+  }
+
+  .campaign-admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .campaign-admin-sidebar {
+    position: static;
   }
 
   .lp-client-grid {
@@ -3292,7 +3538,9 @@ body {
 @media (max-width: 720px) {
   .lp-shell,
   .services-page-shell,
-  .signup-page-shell {
+  .signup-page-shell,
+  .campaigns-page-shell,
+  .campaign-detail-shell {
     width: 100%;
   }
 
@@ -3308,6 +3556,7 @@ body {
   .lp-services-grid,
   .lp-pricing-grid,
   .services-page-grid,
+  .campaigns-page-grid,
   .lp-stats-grid {
     grid-template-columns: 1fr;
   }

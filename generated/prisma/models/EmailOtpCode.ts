@@ -497,10 +497,6 @@ export type EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput = {
   deleteMany?: Prisma.EmailOtpCodeScalarWhereInput | Prisma.EmailOtpCodeScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type EmailOtpCodeCreateWithoutAdminInput = {
   id?: string
   email: string

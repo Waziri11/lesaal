@@ -44,7 +44,36 @@ export async function POST(request) {
       },
     });
 
-    const emailResult = await sendCampaignNotification({ submissionData: cleanedData });
+    try {
+      const matchingCampaign = await prisma.campaign.findFirst({
+        where: {
+          isPublished: true,
+        },
+        orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+        },
+      });
+
+      await prisma.adminNotification.create({
+        data: {
+          type: "CAMPAIGN_RESPONSE",
+          title: "New landing campaign response",
+          message: "A response was submitted from the landing campaign form.",
+          payload: cleanedData,
+          campaignId: matchingCampaign?.id || null,
+        },
+      });
+    } catch (notificationError) {
+      console.warn("Unable to create campaign notification for legacy form:", notificationError);
+    }
+
+    const emailResult = await sendCampaignNotification({
+      submissionData: cleanedData,
+      campaignTitle: "Landing Campaign Form",
+    });
 
     const campaignSection = config.sections.find((section) => section.type === "CAMPAIGN_FORM");
     const successMessage = campaignSection?.settings?.successMessage || "Submission received.";

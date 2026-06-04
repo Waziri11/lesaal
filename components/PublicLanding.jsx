@@ -78,10 +78,6 @@ function scrollAnimationClass(preset) {
   return "";
 }
 
-function toOptionsArray(options) {
-  return Array.isArray(options) ? options : [];
-}
-
 function toStringArray(value) {
   if (Array.isArray(value)) {
     return value.map((entry) => String(entry || "").trim()).filter(Boolean);
@@ -260,17 +256,14 @@ function InlineImageUploader({ label, onUpload }) {
 
 export default function PublicLanding({
   config,
+  campaigns = [],
   editorMode = false,
   selectedSectionId = null,
   selectedItemRef = null,
-  selectedFormFieldId = null,
   onSelectSection,
   onSelectItem,
-  onSelectFormField,
-  onUpdateSectionTitle,
   onUpdateSectionSetting,
   onUpdateItemField,
-  onUpdateFormField,
   onUploadItemImage,
   onUploadSectionImage,
   onRequestSectionOptions,
@@ -281,15 +274,16 @@ export default function PublicLanding({
   onItemDrop,
   onItemDragEnd,
 }) {
-  const [formData, setFormData] = useState({});
-  const [formLoading, setFormLoading] = useState(false);
-  const [formMessage, setFormMessage] = useState("");
-  const [formError, setFormError] = useState("");
   const [activeFaqItemId, setActiveFaqItemId] = useState(null);
   const [dynamicWordIndex, setDynamicWordIndex] = useState(0);
   const [typedDynamicWord, setTypedDynamicWord] = useState("");
   const [isDeletingDynamicWord, setIsDeletingDynamicWord] = useState(false);
   const longPressTimerRef = useRef(null);
+
+  const campaignHighlights = useMemo(
+    () => (Array.isArray(campaigns) ? campaigns : []),
+    [campaigns]
+  );
 
   const visibleSections = useMemo(
     () => config.sections.filter((section) => section.isVisible).sort((a, b) => a.order - b.order),
@@ -360,11 +354,6 @@ export default function PublicLanding({
 
     return links;
   }, [sectionAnchors, visibleSections]);
-
-  const campaignFields = useMemo(
-    () => config.formFields.filter((field) => field.isVisible).sort((a, b) => a.order - b.order),
-    [config.formFields]
-  );
 
   const heroDynamicWords = useMemo(
     () => toStringArray(heroSection?.settings?.dynamicWords),
@@ -557,15 +546,6 @@ export default function PublicLanding({
     };
   }
 
-  function handleFormFieldSelect(sectionId, fieldId, event) {
-    if (!editorMode) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    onSelectSection?.(sectionId);
-    onSelectFormField?.(fieldId);
-  }
-
   function handlePreviewLinkClick(event, sectionId) {
     if (!editorMode) {
       return;
@@ -575,15 +555,6 @@ export default function PublicLanding({
     if (sectionId) {
       onSelectSection?.(sectionId);
     }
-  }
-
-  function setFormValue(fieldKey, value) {
-    if (editorMode) return;
-
-    setFormData((current) => ({
-      ...current,
-      [fieldKey]: value,
-    }));
   }
 
   function renderItemText(sectionId, item, field, fallbackText, multiline = false) {
@@ -602,41 +573,6 @@ export default function PublicLanding({
         onCommit={(nextValue) => onUpdateItemField?.(sectionId, item.id, field, nextValue)}
       />
     );
-  }
-
-  async function handleCampaignSubmit(event) {
-    event.preventDefault();
-
-    if (editorMode) {
-      setFormError("");
-      setFormMessage("Preview mode: form submission is disabled while editing.");
-      return;
-    }
-
-    setFormLoading(true);
-    setFormMessage("");
-    setFormError("");
-
-    try {
-      const response = await fetch("/api/public/campaign-submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: formData }),
-      });
-
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error || "Submission failed.");
-      }
-
-      setFormMessage(payload.message || "Submission received.");
-      setFormData({});
-    } catch (submitError) {
-      setFormError(submitError.message || "Submission failed.");
-    } finally {
-      setFormLoading(false);
-    }
   }
 
   function renderSectionHeading(section, textClass) {
@@ -1423,115 +1359,45 @@ export default function PublicLanding({
               >
                 {renderSectionHeading(section, textClass)}
 
-                <div className="lp-campaign-grid">
-                  <div className="lp-campaign-copy">
-                    <h3>Tell us about your project</h3>
-                    <p>Complete the form and our team will share a tailored proposal with timelines and expected outcomes.</p>
-                  </div>
+                <div className="lp-campaign-carousel">
+                  {campaignHighlights.length ? (
+                    campaignHighlights.map((campaign) => (
+                      <article key={campaign.id || campaign.slug} className="lp-campaign-slide">
+                        <div className="lp-campaign-slide-media">
+                          {campaign.imageUrl ? (
+                            <img src={campaign.imageUrl} alt={campaign.title || "Campaign"} />
+                          ) : (
+                            <div className="lp-image-placeholder">Campaign image</div>
+                          )}
+                        </div>
 
-                  <form className="campaign-form lp-campaign-form" onSubmit={handleCampaignSubmit}>
-                    {campaignFields.map((field) => {
-                      const options = toOptionsArray(field.options);
-                      const value = formData[field.key] || "";
-                      const selectedClass = editorMode && selectedFormFieldId === field.id ? "is-editor-selected" : "";
-
-                      if (field.type === "textarea") {
-                        return (
-                          <label
-                            key={field.id}
-                            className={selectedClass}
-                            onClick={(event) => handleFormFieldSelect(section.id, field.id, event)}
+                        <div className="lp-campaign-slide-content">
+                          <h3>{campaign.title || "Campaign"}</h3>
+                          <p>{campaign.description || "Campaign details coming soon."}</p>
+                          <a
+                            href={`/campaigns/${campaign.slug}`}
+                            className="lp-btn lp-btn-primary"
+                            onClick={(event) => handlePreviewLinkClick(event, section.id)}
                           >
-                            <EditableText
-                              editorMode={editorMode}
-                              as="span"
-                              value={field.label}
-                              fallback="Field Label"
-                              onActivate={() => {
-                                onSelectSection?.(section.id);
-                                onSelectFormField?.(field.id);
-                              }}
-                              onCommit={(nextValue) => onUpdateFormField?.(field.id, "label", nextValue)}
-                            />
-                            <textarea
-                              value={value}
-                              required={field.required}
-                              placeholder={field.placeholder || ""}
-                              onChange={(event) => setFormValue(field.key, event.target.value)}
-                            />
-                          </label>
-                        );
-                      }
+                            Join Campaign
+                          </a>
+                        </div>
+                      </article>
+                    ))
+                  ) : (
+                    <article className="lp-campaign-slide lp-campaign-slide-empty">
+                      <div className="lp-campaign-slide-content">
+                        <h3>No campaigns published yet</h3>
+                        <p>Create and publish campaigns in the admin dashboard to populate this carousel.</p>
+                      </div>
+                    </article>
+                  )}
+                </div>
 
-                      if (field.type === "select") {
-                        return (
-                          <label
-                            key={field.id}
-                            className={selectedClass}
-                            onClick={(event) => handleFormFieldSelect(section.id, field.id, event)}
-                          >
-                            <EditableText
-                              editorMode={editorMode}
-                              as="span"
-                              value={field.label}
-                              fallback="Field Label"
-                              onActivate={() => {
-                                onSelectSection?.(section.id);
-                                onSelectFormField?.(field.id);
-                              }}
-                              onCommit={(nextValue) => onUpdateFormField?.(field.id, "label", nextValue)}
-                            />
-                            <select
-                              value={value}
-                              required={field.required}
-                              onChange={(event) => setFormValue(field.key, event.target.value)}
-                            >
-                              <option value="">Select an option</option>
-                              {options.map((option) => (
-                                <option key={option} value={option}>
-                                  {option}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        );
-                      }
-
-                      return (
-                        <label
-                          key={field.id}
-                          className={selectedClass}
-                          onClick={(event) => handleFormFieldSelect(section.id, field.id, event)}
-                        >
-                          <EditableText
-                            editorMode={editorMode}
-                            as="span"
-                            value={field.label}
-                            fallback="Field Label"
-                            onActivate={() => {
-                              onSelectSection?.(section.id);
-                              onSelectFormField?.(field.id);
-                            }}
-                            onCommit={(nextValue) => onUpdateFormField?.(field.id, "label", nextValue)}
-                          />
-                          <input
-                            type={field.type}
-                            value={value}
-                            required={field.required}
-                            placeholder={field.placeholder || ""}
-                            onChange={(event) => setFormValue(field.key, event.target.value)}
-                          />
-                        </label>
-                      );
-                    })}
-
-                    {formError ? <p className="form-error">{formError}</p> : null}
-                    {formMessage ? <p className="form-success">{formMessage}</p> : null}
-
-                    <button type="submit" disabled={formLoading || editorMode}>
-                      {formLoading ? "Submitting..." : editorMode ? "Preview Mode" : settings.submitText || "Submit"}
-                    </button>
-                  </form>
+                <div className="lp-campaign-cta-row">
+                  <a href="/campaigns" className="lp-btn lp-btn-ghost" onClick={(event) => handlePreviewLinkClick(event, section.id)}>
+                    {settings.submitText || "See all campaigns"}
+                  </a>
                 </div>
               </motion.section>
             );

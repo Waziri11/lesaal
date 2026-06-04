@@ -77,6 +77,26 @@ export type CampaignFormField = Prisma.CampaignFormFieldModel
  */
 export type CampaignSubmission = Prisma.CampaignSubmissionModel
 /**
+ * Model Campaign
+ * 
+ */
+export type Campaign = Prisma.CampaignModel
+/**
+ * Model CampaignQuestion
+ * 
+ */
+export type CampaignQuestion = Prisma.CampaignQuestionModel
+/**
+ * Model CampaignResponse
+ * 
+ */
+export type CampaignResponse = Prisma.CampaignResponseModel
+/**
+ * Model AdminNotification
+ * 
+ */
+export type AdminNotification = Prisma.AdminNotificationModel
+/**
  * Model EmailOtpCode
  * 
  */

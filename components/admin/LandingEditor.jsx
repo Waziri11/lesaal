@@ -35,8 +35,8 @@ function clampContextMenuPosition(position) {
     return { x: 40, y: 120 };
   }
 
-  const menuWidth = 420;
-  const menuHeight = 760;
+  const menuWidth = 620;
+  const menuHeight = 820;
   const margin = 12;
   const rawX = typeof position?.x === "number" ? position.x : window.innerWidth / 2;
   const rawY = typeof position?.y === "number" ? position.y : window.innerHeight / 2;
@@ -813,192 +813,204 @@ export default function LandingEditor() {
               </button>
             </div>
 
-            <div className="section-context-grid">
-              <label className="field-full">
-                Section Title
-                <input
-                  type="text"
-                  value={menuSection.title}
-                  onChange={(event) =>
-                    updateSection(menuSection.id, (current) => ({
-                      ...current,
-                      title: event.target.value,
-                    }))
-                  }
-                />
-              </label>
+            <div className="section-context-group">
+              <h4 className="section-context-group-title">General</h4>
+              <div className="section-context-grid">
+                <label className="field-full">
+                  Section Title
+                  <input
+                    type="text"
+                    value={menuSection.title}
+                    onChange={(event) =>
+                      updateSection(menuSection.id, (current) => ({
+                        ...current,
+                        title: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
 
-              <label>
-                Component Variant
-                <select
-                  value={menuSection.componentVariant}
-                  onChange={(event) =>
-                    updateSection(menuSection.id, (current) => ({
-                      ...current,
-                      componentVariant: event.target.value,
-                    }))
-                  }
-                >
-                  {COMPONENT_VARIANT_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <label>
+                  Component Variant
+                  <select
+                    value={menuSection.componentVariant}
+                    onChange={(event) =>
+                      updateSection(menuSection.id, (current) => ({
+                        ...current,
+                        componentVariant: event.target.value,
+                      }))
+                    }
+                  >
+                    {COMPONENT_VARIANT_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-              <label>
-                Text Animation
-                <select
-                  value={menuSection.textAnimation}
-                  onChange={(event) =>
-                    updateSection(menuSection.id, (current) => ({
-                      ...current,
-                      textAnimation: event.target.value,
-                    }))
-                  }
-                >
-                  {TEXT_ANIMATION_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <label>
+                  Text Animation
+                  <select
+                    value={menuSection.textAnimation}
+                    onChange={(event) =>
+                      updateSection(menuSection.id, (current) => ({
+                        ...current,
+                        textAnimation: event.target.value,
+                      }))
+                    }
+                  >
+                    {TEXT_ANIMATION_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-              <label>
-                Section Animation
-                <select
-                  value={menuSection.sectionAnimation}
-                  onChange={(event) =>
-                    updateSection(menuSection.id, (current) => ({
-                      ...current,
-                      sectionAnimation: event.target.value,
-                    }))
-                  }
-                >
-                  {SECTION_ANIMATION_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <label>
+                  Section Animation
+                  <select
+                    value={menuSection.sectionAnimation}
+                    onChange={(event) =>
+                      updateSection(menuSection.id, (current) => ({
+                        ...current,
+                        sectionAnimation: event.target.value,
+                      }))
+                    }
+                  >
+                    {SECTION_ANIMATION_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-              <label>
-                Scroll Animation
-                <select
-                  value={menuSection.scrollAnimation}
-                  onChange={(event) =>
-                    updateSection(menuSection.id, (current) => ({
-                      ...current,
-                      scrollAnimation: event.target.value,
-                    }))
-                  }
-                >
-                  {SCROLL_ANIMATION_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <label>
+                  Scroll Animation
+                  <select
+                    value={menuSection.scrollAnimation}
+                    onChange={(event) =>
+                      updateSection(menuSection.id, (current) => ({
+                        ...current,
+                        scrollAnimation: event.target.value,
+                      }))
+                    }
+                  >
+                    {SCROLL_ANIMATION_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </div>
 
-              <label>
-                Font Size (px)
-                <input
-                  type="number"
-                  min={12}
-                  max={120}
-                  value={menuTextStyle.fontSize ?? ""}
-                  placeholder="Default"
-                  onChange={(event) => {
-                    const rawValue = event.target.value;
-                    updateMenuTextStyle({
-                      fontSize: rawValue === "" ? null : rawValue,
-                    });
-                  }}
-                />
-              </label>
+            <div className="section-context-group">
+              <h4 className="section-context-group-title">Text Style</h4>
+              <div className="section-context-grid">
+                <label>
+                  Font Size (px)
+                  <input
+                    type="number"
+                    min={12}
+                    max={120}
+                    value={menuTextStyle.fontSize ?? ""}
+                    placeholder="Default"
+                    onChange={(event) => {
+                      const rawValue = event.target.value;
+                      updateMenuTextStyle({
+                        fontSize: rawValue === "" ? null : rawValue,
+                      });
+                    }}
+                  />
+                </label>
 
-              <label>
-                Color Picker
-                <input
-                  type="color"
-                  value={menuTextStyle.color || "#10254e"}
-                  onChange={(event) =>
-                    updateMenuTextStyle({
-                      color: event.target.value,
-                    })
-                  }
-                />
-              </label>
+                <label className="field-color">
+                  Text Color
+                  <input
+                    type="color"
+                    value={menuTextStyle.color || "#10254e"}
+                    onChange={(event) =>
+                      updateMenuTextStyle({
+                        color: event.target.value,
+                      })
+                    }
+                  />
+                </label>
 
-              <label>
-                Bold
-                <select
-                  value={menuTextStyle.bold ? "yes" : "no"}
-                  onChange={(event) =>
-                    updateMenuTextStyle({
-                      bold: event.target.value === "yes",
-                    })
-                  }
-                >
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </label>
+                <label>
+                  Bold
+                  <select
+                    value={menuTextStyle.bold ? "yes" : "no"}
+                    onChange={(event) =>
+                      updateMenuTextStyle({
+                        bold: event.target.value === "yes",
+                      })
+                    }
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </label>
 
-              <label>
-                Italic
-                <select
-                  value={menuTextStyle.italic ? "yes" : "no"}
-                  onChange={(event) =>
-                    updateMenuTextStyle({
-                      italic: event.target.value === "yes",
-                    })
-                  }
-                >
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </label>
+                <label>
+                  Italic
+                  <select
+                    value={menuTextStyle.italic ? "yes" : "no"}
+                    onChange={(event) =>
+                      updateMenuTextStyle({
+                        italic: event.target.value === "yes",
+                      })
+                    }
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </label>
 
-              <label>
-                Underline
-                <select
-                  value={menuTextStyle.underline ? "yes" : "no"}
-                  onChange={(event) =>
-                    updateMenuTextStyle({
-                      underline: event.target.value === "yes",
-                    })
-                  }
-                >
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </label>
+                <label>
+                  Underline
+                  <select
+                    value={menuTextStyle.underline ? "yes" : "no"}
+                    onChange={(event) =>
+                      updateMenuTextStyle({
+                        underline: event.target.value === "yes",
+                      })
+                    }
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </label>
 
-              <label className="field-full">
-                Text Style Reset
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateSectionSettingFromPreview(menuSection.id, "textStyle", {
-                      fontSize: null,
-                      color: "",
-                      bold: false,
-                      italic: false,
-                      underline: false,
-                    })
-                  }
-                >
-                  Reset Text Style
-                </button>
-              </label>
+                <label className="field-full">
+                  Text Style Reset
+                  <button
+                    type="button"
+                    className="section-reset-btn"
+                    onClick={() =>
+                      updateSectionSettingFromPreview(menuSection.id, "textStyle", {
+                        fontSize: null,
+                        color: "",
+                        bold: false,
+                        italic: false,
+                        underline: false,
+                      })
+                    }
+                  >
+                    Reset Text Style
+                  </button>
+                </label>
+              </div>
+            </div>
 
-              {menuSection.type === "HERO" ? (
-                <>
+            {menuSection.type === "HERO" ? (
+              <div className="section-context-group">
+                <h4 className="section-context-group-title">Hero Content</h4>
+                <div className="section-context-grid">
                   <label className="field-full">
                     Static Hero Text
                     <textarea
@@ -1062,11 +1074,14 @@ export default function LandingEditor() {
                       }
                     />
                   </label>
-                </>
-              ) : null}
+                </div>
+              </div>
+            ) : null}
 
-              {menuSection.type === "SERVICES_GRID" ? (
-                <>
+            {menuSection.type === "SERVICES_GRID" ? (
+              <div className="section-context-group">
+                <h4 className="section-context-group-title">Services Settings</h4>
+                <div className="section-context-grid">
                   <label>
                     Home Service Limit
                     <input
@@ -1101,33 +1116,41 @@ export default function LandingEditor() {
                       }
                     />
                   </label>
-                </>
-              ) : null}
+                </div>
+              </div>
+            ) : null}
 
-              {menuSection.type === "PRICING" ? (
-                <label className="field-full">
-                  Recommended Plan
-                  <select
-                    value={menuSection.settings?.recommendedPlanKey || ""}
-                    onChange={(event) =>
-                      updateSectionSettingFromPreview(menuSection.id, "recommendedPlanKey", event.target.value)
-                    }
-                  >
-                    <option value="">None</option>
-                    {menuSection.items.map((item) => {
-                      const key = String(item.extra?.key || item.id || "");
-                      return (
-                        <option key={item.id} value={key}>
-                          {item.title || "Untitled plan"}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </label>
-              ) : null}
+            {menuSection.type === "PRICING" ? (
+              <div className="section-context-group">
+                <h4 className="section-context-group-title">Pricing Settings</h4>
+                <div className="section-context-grid">
+                  <label className="field-full">
+                    Recommended Plan
+                    <select
+                      value={menuSection.settings?.recommendedPlanKey || ""}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "recommendedPlanKey", event.target.value)
+                      }
+                    >
+                      <option value="">None</option>
+                      {menuSection.items.map((item) => {
+                        const key = String(item.extra?.key || item.id || "");
+                        return (
+                          <option key={item.id} value={key}>
+                            {item.title || "Untitled plan"}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </label>
+                </div>
+              </div>
+            ) : null}
 
-              {menuSection.type === "FOOTER" ? (
-                <>
+            {menuSection.type === "FOOTER" ? (
+              <div className="section-context-group">
+                <h4 className="section-context-group-title">Footer Settings</h4>
+                <div className="section-context-grid">
                   <label className="field-full">
                     Contact Email
                     <input
@@ -1160,11 +1183,14 @@ export default function LandingEditor() {
                       }
                     />
                   </label>
-                </>
-              ) : null}
+                </div>
+              </div>
+            ) : null}
 
-              {menuSection.type === "CAMPAIGN_FORM" ? (
-                <>
+            {menuSection.type === "CAMPAIGN_FORM" ? (
+              <div className="section-context-group">
+                <h4 className="section-context-group-title">Form Settings</h4>
+                <div className="section-context-grid">
                   <label>
                     Submit Button Text
                     <input
@@ -1186,9 +1212,9 @@ export default function LandingEditor() {
                       }
                     />
                   </label>
-                </>
-              ) : null}
-            </div>
+                </div>
+              </div>
+            ) : null}
 
             {menuSection.type === "CAMPAIGN_FORM" ? (
               <div className="builder-subpanel">

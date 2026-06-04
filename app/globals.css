@@ -620,6 +620,10 @@ body {
 .section-editor-card select,
 .section-editor-card textarea,
 .section-editor-card button,
+.section-context-menu input,
+.section-context-menu select,
+.section-context-menu textarea,
+.section-context-menu button,
 .campaign-form input,
 .campaign-form textarea,
 .campaign-form select,
@@ -634,6 +638,9 @@ body {
 .section-editor-card input,
 .section-editor-card select,
 .section-editor-card textarea,
+.section-context-menu input,
+.section-context-menu select,
+.section-context-menu textarea,
 .campaign-form input,
 .campaign-form textarea,
 .campaign-form select {
@@ -649,6 +656,7 @@ body {
 .save-btn,
 .admin-page-card button,
 .section-editor-card button,
+.section-context-menu button,
 .campaign-form button,
 .public-btn {
   border: 0;
@@ -1009,23 +1017,25 @@ body {
 .section-context-menu {
   position: fixed;
   z-index: 70;
-  width: min(420px, calc(100vw - 1.5rem));
-  max-height: min(84vh, 760px);
+  width: min(620px, calc(100vw - 1.5rem));
+  max-height: min(86vh, 820px);
   overflow: auto;
-  border: 1px solid rgba(168, 192, 232, 0.35);
-  border-radius: 0.9rem;
-  background: rgba(3, 13, 33, 0.96);
-  box-shadow: 0 16px 34px rgba(0, 8, 26, 0.6);
-  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: rgba(5, 17, 42, 0.96);
+  box-shadow: var(--shadow);
+  padding: 1rem;
   display: grid;
-  gap: 0.75rem;
+  gap: 0.9rem;
 }
 
 .section-context-head {
   display: flex;
   justify-content: space-between;
-  gap: 0.65rem;
-  align-items: flex-start;
+  gap: 0.8rem;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.82rem;
 }
 
 .section-context-head h3,
@@ -1033,35 +1043,114 @@ body {
   margin: 0;
 }
 
+.section-context-head h3 {
+  font-size: 1.04rem;
+}
+
 .section-context-head p {
   color: var(--ink-200);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.section-context-head button {
+  min-height: 2.1rem;
+  padding: 0.48rem 0.72rem;
+  font-size: 0.82rem;
+  border: 1px solid rgba(168, 192, 232, 0.3);
+  background: rgba(2, 12, 27, 0.74);
+  color: var(--ink-050);
+  font-weight: 600;
 }
 
 .section-context-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(122px, 1fr));
+  gap: 0.55rem;
+}
+
+.section-context-actions button {
+  min-height: 2.35rem;
+  padding: 0.56rem 0.72rem;
+  border: 1px solid rgba(168, 192, 232, 0.3);
+  background: rgba(2, 12, 27, 0.78);
+  color: var(--ink-050);
+  font-weight: 600;
+}
+
+.section-context-actions button:hover,
+.section-context-head button:hover,
+.section-context-grid .section-reset-btn:hover {
+  border-color: rgba(85, 144, 224, 0.66);
+  background: rgba(8, 27, 65, 0.86);
+}
+
+.section-context-group {
+  border: 1px solid rgba(168, 192, 232, 0.18);
+  border-radius: 0.92rem;
+  background: rgba(2, 10, 30, 0.46);
+  padding: 0.8rem;
+  display: grid;
+  gap: 0.72rem;
+}
+
+.section-context-group-title {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-200);
 }
 
 .section-context-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.7rem;
+  gap: 0.8rem 0.9rem;
 }
 
 .section-context-grid label {
   display: grid;
-  gap: 0.32rem;
+  gap: 0.35rem;
+  color: var(--ink-100);
+  font-size: 0.9rem;
 }
 
 .section-context-grid textarea {
-  min-height: 88px;
+  min-height: 112px;
   resize: vertical;
 }
 
 .section-context-grid .field-full {
   grid-column: span 2;
+}
+
+.section-context-grid .field-color input[type="color"] {
+  width: 100%;
+  height: 2.65rem;
+  padding: 0.24rem;
+  border-radius: 0.65rem;
+  cursor: pointer;
+}
+
+.section-context-grid .section-reset-btn {
+  width: 100%;
+  min-height: 2.35rem;
+  border: 1px solid rgba(168, 192, 232, 0.3);
+  background: rgba(2, 12, 27, 0.78);
+  color: var(--ink-050);
+  font-weight: 600;
+}
+
+.section-context-menu .danger-btn {
+  border: 1px solid rgba(255, 152, 168, 0.52);
+  background: rgba(122, 35, 49, 0.38);
+  color: #ffd6dd;
+}
+
+.section-context-menu .danger-btn:hover {
+  border-color: rgba(255, 176, 189, 0.72);
+  background: rgba(122, 35, 49, 0.6);
 }
 
 .builder-canvas-head h2,

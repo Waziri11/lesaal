@@ -35,8 +35,8 @@ function clampContextMenuPosition(position) {
     return { x: 40, y: 120 };
   }
 
-  const menuWidth = 620;
-  const menuHeight = 820;
+  const menuWidth = 980;
+  const menuHeight = 900;
   const margin = 12;
   const rawX = typeof position?.x === "number" ? position.x : window.innerWidth / 2;
   const rawY = typeof position?.y === "number" ? position.y : window.innerHeight / 2;
@@ -93,6 +93,55 @@ function normalizeTextStyle(value) {
   };
 }
 
+function textAnimationClass(preset) {
+  if (preset === "TYPEWRITER") return "text-anim-typewriter";
+  if (preset === "SLIDE_IN") return "text-anim-slide";
+  if (preset === "ZOOM_IN") return "text-anim-zoom";
+  if (preset === "FADE_UP") return "text-anim-fade-up";
+  return "";
+}
+
+function scrollAnimationClass(preset) {
+  if (preset === "PARALLAX") return "scroll-parallax";
+  if (preset === "STICKY") return "scroll-sticky";
+  if (preset === "REVEAL") return "scroll-reveal";
+  return "";
+}
+
+function sectionPreviewAnimationClass(preset) {
+  if (preset === "SLIDE_UP") return "section-preview-anim-slide-up";
+  if (preset === "SCALE_IN") return "section-preview-anim-scale-in";
+  if (preset === "FADE_IN") return "section-preview-anim-fade-in";
+  return "";
+}
+
+function textStyleToCssVars(value) {
+  const style = normalizeTextStyle(value);
+  const vars = {};
+
+  if (style.fontSize) {
+    vars["--lp-text-size"] = `${style.fontSize}px`;
+  }
+
+  if (style.color) {
+    vars["--lp-text-color"] = style.color;
+  }
+
+  if (style.bold) {
+    vars["--lp-text-weight"] = "700";
+  }
+
+  if (style.italic) {
+    vars["--lp-text-style"] = "italic";
+  }
+
+  if (style.underline) {
+    vars["--lp-text-decoration"] = "underline";
+  }
+
+  return vars;
+}
+
 export default function LandingEditor() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -125,6 +174,69 @@ export default function LandingEditor() {
     () => normalizeTextStyle(menuSection?.settings?.textStyle),
     [menuSection]
   );
+
+  const [previewReplayTick, setPreviewReplayTick] = useState(0);
+
+  const menuPreview = useMemo(() => {
+    if (!menuSection) return null;
+
+    const settings = menuSection.settings || {};
+    const dynamicWords = toStringArray(settings.dynamicWords);
+    const dynamicWord = dynamicWords[0] || "";
+    const baseBody =
+      settings.description ||
+      settings.body ||
+      settings.subheading ||
+      "Preview your unsaved changes here before publishing.";
+
+    if (menuSection.type === "HERO") {
+      return {
+        title: settings.staticText || menuSection.title || "Let us help you grow your reach through",
+        dynamicWord: dynamicWord || "Social media management",
+        body: baseBody,
+        primaryCtaText: settings.primaryCtaText || "Primary CTA",
+        secondaryCtaText: settings.secondaryCtaText || "Secondary CTA",
+      };
+    }
+
+    return {
+      title: menuSection.title || "Section title",
+      dynamicWord: "",
+      body: baseBody,
+      primaryCtaText: settings.ctaText || settings.submitText || "Primary Action",
+      secondaryCtaText: settings.secondaryCtaText || "",
+    };
+  }, [menuSection]);
+
+  const menuPreviewTextVars = useMemo(
+    () => textStyleToCssVars(menuSection?.settings?.textStyle),
+    [menuSection]
+  );
+
+  const menuPreviewKey = useMemo(() => {
+    if (!menuSection) return "section-preview-empty";
+    const settings = menuSection.settings || {};
+
+    return [
+      menuSection.id,
+      menuSection.title,
+      menuSection.textAnimation,
+      menuSection.sectionAnimation,
+      menuSection.scrollAnimation,
+      settings.staticText || "",
+      settings.description || "",
+      settings.body || "",
+      toStringArray(settings.dynamicWords).join("|"),
+      settings.primaryCtaText || "",
+      settings.secondaryCtaText || "",
+      menuTextStyle.fontSize ?? "",
+      menuTextStyle.color || "",
+      menuTextStyle.bold ? "1" : "0",
+      menuTextStyle.italic ? "1" : "0",
+      menuTextStyle.underline ? "1" : "0",
+      previewReplayTick,
+    ].join("::");
+  }, [menuSection, menuTextStyle, previewReplayTick]);
 
   const selectedFormField = useMemo(() => {
     if (!config) return null;
@@ -813,9 +925,11 @@ export default function LandingEditor() {
               </button>
             </div>
 
-            <div className="section-context-group">
-              <h4 className="section-context-group-title">General</h4>
-              <div className="section-context-grid">
+            <div className="section-context-body">
+              <div className="section-context-editor">
+                <div className="section-context-group">
+                  <h4 className="section-context-group-title">General</h4>
+                  <div className="section-context-grid">
                 <label className="field-full">
                   Section Title
                   <input
@@ -905,12 +1019,12 @@ export default function LandingEditor() {
                     ))}
                   </select>
                 </label>
-              </div>
-            </div>
+                  </div>
+                </div>
 
-            <div className="section-context-group">
-              <h4 className="section-context-group-title">Text Style</h4>
-              <div className="section-context-grid">
+                <div className="section-context-group">
+                  <h4 className="section-context-group-title">Text Style</h4>
+                  <div className="section-context-grid">
                 <label>
                   Font Size (px)
                   <input
@@ -1004,13 +1118,13 @@ export default function LandingEditor() {
                     Reset Text Style
                   </button>
                 </label>
-              </div>
-            </div>
+                  </div>
+                </div>
 
-            {menuSection.type === "HERO" ? (
-              <div className="section-context-group">
-                <h4 className="section-context-group-title">Hero Content</h4>
-                <div className="section-context-grid">
+                {menuSection.type === "HERO" ? (
+                  <div className="section-context-group">
+                    <h4 className="section-context-group-title">Hero Content</h4>
+                    <div className="section-context-grid">
                   <label className="field-full">
                     Static Hero Text
                     <textarea
@@ -1074,14 +1188,14 @@ export default function LandingEditor() {
                       }
                     />
                   </label>
-                </div>
-              </div>
-            ) : null}
+                    </div>
+                  </div>
+                ) : null}
 
-            {menuSection.type === "SERVICES_GRID" ? (
-              <div className="section-context-group">
-                <h4 className="section-context-group-title">Services Settings</h4>
-                <div className="section-context-grid">
+                {menuSection.type === "SERVICES_GRID" ? (
+                  <div className="section-context-group">
+                    <h4 className="section-context-group-title">Services Settings</h4>
+                    <div className="section-context-grid">
                   <label>
                     Home Service Limit
                     <input
@@ -1116,14 +1230,14 @@ export default function LandingEditor() {
                       }
                     />
                   </label>
-                </div>
-              </div>
-            ) : null}
+                    </div>
+                  </div>
+                ) : null}
 
-            {menuSection.type === "PRICING" ? (
-              <div className="section-context-group">
-                <h4 className="section-context-group-title">Pricing Settings</h4>
-                <div className="section-context-grid">
+                {menuSection.type === "PRICING" ? (
+                  <div className="section-context-group">
+                    <h4 className="section-context-group-title">Pricing Settings</h4>
+                    <div className="section-context-grid">
                   <label className="field-full">
                     Recommended Plan
                     <select
@@ -1143,14 +1257,14 @@ export default function LandingEditor() {
                       })}
                     </select>
                   </label>
-                </div>
-              </div>
-            ) : null}
+                    </div>
+                  </div>
+                ) : null}
 
-            {menuSection.type === "FOOTER" ? (
-              <div className="section-context-group">
-                <h4 className="section-context-group-title">Footer Settings</h4>
-                <div className="section-context-grid">
+                {menuSection.type === "FOOTER" ? (
+                  <div className="section-context-group">
+                    <h4 className="section-context-group-title">Footer Settings</h4>
+                    <div className="section-context-grid">
                   <label className="field-full">
                     Contact Email
                     <input
@@ -1183,14 +1297,14 @@ export default function LandingEditor() {
                       }
                     />
                   </label>
-                </div>
-              </div>
-            ) : null}
+                    </div>
+                  </div>
+                ) : null}
 
-            {menuSection.type === "CAMPAIGN_FORM" ? (
-              <div className="section-context-group">
-                <h4 className="section-context-group-title">Form Settings</h4>
-                <div className="section-context-grid">
+                {menuSection.type === "CAMPAIGN_FORM" ? (
+                  <div className="section-context-group">
+                    <h4 className="section-context-group-title">Form Settings</h4>
+                    <div className="section-context-grid">
                   <label>
                     Submit Button Text
                     <input
@@ -1212,16 +1326,16 @@ export default function LandingEditor() {
                       }
                     />
                   </label>
-                </div>
-              </div>
-            ) : null}
+                    </div>
+                  </div>
+                ) : null}
 
-            {menuSection.type === "CAMPAIGN_FORM" ? (
-              <div className="builder-subpanel">
-                <div className="builder-inline-head">
-                  <h3>Form Field Controls</h3>
-                  <button type="button" onClick={addFormField}>Add Field</button>
-                </div>
+                {menuSection.type === "CAMPAIGN_FORM" ? (
+                  <div className="builder-subpanel">
+                    <div className="builder-inline-head">
+                      <h3>Form Field Controls</h3>
+                      <button type="button" onClick={addFormField}>Add Field</button>
+                    </div>
 
                 {selectedFormField ? (
                   <div className="section-context-grid">
@@ -1358,21 +1472,78 @@ export default function LandingEditor() {
                   <p>No form fields yet.</p>
                 )}
 
-                {selectedFormField ? (
-                  <div className="section-context-actions">
-                    <button type="button" onClick={() => moveFormField(selectedFormField.id, "up")}>
-                      Move Field Up
-                    </button>
-                    <button type="button" onClick={() => moveFormField(selectedFormField.id, "down")}>
-                      Move Field Down
-                    </button>
-                    <button type="button" className="danger-btn" onClick={() => removeFormField(selectedFormField.id)}>
-                      Remove Field
-                    </button>
+                    {selectedFormField ? (
+                      <div className="section-context-actions">
+                        <button type="button" onClick={() => moveFormField(selectedFormField.id, "up")}>
+                          Move Field Up
+                        </button>
+                        <button type="button" onClick={() => moveFormField(selectedFormField.id, "down")}>
+                          Move Field Down
+                        </button>
+                        <button type="button" className="danger-btn" onClick={() => removeFormField(selectedFormField.id)}>
+                          Remove Field
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
-            ) : null}
+
+              <aside className="section-context-preview-panel">
+                <div className="section-context-preview-head">
+                  <div>
+                    <h4>Live Draft Preview</h4>
+                    <p>Unsaved edits update here instantly</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="section-context-preview-replay"
+                    onClick={() => setPreviewReplayTick((current) => current + 1)}
+                  >
+                    Replay
+                  </button>
+                </div>
+
+                <div
+                  key={menuPreviewKey}
+                  className={`section-context-preview-canvas ${sectionPreviewAnimationClass(menuSection.sectionAnimation)} ${scrollAnimationClass(menuSection.scrollAnimation)}`.trim()}
+                  style={menuPreviewTextVars}
+                >
+                  <span className="section-context-preview-type">{menuSection.type}</span>
+
+                  <h5 className={`section-context-preview-title ${textAnimationClass(menuSection.textAnimation)}`.trim()}>
+                    {menuPreview?.title || "Section preview"}
+                    {menuPreview?.dynamicWord ? (
+                      <>
+                        {" "}
+                        <span className="section-context-preview-dynamic">{menuPreview.dynamicWord}</span>
+                      </>
+                    ) : null}
+                  </h5>
+
+                  <p className="section-context-preview-copy">
+                    {menuPreview?.body || "Preview your current draft settings before saving."}
+                  </p>
+
+                  <div className="section-context-preview-cta">
+                    <button type="button" className="section-context-preview-primary">
+                      {menuPreview?.primaryCtaText || "Primary Action"}
+                    </button>
+                    {menuPreview?.secondaryCtaText ? (
+                      <button type="button" className="section-context-preview-secondary">
+                        {menuPreview.secondaryCtaText}
+                      </button>
+                    ) : null}
+                  </div>
+
+                  <div className="section-context-preview-meta">
+                    <span>{menuSection.textAnimation}</span>
+                    <span>{menuSection.sectionAnimation}</span>
+                    <span>{menuSection.scrollAnimation}</span>
+                  </div>
+                </div>
+              </aside>
+            </div>
           </div>
         </>
       ) : null}

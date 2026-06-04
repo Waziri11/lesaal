@@ -142,6 +142,111 @@ function textStyleToCssVars(value) {
   return vars;
 }
 
+const ITEM_ENABLED_SECTION_TYPES = new Set([
+  "STATS_BAND",
+  "CLIENT_LOGOS",
+  "SERVICES_GRID",
+  "COMMENTARY",
+  "PRICING",
+  "FAQ",
+  "FOOTER",
+]);
+
+function sectionSupportsItems(sectionType) {
+  return ITEM_ENABLED_SECTION_TYPES.has(sectionType);
+}
+
+function createDefaultItemForSection(sectionType, order) {
+  const base = {
+    id: createTempId("item"),
+    order,
+    label: "",
+    title: "",
+    description: "",
+    imageUrl: "",
+    value: "",
+    extra: {},
+  };
+
+  if (sectionType === "STATS_BAND") {
+    return {
+      ...base,
+      title: "New Stat",
+      description: "Metric label",
+    };
+  }
+
+  if (sectionType === "CLIENT_LOGOS") {
+    return {
+      ...base,
+      title: "Client Name",
+    };
+  }
+
+  if (sectionType === "SERVICES_GRID") {
+    return {
+      ...base,
+      title: "New Service",
+      description: "Service description",
+      extra: {
+        tags: ["Tag"],
+      },
+    };
+  }
+
+  if (sectionType === "COMMENTARY") {
+    return {
+      ...base,
+      title: "Client Name",
+      label: "Role",
+      description: "Client quote",
+      value: "5/5",
+      extra: {
+        stars: 5,
+      },
+    };
+  }
+
+  if (sectionType === "PRICING") {
+    return {
+      ...base,
+      title: "New Plan",
+      label: "Plan summary",
+      description: "Plan description",
+      value: "$0 / month",
+      extra: {
+        key: createTempId("plan"),
+        ctaText: "Get started",
+        ctaLink: "#campaign-form",
+        features: ["New feature"],
+      },
+    };
+  }
+
+  if (sectionType === "FAQ") {
+    return {
+      ...base,
+      title: "New question?",
+      description: "Answer goes here.",
+    };
+  }
+
+  if (sectionType === "FOOTER") {
+    return {
+      ...base,
+      title: "New Link",
+      value: "#",
+    };
+  }
+
+  return {
+    ...base,
+    extra: {
+      key: createTempId("plan"),
+    },
+  };
+}
+
 export default function LandingEditor() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -436,23 +541,24 @@ export default function LandingEditor() {
   }
 
   function addItem(sectionId) {
+    const section = config?.sections.find((entry) => entry.id === sectionId);
+    if (!section || !sectionSupportsItems(section.type)) return;
+
+    const currentItems = Array.isArray(section.items) ? section.items : [];
+    const nextItem = createDefaultItemForSection(section.type, currentItems.length);
+
     updateSection(sectionId, (section) => {
-      const nextItemId = createTempId("item");
-      const nextItems = [
-        ...section.items,
-        {
-          id: nextItemId,
-          order: section.items.length,
-          label: "",
-          title: "",
-          description: "",
-          imageUrl: "",
-          value: "",
-          extra: {
-            key: createTempId("plan"),
-          },
-        },
-      ];
+      const safeItems = Array.isArray(section.items) ? section.items : [];
+      let nextItems = [];
+
+      if (section.type === "COMMENTARY") {
+        nextItems = [nextItem, ...safeItems].map((item, order) => ({
+          ...item,
+          order,
+        }));
+      } else {
+        nextItems = [...safeItems, { ...nextItem, order: safeItems.length }];
+      }
 
       return {
         ...section,
@@ -461,7 +567,7 @@ export default function LandingEditor() {
     });
 
     setSelectedSectionId(sectionId);
-    setSelectedItemId(null);
+    setSelectedItemId(nextItem.id);
   }
 
   function reorderItems(sectionId, sourceItemId, targetItemId) {
@@ -916,7 +1022,9 @@ export default function LandingEditor() {
               >
                 {menuSection.isVisible ? "Hide" : "Show"}
               </button>
-              <button type="button" onClick={() => addItem(menuSection.id)}>Add Item</button>
+              {sectionSupportsItems(menuSection.type) ? (
+                <button type="button" onClick={() => addItem(menuSection.id)}>Add Item</button>
+              ) : null}
               {menuSection.type === "CAMPAIGN_FORM" ? (
                 <button type="button" onClick={addFormField}>Add Form Field</button>
               ) : null}

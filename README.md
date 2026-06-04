@@ -44,6 +44,7 @@ For Gmail SMTP, use a Gmail app password (not your normal account password).
 
 - Set `DATABASE_URL` to your Prisma Postgres connection string.
 - Keep `.env` out of version control.
+- Add `DATABASE_URL` in Vercel Project Settings -> Environment Variables for Production/Preview.
 
 ## Useful scripts
 

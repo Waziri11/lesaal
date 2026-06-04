@@ -1,96 +1,116 @@
 import "dotenv/config";
 import { prisma } from "../lib/prisma";
+import bcrypt from "bcryptjs";
+import { DEFAULT_SITE_TITLE, getDefaultFormFields, getDefaultLandingSections } from "../lib/landing-defaults";
 
 async function seedAdmin() {
+  const email = String(process.env.ADMIN_EMAIL || "admin@example.com").trim().toLowerCase();
+  const password = String(process.env.ADMIN_PASSWORD || "change-me-strong");
+
+  if (!email || !password || password.length < 8) {
+    throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD (min 8 chars) are required for seeding admin user.");
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+
   await prisma.adminUser.upsert({
-    where: { email: "admin@example.com" },
-    update: {},
+    where: { email },
+    update: { passwordHash },
     create: {
-      email: "admin@example.com",
-      passwordHash: "replace-with-secure-hash",
+      email,
+      passwordHash,
     },
   });
 }
 
 async function seedLandingConfig() {
+  const defaultSections = getDefaultLandingSections();
+  const defaultFields = getDefaultFormFields();
+
   const existing = await prisma.landingPageConfig.findFirst({
     select: { id: true },
   });
 
-  if (existing) {
-    return;
-  }
+  const configId =
+    existing?.id ||
+    (
+      await prisma.landingPageConfig.create({
+        data: {
+          siteTitle: DEFAULT_SITE_TITLE,
+        },
+        select: { id: true },
+      })
+    ).id;
 
-  await prisma.landingPageConfig.create({
-    data: {
-      siteTitle: "Lesaal",
-      sections: {
-        create: [
-          {
-            type: "HERO",
-            title: "Hero",
-            order: 0,
-            isVisible: true,
-            componentVariant: "DEFAULT",
-            textAnimation: "FADE_UP",
-            sectionAnimation: "FADE_IN",
-            scrollAnimation: "PARALLAX",
-            settings: {
-              staticText: "Let us help you grow your reach through",
-              dynamicWords: ["Social media management", "SEO", "Paid ads"],
-            },
-          },
-          {
-            type: "SERVICES_GRID",
-            title: "Services",
-            order: 1,
-            isVisible: true,
-            componentVariant: "CARD",
-            textAnimation: "FADE_UP",
-            sectionAnimation: "FADE_IN",
-            scrollAnimation: "REVEAL",
-            settings: {
-              heading: "Services",
-              maxHomeItems: 6,
-            },
-            items: {
-              create: [
-                {
-                  order: 0,
-                  title: "Social Media Management",
-                  description: "Content planning and publishing for growth.",
-                },
-                {
-                  order: 1,
-                  title: "SEO Optimization",
-                  description: "Technical and on-page SEO improvements.",
-                },
-              ],
-            },
-          },
-        ],
-      },
-      formFields: {
-        create: [
-          {
-            key: "full_name",
-            label: "Full Name",
-            type: "text",
-            required: true,
-            order: 0,
-            isVisible: true,
-          },
-          {
-            key: "email",
-            label: "Email",
-            type: "email",
-            required: true,
-            order: 1,
-            isVisible: true,
-          },
-        ],
-      },
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.landingPageConfig.update({
+      where: { id: configId },
+      data: { siteTitle: DEFAULT_SITE_TITLE },
+    });
+
+    await tx.landingSection.deleteMany({
+      where: { configId },
+    });
+
+    await tx.campaignFormField.deleteMany({
+      where: { configId },
+    });
+
+    await tx.landingSection.createMany({
+      data: defaultSections.map((section, order) => ({
+        configId,
+        type: section.type,
+        title: section.title,
+        isVisible: section.isVisible !== false,
+        order,
+        componentVariant: section.componentVariant,
+        textAnimation: section.textAnimation,
+        sectionAnimation: section.sectionAnimation,
+        scrollAnimation: section.scrollAnimation,
+        settings: section.settings ?? null,
+      })),
+    });
+
+    const createdSections = await tx.landingSection.findMany({
+      where: { configId },
+      select: { id: true, type: true, order: true },
+      orderBy: { order: "asc" },
+    });
+
+    for (const section of createdSections) {
+      const template = defaultSections.find((entry) => entry.type === section.type && entry.order === section.order);
+
+      if (!template?.items?.length) {
+        continue;
+      }
+
+      await tx.sectionItem.createMany({
+        data: template.items.map((item, itemOrder) => ({
+          sectionId: section.id,
+          order: typeof item.order === "number" ? item.order : itemOrder,
+          label: item.label || null,
+          title: item.title || null,
+          description: item.description || null,
+          imageUrl: item.imageUrl || null,
+          value: item.value || null,
+          extra: item.extra || null,
+        })),
+      });
+    }
+
+    await tx.campaignFormField.createMany({
+      data: defaultFields.map((field, order) => ({
+        configId,
+        key: field.key,
+        label: field.label,
+        type: field.type,
+        required: field.required === true,
+        placeholder: field.placeholder || null,
+        options: field.options || [],
+        order,
+        isVisible: field.isVisible !== false,
+      })),
+    });
   });
 }
 
@@ -98,13 +118,17 @@ async function main() {
   await seedAdmin();
   await seedLandingConfig();
 
-  const [admins, configs, sections] = await Promise.all([
+  const [admins, configs, sections, items, fields] = await Promise.all([
     prisma.adminUser.count(),
     prisma.landingPageConfig.count(),
     prisma.landingSection.count(),
+    prisma.sectionItem.count(),
+    prisma.campaignFormField.count(),
   ]);
 
-  console.log(`Seed complete: admins=${admins}, configs=${configs}, sections=${sections}`);
+  console.log(
+    `Seed complete: admins=${admins}, configs=${configs}, sections=${sections}, items=${items}, formFields=${fields}`
+  );
 }
 
 main()

@@ -8,7 +8,7 @@ This project now includes:
 - Campaign form builder and campaign submission inbox persistence
 - Profile security flows (change password, email change with OTP verification)
 - Gmail SMTP integration for OTP and campaign notifications
-- Prisma + SQLite persistence
+- Prisma + PostgreSQL (Prisma Postgres) persistence
 
 ## Run locally
 
@@ -39,6 +39,11 @@ Create `.env` from `.env.example` and configure:
 - `NOTIFY_EMAIL`
 
 For Gmail SMTP, use a Gmail app password (not your normal account password).
+
+### Vercel deployment note
+
+- Set `DATABASE_URL` to your Prisma Postgres connection string.
+- Keep `.env` out of version control.
 
 ## Useful scripts
 

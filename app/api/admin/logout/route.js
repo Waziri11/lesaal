@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { clearAdminSessionCookie } from "../../../../lib/auth";
-import { prisma } from "../../../../lib/prisma";
+import { ensureDatabaseReady, prisma } from "../../../../lib/prisma";
 import { hashToken } from "../../../../lib/security";
 import { SESSION_COOKIE_NAME } from "../../../../lib/constants";
 
 export async function POST(request) {
   try {
+    await ensureDatabaseReady();
+
     const rawToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
     if (rawToken) {

@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma db execute --file prisma/migrations/20260603233000_init/migration.sql",
     "prisma:init": "prisma db execute --file prisma/migrations/20260603233000_init/migration.sql",

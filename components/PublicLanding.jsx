@@ -15,7 +15,13 @@ const SECTION_ANCHOR_BASES = {
   FOOTER: "footer",
 };
 
-const NAV_HIDDEN_TYPES = new Set(["STATS_BAND", "FOOTER", "CAMPAIGN_FORM"]);
+const LANDING_NAV_ITEMS = [
+  { key: "home", label: "Home" },
+  { key: "services", label: "Services", preferredTypes: ["SERVICES_GRID"] },
+  { key: "campaigns", label: "Campaigns", preferredTypes: ["CAMPAIGN_FORM", "COMMENTARY"] },
+  { key: "pricing", label: "Pricing", preferredTypes: ["PRICING"] },
+  { key: "faq", label: "FAQ", preferredTypes: ["FAQ"] },
+];
 
 function getSectionMotion(preset) {
   if (preset === "NONE") {
@@ -314,10 +320,46 @@ export default function PublicLanding({
     return anchorsById;
   }, [visibleSections]);
 
-  const navigationSections = useMemo(
-    () => visibleSections.filter((section) => !NAV_HIDDEN_TYPES.has(section.type)),
-    [visibleSections]
-  );
+  const navigationLinks = useMemo(() => {
+    const firstSectionByType = new Map();
+    for (const section of visibleSections) {
+      if (!firstSectionByType.has(section.type)) {
+        firstSectionByType.set(section.type, section);
+      }
+    }
+
+    const homeSection = firstSectionByType.get("HERO") || visibleSections[0] || null;
+    const links = [];
+
+    for (const item of LANDING_NAV_ITEMS) {
+      if (item.key === "home") {
+        links.push({
+          key: item.key,
+          label: item.label,
+          href: "#top",
+          sectionId: homeSection?.id || null,
+        });
+        continue;
+      }
+
+      const targetSection = (item.preferredTypes || [])
+        .map((type) => firstSectionByType.get(type))
+        .find(Boolean);
+
+      if (!targetSection) {
+        continue;
+      }
+
+      links.push({
+        key: item.key,
+        label: item.label,
+        href: `#${sectionAnchors[targetSection.id]}`,
+        sectionId: targetSection.id,
+      });
+    }
+
+    return links;
+  }, [sectionAnchors, visibleSections]);
 
   const campaignFields = useMemo(
     () => config.formFields.filter((field) => field.isVisible).sort((a, b) => a.order - b.order),
@@ -634,13 +676,13 @@ export default function PublicLanding({
         </a>
 
         <nav className="lp-nav">
-          {navigationSections.map((section) => (
+          {navigationLinks.map((link) => (
             <a
-              key={section.id}
-              href={`#${sectionAnchors[section.id]}`}
-              onClick={(event) => handlePreviewLinkClick(event, section.id)}
+              key={link.key}
+              href={link.href}
+              onClick={(event) => handlePreviewLinkClick(event, link.sectionId)}
             >
-              {section.title}
+              {link.label}
             </a>
           ))}
         </nav>

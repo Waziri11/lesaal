@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Badge } from "../../../../components/ui/badge";
+import { Button } from "../../../../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
 
 function formatDateTime(value) {
   if (!value) return "-";
@@ -71,64 +74,73 @@ export default function NotificationsPage() {
   }, []);
 
   return (
-    <section className="notification-shell">
-      <article className="admin-page-card notification-head-card">
-        <h1>Notifications</h1>
-        <p>Track campaign responses as they arrive and keep your inbox organized.</p>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
+          <div>
+            <CardTitle>Notifications</CardTitle>
+            <CardDescription>Track campaign responses as they arrive.</CardDescription>
+          </div>
 
-        <div className="notification-head-actions">
-          <span className="status-pill">{unreadCount} unread</span>
-          <button type="button" onClick={() => markAsRead()} disabled={updating || unreadCount === 0}>
-            {updating ? "Updating..." : "Mark all as read"}
-          </button>
-        </div>
+          <div className="flex items-center gap-2">
+            <Badge variant={unreadCount > 0 ? "secondary" : "default"}>{unreadCount} unread</Badge>
+            <Button type="button" variant="outline" onClick={() => markAsRead()} disabled={updating || unreadCount === 0}>
+              {updating ? "Updating..." : "Mark all as read"}
+            </Button>
+          </div>
+        </CardHeader>
 
-        {error ? <p className="form-error">{error}</p> : null}
-      </article>
+        {error ? <CardContent><p className="text-sm text-red-300">{error}</p></CardContent> : null}
+      </Card>
 
-      <div className="notification-list">
-        {loading ? <article className="admin-page-card"><p>Loading notifications...</p></article> : null}
+      {loading ? (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-slate-300">Loading notifications...</p>
+          </CardContent>
+        </Card>
+      ) : null}
 
-        {!loading && !notifications.length ? (
-          <article className="admin-page-card">
-            <h2>No notifications yet</h2>
-            <p>New campaign responses will appear here.</p>
-          </article>
-        ) : null}
+      {!loading && !notifications.length ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">No notifications yet</CardTitle>
+            <CardDescription>New campaign responses will appear here.</CardDescription>
+          </CardHeader>
+        </Card>
+      ) : null}
 
-        {!loading
-          ? notifications.map((notification) => (
-              <article
-                key={notification.id}
-                className={`admin-page-card notification-item${notification.isRead ? "" : " is-unread"}`}
-              >
-                <div className="notification-item-head">
-                  <div>
-                    <h2>{notification.title}</h2>
-                    <p>{notification.message}</p>
-                  </div>
-
-                  {!notification.isRead ? (
-                    <button type="button" onClick={() => markAsRead(notification.id)} disabled={updating}>
-                      Mark as read
-                    </button>
-                  ) : (
-                    <span className="section-type-pill">Read</span>
-                  )}
+      {!loading
+        ? notifications.map((notification) => (
+            <Card key={notification.id} className={notification.isRead ? "" : "border-blue-500/60"}>
+              <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base">{notification.title}</CardTitle>
+                  <CardDescription>{notification.message}</CardDescription>
                 </div>
 
-                <div className="notification-item-meta">
-                  <span>Received: {formatDateTime(notification.createdAt)}</span>
-                  {notification.campaign ? (
+                {!notification.isRead ? (
+                  <Button type="button" variant="secondary" size="sm" onClick={() => markAsRead(notification.id)} disabled={updating}>
+                    Mark as read
+                  </Button>
+                ) : (
+                  <Badge>Read</Badge>
+                )}
+              </CardHeader>
+
+              <CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300">
+                <span>Received: {formatDateTime(notification.createdAt)}</span>
+                {notification.campaign ? (
+                  <Button asChild variant="ghost" size="sm">
                     <a href={`/campaigns/${notification.campaign.slug}`} target="_blank" rel="noreferrer">
                       Open public campaign
                     </a>
-                  ) : null}
-                </div>
-              </article>
-            ))
-          : null}
-      </div>
-    </section>
+                  </Button>
+                ) : null}
+              </CardContent>
+            </Card>
+          ))
+        : null}
+    </div>
   );
 }

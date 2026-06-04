@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --font-display: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
   --font-body: "Nunito Sans", "Avenir Next", "Helvetica Neue", sans-serif;

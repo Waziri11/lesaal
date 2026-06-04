@@ -1,6 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Checkbox } from "../ui/checkbox";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { Textarea } from "../ui/textarea";
 
 function slugify(value) {
   return String(value || "")
@@ -70,13 +79,14 @@ function campaignToDraft(campaign) {
     imageUrl: campaign?.imageUrl || "",
     isPublished: campaign?.isPublished !== false,
     order: Number.isFinite(campaign?.order) ? campaign.order : 0,
-    questions: Array.isArray(campaign?.questions) && campaign.questions.length
-      ? campaign.questions.map((question, index) => ({
-          ...question,
-          order: index,
-          options: Array.isArray(question.options) ? question.options : [],
-        }))
-      : [createEmptyQuestion(0)],
+    questions:
+      Array.isArray(campaign?.questions) && campaign.questions.length
+        ? campaign.questions.map((question, index) => ({
+            ...question,
+            order: index,
+            options: Array.isArray(question.options) ? question.options : [],
+          }))
+        : [createEmptyQuestion(0)],
   };
 }
 
@@ -97,10 +107,8 @@ function reorderByIndex(items, sourceIndex, targetIndex) {
 
 function formatDateTime(value) {
   if (!value) return "-";
-
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "-";
-
   return parsed.toLocaleString();
 }
 
@@ -127,9 +135,7 @@ export default function CampaignsManager() {
     setStatusError("");
 
     try {
-      const response = await fetch("/api/admin/campaigns", {
-        cache: "no-store",
-      });
+      const response = await fetch("/api/admin/campaigns", { cache: "no-store" });
       const payload = await response.json();
 
       if (!response.ok) {
@@ -168,9 +174,7 @@ export default function CampaignsManager() {
     setResponsesLoading(true);
 
     try {
-      const response = await fetch(`/api/admin/campaigns/${campaignId}/responses`, {
-        cache: "no-store",
-      });
+      const response = await fetch(`/api/admin/campaigns/${campaignId}/responses`, { cache: "no-store" });
       const payload = await response.json();
 
       if (!response.ok) {
@@ -193,10 +197,7 @@ export default function CampaignsManager() {
   }, []);
 
   useEffect(() => {
-    if (!selectedCampaign) {
-      return;
-    }
-
+    if (!selectedCampaign) return;
     setDraft(campaignToDraft(selectedCampaign));
     loadResponses(selectedCampaign.id);
   }, [selectedCampaign]);
@@ -211,10 +212,7 @@ export default function CampaignsManager() {
   }
 
   function handleDraftValue(key, value) {
-    setDraft((current) => ({
-      ...current,
-      [key]: value,
-    }));
+    setDraft((current) => ({ ...current, [key]: value }));
   }
 
   function handleQuestionChange(index, key, value) {
@@ -283,9 +281,7 @@ export default function CampaignsManager() {
   }
 
   async function handleImageUpload(file) {
-    if (!(file instanceof File)) {
-      return;
-    }
+    if (!(file instanceof File)) return;
 
     setStatusError("");
     setStatusSuccess("");
@@ -389,296 +385,336 @@ export default function CampaignsManager() {
   }
 
   return (
-    <section className="campaign-admin-shell">
-      <article className="admin-page-card">
-        <h1>Campaigns</h1>
-        <p>Create outreach campaigns, publish forms, and manage incoming responses from one place.</p>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Campaigns</CardTitle>
+          <CardDescription>Create outreach campaigns, publish forms, and manage incoming responses.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {statusError ? <p className="text-sm text-red-300">{statusError}</p> : null}
+          {statusSuccess ? <p className="text-sm text-emerald-300">{statusSuccess}</p> : null}
+        </CardContent>
+      </Card>
 
-        {statusError ? <p className="form-error">{statusError}</p> : null}
-        {statusSuccess ? <p className="form-success">{statusSuccess}</p> : null}
-      </article>
-
-      <div className="campaign-admin-layout">
-        <aside className="admin-page-card campaign-admin-sidebar">
-          <div className="campaign-admin-sidebar-head">
-            <h2>All Campaigns</h2>
-            <button type="button" onClick={startCreatingCampaign}>
+      <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">All Campaigns</CardTitle>
+              <CardDescription>Pick one to edit or create a new one.</CardDescription>
+            </div>
+            <Button size="sm" onClick={startCreatingCampaign}>
               New Campaign
-            </button>
-          </div>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {loadingCampaigns ? <p className="text-sm text-slate-300">Loading campaigns...</p> : null}
 
-          {loadingCampaigns ? <p>Loading campaigns...</p> : null}
+            {!loadingCampaigns && !campaigns.length ? <p className="text-sm text-slate-300">No campaigns yet.</p> : null}
 
-          <div className="campaign-admin-list">
             {campaigns.map((campaign) => (
               <button
                 key={campaign.id}
                 type="button"
-                className={`campaign-admin-item${selectedCampaignId === campaign.id ? " is-active" : ""}`}
+                className={`w-full rounded-md border p-3 text-left transition-colors ${
+                  selectedCampaignId === campaign.id
+                    ? "border-blue-500 bg-blue-500/10"
+                    : "border-slate-700 bg-slate-900/40 hover:bg-slate-800/40"
+                }`}
                 onClick={() => setSelectedCampaignId(campaign.id)}
               >
-                <strong>{campaign.title}</strong>
-                <span>{campaign.isPublished ? "Published" : "Draft"}</span>
-                <small>{campaign.responseCount || 0} responses</small>
+                <p className="font-semibold text-slate-100">{campaign.title}</p>
+                <p className="text-xs text-slate-300">{campaign.responseCount || 0} responses</p>
+                <div className="mt-2">
+                  <Badge variant={campaign.isPublished ? "success" : "default"}>
+                    {campaign.isPublished ? "Published" : "Draft"}
+                  </Badge>
+                </div>
               </button>
             ))}
+          </CardContent>
+        </Card>
 
-            {!loadingCampaigns && !campaigns.length ? <p>No campaigns yet. Create your first one.</p> : null}
-          </div>
-        </aside>
-
-        <article className="admin-page-card campaign-admin-editor">
-          <div className="campaign-admin-editor-head">
-            <h2>{selectedCampaignId ? "Edit Campaign" : "Create Campaign"}</h2>
-            {selectedCampaign ? (
-              <a href={`/campaigns/${selectedCampaign.slug}`} target="_blank" rel="noreferrer">
-                Open Public Page
-              </a>
-            ) : null}
-          </div>
-
-          <form className="campaign-admin-form" onSubmit={saveCampaign}>
-            <label>
-              Title
-              <input
-                type="text"
-                value={draft.title}
-                onChange={(event) => {
-                  const nextTitle = event.target.value;
-                  setDraft((current) => ({
-                    ...current,
-                    title: nextTitle,
-                    slug: current.slug ? current.slug : slugify(nextTitle),
-                  }));
-                }}
-                required
-              />
-            </label>
-
-            <label>
-              Slug
-              <input
-                type="text"
-                value={draft.slug}
-                onChange={(event) => handleDraftValue("slug", slugify(event.target.value))}
-                placeholder="campaign-slug"
-                required
-              />
-            </label>
-
-            <label>
-              Description
-              <textarea
-                value={draft.description}
-                onChange={(event) => handleDraftValue("description", event.target.value)}
-                rows={4}
-                required
-              />
-            </label>
-
-            <label>
-              Campaign Image URL
-              <input
-                type="text"
-                value={draft.imageUrl}
-                onChange={(event) => handleDraftValue("imageUrl", event.target.value)}
-                placeholder="/uploads/campaign-image.webp"
-              />
-            </label>
-
-            <label>
-              Upload Campaign Image
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(event) => handleImageUpload(event.target.files?.[0])}
-              />
-            </label>
-
-            <label>
-              Display Order
-              <input
-                type="number"
-                min={0}
-                value={draft.order}
-                onChange={(event) => handleDraftValue("order", Number.parseInt(event.target.value || "0", 10))}
-              />
-            </label>
-
-            <label className="campaign-admin-toggle">
-              <input
-                type="checkbox"
-                checked={draft.isPublished}
-                onChange={(event) => handleDraftValue("isPublished", event.target.checked)}
-              />
-              Published
-            </label>
-
-            <div className="campaign-admin-questions-head">
-              <h3>Form Questions</h3>
-              <button type="button" onClick={addQuestion}>
-                Add Question
-              </button>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>{selectedCampaignId ? "Edit Campaign" : "Create Campaign"}</CardTitle>
+              <CardDescription>Configure campaign content and form fields.</CardDescription>
             </div>
+            {selectedCampaign ? (
+              <Button asChild variant="outline" size="sm">
+                <a href={`/campaigns/${selectedCampaign.slug}`} target="_blank" rel="noreferrer">
+                  Open Public Page
+                </a>
+              </Button>
+            ) : null}
+          </CardHeader>
 
-            <div className="campaign-admin-question-list">
-              {draft.questions.map((question, index) => (
-                <div key={question.id || `${question.key}_${index}`} className="campaign-admin-question-item">
-                  <div className="campaign-admin-question-top">
-                    <strong>Question {index + 1}</strong>
-                    <div className="campaign-admin-question-actions">
-                      <button type="button" onClick={() => moveQuestion(index, "up")} disabled={index === 0}>
-                        Move Up
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveQuestion(index, "down")}
-                        disabled={index === draft.questions.length - 1}
-                      >
-                        Move Down
-                      </button>
-                      <button type="button" onClick={() => removeQuestion(index)} disabled={draft.questions.length === 1}>
-                        Remove
-                      </button>
+          <CardContent>
+            <form className="space-y-4" onSubmit={saveCampaign}>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-title">Title</Label>
+                  <Input
+                    id="campaign-title"
+                    value={draft.title}
+                    onChange={(event) => {
+                      const nextTitle = event.target.value;
+                      setDraft((current) => ({
+                        ...current,
+                        title: nextTitle,
+                        slug: current.slug ? current.slug : slugify(nextTitle),
+                      }));
+                    }}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-slug">Slug</Label>
+                  <Input
+                    id="campaign-slug"
+                    value={draft.slug}
+                    onChange={(event) => handleDraftValue("slug", slugify(event.target.value))}
+                    placeholder="campaign-slug"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="campaign-description">Description</Label>
+                <Textarea
+                  id="campaign-description"
+                  value={draft.description}
+                  onChange={(event) => handleDraftValue("description", event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-image-url">Campaign Image URL</Label>
+                  <Input
+                    id="campaign-image-url"
+                    value={draft.imageUrl}
+                    onChange={(event) => handleDraftValue("imageUrl", event.target.value)}
+                    placeholder="/uploads/campaign-image.webp"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-image-upload">Upload Campaign Image</Label>
+                  <Input
+                    id="campaign-image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => handleImageUpload(event.target.files?.[0])}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-order">Display Order</Label>
+                  <Input
+                    id="campaign-order"
+                    type="number"
+                    min={0}
+                    value={draft.order}
+                    onChange={(event) => handleDraftValue("order", Number.parseInt(event.target.value || "0", 10))}
+                  />
+                </div>
+
+                <div className="flex items-end gap-2 rounded-md border border-slate-700 p-3">
+                  <Checkbox
+                    id="campaign-published"
+                    checked={draft.isPublished}
+                    onCheckedChange={(checked) => handleDraftValue("isPublished", Boolean(checked))}
+                  />
+                  <Label htmlFor="campaign-published">Published</Label>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-100">Form Questions</h3>
+                  <p className="text-xs text-slate-300">Build your campaign intake form.</p>
+                </div>
+                <Button type="button" size="sm" variant="secondary" onClick={addQuestion}>
+                  Add Question
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {draft.questions.map((question, index) => (
+                  <div key={question.id || `${question.key}_${index}`} className="space-y-3 rounded-md border border-slate-700 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-semibold text-slate-100">Question {index + 1}</p>
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" size="sm" variant="outline" onClick={() => moveQuestion(index, "up")} disabled={index === 0}>
+                          Move Up
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => moveQuestion(index, "down")}
+                          disabled={index === draft.questions.length - 1}
+                        >
+                          Move Down
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => removeQuestion(index)}
+                          disabled={draft.questions.length === 1}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Label</Label>
+                        <Input
+                          value={question.label}
+                          onChange={(event) => handleQuestionChange(index, "label", event.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Key</Label>
+                        <Input
+                          value={question.key}
+                          onChange={(event) => handleQuestionChange(index, "key", event.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Type</Label>
+                        <Select value={question.type} onValueChange={(value) => handleQuestionChange(index, "type", value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="text">Text</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="tel">Phone</SelectItem>
+                            <SelectItem value="textarea">Textarea</SelectItem>
+                            <SelectItem value="select">Select</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Placeholder</Label>
+                        <Input
+                          value={question.placeholder || ""}
+                          onChange={(event) => handleQuestionChange(index, "placeholder", event.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {question.type === "select" ? (
+                      <div className="space-y-2">
+                        <Label>Select Options (comma or new line separated)</Label>
+                        <Textarea
+                          value={(question.options || []).join("\n")}
+                          onChange={(event) => handleQuestionChange(index, "options", event.target.value)}
+                        />
+                      </div>
+                    ) : null}
+
+                    <div className="flex flex-wrap gap-4 rounded-md border border-slate-700 p-3">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={`required-${index}`}
+                          checked={Boolean(question.required)}
+                          onCheckedChange={(checked) => handleQuestionChange(index, "required", Boolean(checked))}
+                        />
+                        <Label htmlFor={`required-${index}`}>Required</Label>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={`visible-${index}`}
+                          checked={question.isVisible !== false}
+                          onCheckedChange={(checked) => handleQuestionChange(index, "isVisible", Boolean(checked))}
+                        />
+                        <Label htmlFor={`visible-${index}`}>Visible</Label>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  <label>
-                    Label
-                    <input
-                      type="text"
-                      value={question.label}
-                      onChange={(event) => handleQuestionChange(index, "label", event.target.value)}
-                      required
-                    />
-                  </label>
+              <div className="flex flex-wrap gap-2">
+                <Button type="submit" disabled={saving}>
+                  {saving ? "Saving..." : selectedCampaignId ? "Update Campaign" : "Create Campaign"}
+                </Button>
 
-                  <label>
-                    Key
-                    <input
-                      type="text"
-                      value={question.key}
-                      onChange={(event) => handleQuestionChange(index, "key", event.target.value)}
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Type
-                    <select
-                      value={question.type}
-                      onChange={(event) => handleQuestionChange(index, "type", event.target.value)}
-                    >
-                      <option value="text">Text</option>
-                      <option value="email">Email</option>
-                      <option value="tel">Phone</option>
-                      <option value="textarea">Textarea</option>
-                      <option value="select">Select</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    Placeholder
-                    <input
-                      type="text"
-                      value={question.placeholder || ""}
-                      onChange={(event) => handleQuestionChange(index, "placeholder", event.target.value)}
-                    />
-                  </label>
-
-                  {question.type === "select" ? (
-                    <label>
-                      Select Options (comma or new line separated)
-                      <textarea
-                        value={(question.options || []).join("\n")}
-                        onChange={(event) => handleQuestionChange(index, "options", event.target.value)}
-                        rows={3}
-                      />
-                    </label>
-                  ) : null}
-
-                  <div className="campaign-admin-question-flags">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={Boolean(question.required)}
-                        onChange={(event) => handleQuestionChange(index, "required", event.target.checked)}
-                      />
-                      Required
-                    </label>
-
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={question.isVisible !== false}
-                        onChange={(event) => handleQuestionChange(index, "isVisible", event.target.checked)}
-                      />
-                      Visible
-                    </label>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="campaign-admin-form-actions">
-              <button type="submit" disabled={saving}>
-                {saving ? "Saving..." : selectedCampaignId ? "Update Campaign" : "Create Campaign"}
-              </button>
-
-              {selectedCampaignId ? (
-                <button type="button" className="danger-btn" onClick={handleDeleteCampaign} disabled={deleting}>
-                  {deleting ? "Deleting..." : "Delete Campaign"}
-                </button>
-              ) : null}
-            </div>
-          </form>
-        </article>
+                {selectedCampaignId ? (
+                  <Button type="button" variant="destructive" onClick={handleDeleteCampaign} disabled={deleting}>
+                    {deleting ? "Deleting..." : "Delete Campaign"}
+                  </Button>
+                ) : null}
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
 
-      <article className="admin-page-card campaign-admin-responses">
-        <div className="campaign-admin-responses-head">
-          <h2>Responses</h2>
-          <div className="campaign-admin-responses-actions">
-            <span>{responses.length} responses</span>
-            <button type="button" onClick={openExport} disabled={!selectedCampaignId || !responses.length}>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Responses</CardTitle>
+            <CardDescription>Review incoming form responses for the selected campaign.</CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">{responses.length} responses</Badge>
+            <Button type="button" variant="outline" onClick={openExport} disabled={!selectedCampaignId || !responses.length}>
               Export CSV
-            </button>
+            </Button>
           </div>
-        </div>
+        </CardHeader>
 
-        {responsesLoading ? <p>Loading responses...</p> : null}
+        <CardContent>
+          {responsesLoading ? <p className="text-sm text-slate-300">Loading responses...</p> : null}
+          {!responsesLoading && !selectedCampaignId ? <p className="text-sm text-slate-300">Select a campaign to view responses.</p> : null}
+          {!responsesLoading && selectedCampaignId && !responses.length ? <p className="text-sm text-slate-300">No responses yet for this campaign.</p> : null}
 
-        {!responsesLoading && !selectedCampaignId ? <p>Select a campaign to view responses.</p> : null}
-
-        {!responsesLoading && selectedCampaignId && !responses.length ? (
-          <p>No responses yet for this campaign.</p>
-        ) : null}
-
-        {!responsesLoading && responses.length ? (
-          <div className="campaign-admin-table-wrap">
-            <table className="dynamic-table">
-              <thead>
-                <tr>
-                  <th>Submitted At</th>
+          {!responsesLoading && responses.length ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Submitted At</TableHead>
                   {responseQuestions.map((question) => (
-                    <th key={question.id || question.key}>{question.label}</th>
+                    <TableHead key={question.id || question.key}>{question.label}</TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {responses.map((response) => (
-                  <tr key={response.id}>
-                    <td>{formatDateTime(response.submittedAt)}</td>
+                  <TableRow key={response.id}>
+                    <TableCell>{formatDateTime(response.submittedAt)}</TableCell>
                     {responseQuestions.map((question) => (
-                      <td key={`${response.id}_${question.key}`}>{String(response.data?.[question.key] || "-")}</td>
+                      <TableCell key={`${response.id}_${question.key}`}>{String(response.data?.[question.key] || "-")}</TableCell>
                     ))}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        ) : null}
-      </article>
-    </section>
+              </TableBody>
+            </Table>
+          ) : null}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

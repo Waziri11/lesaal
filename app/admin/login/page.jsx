@@ -47,27 +47,21 @@ export default function AdminLoginPage() {
       <div className={styles.bgOrbTwo} aria-hidden="true" />
 
       <form className={styles.card} onSubmit={handleSubmit}>
-        <p className={styles.eyebrow}>Lesaal Admin</p>
         <h1>Sign in</h1>
-        <p className={styles.subtitle}>
-          Use the seeded admin email and password. If you changed <code>ADMIN_EMAIL</code> or{" "}
-          <code>ADMIN_PASSWORD</code> in <code>.env</code>, run <code>npm run seed:admin</code> first.
-        </p>
 
-        <label htmlFor="email" className={styles.field}>
-          <span>Email</span>
+        <div className={styles.field}>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="admin@example.com"
+            aria-label="Email"
             required
           />
-        </label>
+        </div>
 
-        <label htmlFor="password" className={styles.field}>
-          <span>Password</span>
+        <div className={styles.field}>
           <div className={styles.passwordRow}>
             <input
               id="password"
@@ -75,6 +69,7 @@ export default function AdminLoginPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="********"
+              aria-label="Password"
               className={styles.passwordInput}
               required
             />
@@ -118,7 +113,7 @@ export default function AdminLoginPage() {
               )}
             </button>
           </div>
-        </label>
+        </div>
 
         {error ? <p className={styles.error}>{error}</p> : null}
 

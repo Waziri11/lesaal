@@ -91,12 +91,49 @@ function toStringArray(value) {
   return [];
 }
 
+function normalizeHexColor(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  const normalized = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(normalized) ? normalized.toLowerCase() : "";
+}
+
+function textStyleToCssVars(value) {
+  const raw = value && typeof value === "object" ? value : {};
+  const vars = {};
+  const parsedSize = Number.parseInt(String(raw.fontSize ?? ""), 10);
+  const color = normalizeHexColor(raw.color);
+
+  if (Number.isFinite(parsedSize)) {
+    vars["--lp-text-size"] = `${Math.max(12, Math.min(120, parsedSize))}px`;
+  }
+
+  if (color) {
+    vars["--lp-text-color"] = color;
+  }
+
+  if (raw.bold) {
+    vars["--lp-text-weight"] = "700";
+  }
+
+  if (raw.italic) {
+    vars["--lp-text-style"] = "italic";
+  }
+
+  if (raw.underline) {
+    vars["--lp-text-decoration"] = "underline";
+  }
+
+  return vars;
+}
+
 function EditableText({
   editorMode,
   value,
   fallback = "",
   className = "",
   as = "span",
+  style,
   multiline = false,
   placeholder = "Tap to edit text",
   onCommit,
@@ -127,7 +164,7 @@ function EditableText({
   }
 
   if (!editorMode) {
-    return <Tag className={className}>{resolvedValue}</Tag>;
+    return <Tag className={`${className} live-editable-text`.trim()} style={style}>{resolvedValue}</Tag>;
   }
 
   if (isEditing) {
@@ -135,6 +172,7 @@ function EditableText({
       return (
         <textarea
           className={`live-editable-input live-editable-input-multi ${className}`.trim()}
+          style={style}
           value={draft}
           autoFocus
           onClick={(event) => event.stopPropagation()}
@@ -157,6 +195,7 @@ function EditableText({
     return (
       <input
         className={`live-editable-input ${className}`.trim()}
+        style={style}
         value={draft}
         autoFocus
         onClick={(event) => event.stopPropagation()}
@@ -179,6 +218,7 @@ function EditableText({
   return (
     <Tag
       className={`${className} live-editable-text`.trim()}
+      style={style}
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -241,6 +281,8 @@ export default function PublicLanding({
   const [formError, setFormError] = useState("");
   const [activeFaqItemId, setActiveFaqItemId] = useState(null);
   const [dynamicWordIndex, setDynamicWordIndex] = useState(0);
+  const [typedDynamicWord, setTypedDynamicWord] = useState("");
+  const [isDeletingDynamicWord, setIsDeletingDynamicWord] = useState(false);
   const longPressTimerRef = useRef(null);
 
   const visibleSections = useMemo(
@@ -287,22 +329,57 @@ export default function PublicLanding({
     [heroSection]
   );
 
+  const heroRotationWords = useMemo(() => {
+    const fallbackWords = ["Social media management", "SEO optimization"];
+    return heroDynamicWords.length ? heroDynamicWords : fallbackWords;
+  }, [heroDynamicWords]);
+
   useEffect(() => {
     setDynamicWordIndex(0);
+    setTypedDynamicWord("");
+    setIsDeletingDynamicWord(false);
   }, [heroSection?.id]);
 
   useEffect(() => {
-    if (!heroDynamicWords.length || heroDynamicWords.length === 1) {
+    if (!heroRotationWords.length) {
       setDynamicWordIndex(0);
+      setTypedDynamicWord("");
+      setIsDeletingDynamicWord(false);
       return undefined;
     }
 
-    const timer = setInterval(() => {
-      setDynamicWordIndex((current) => (current + 1) % heroDynamicWords.length);
-    }, 2500);
+    const currentWord = heroRotationWords[dynamicWordIndex % heroRotationWords.length] || "";
 
-    return () => clearInterval(timer);
-  }, [heroDynamicWords]);
+    if (editorMode) {
+      setTypedDynamicWord(currentWord);
+      setIsDeletingDynamicWord(false);
+      return undefined;
+    }
+
+    const baseTypingSpeed = isDeletingDynamicWord ? 45 : 85;
+    let timer;
+
+    if (!isDeletingDynamicWord && typedDynamicWord.length < currentWord.length) {
+      timer = setTimeout(() => {
+        setTypedDynamicWord(currentWord.slice(0, typedDynamicWord.length + 1));
+      }, baseTypingSpeed);
+    } else if (!isDeletingDynamicWord && typedDynamicWord.length === currentWord.length) {
+      timer = setTimeout(() => {
+        setIsDeletingDynamicWord(true);
+      }, 950);
+    } else if (isDeletingDynamicWord && typedDynamicWord.length > 0) {
+      timer = setTimeout(() => {
+        setTypedDynamicWord(currentWord.slice(0, typedDynamicWord.length - 1));
+      }, 35);
+    } else {
+      timer = setTimeout(() => {
+        setIsDeletingDynamicWord(false);
+        setDynamicWordIndex((current) => (current + 1) % heroRotationWords.length);
+      }, 220);
+    }
+
+    return () => clearTimeout(timer);
+  }, [dynamicWordIndex, editorMode, heroRotationWords, isDeletingDynamicWord, typedDynamicWord]);
 
   useEffect(() => {
     const faqSection = visibleSections.find((section) => section.type === "FAQ");
@@ -527,15 +604,6 @@ export default function PublicLanding({
       <div className="lp-section-heading">
         <EditableText
           editorMode={editorMode}
-          as="p"
-          className={`lp-section-kicker ${textClass}`}
-          value={section.title}
-          fallback="Section"
-          onActivate={() => onSelectSection?.(section.id)}
-          onCommit={(nextValue) => onUpdateSectionTitle?.(section.id, nextValue)}
-        />
-        <EditableText
-          editorMode={editorMode}
           as="h2"
           className={textClass}
           value={settings.heading || ""}
@@ -601,12 +669,13 @@ export default function PublicLanding({
           const sectionMotion = editorMode ? {} : getSectionMotion(section.sectionAnimation);
           const sectionProps = getSectionProps(section.id);
           const anchorId = sectionAnchors[section.id];
+          const sectionTextVars = textStyleToCssVars(settings.textStyle);
 
           if (section.type === "HERO") {
-            const dynamicWords = toStringArray(settings.dynamicWords);
-            const fallbackWords = ["Social media management", "SEO optimization"];
-            const wordsToUse = dynamicWords.length ? dynamicWords : fallbackWords;
-            const currentWord = wordsToUse[dynamicWordIndex % wordsToUse.length];
+            const heroWords = heroRotationWords.length ? heroRotationWords : ["Social media management"];
+            const activeWordIndex = dynamicWordIndex % heroWords.length;
+            const currentWord = heroWords[activeWordIndex] || "";
+            const displayedDynamicWord = editorMode ? currentWord : typedDynamicWord;
             const heroStatsItems = (statsBandSection?.items || []).slice().sort((a, b) => a.order - b.order).slice(0, 2);
             const statPrimaryItem = heroStatsItems[0] || null;
             const statSecondaryItem = heroStatsItems[1] || null;
@@ -617,6 +686,7 @@ export default function PublicLanding({
                 key={section.id}
                 className={`lp-section lp-hero ${scrollClass}${sectionProps.className}`}
                 {...sectionMotion}
+                style={sectionTextVars}
                 draggable={sectionProps.draggable}
                 onClick={sectionProps.onClick}
                 onDragStart={sectionProps.onDragStart}
@@ -629,42 +699,51 @@ export default function PublicLanding({
                 onTouchMove={sectionProps.onTouchMove}
                 onTouchCancel={sectionProps.onTouchCancel}
               >
+                <div className="lp-hero-background">
+                  {settings.imageUrl ? (
+                    <img src={settings.imageUrl} alt="Marketing growth visual" />
+                  ) : (
+                    <div className="lp-image-placeholder">No image selected</div>
+                  )}
+
+                  {editorMode ? (
+                    <InlineImageUploader
+                      label={settings.imageUrl ? "Replace Image" : "Add Image"}
+                      onUpload={(file) => handleSectionImageUpload(section.id, "imageUrl", file)}
+                    />
+                  ) : null}
+                </div>
+
                 <div className="lp-hero-content">
-                  <EditableText
-                    editorMode={editorMode}
-                    as="p"
-                    className={`lp-hero-eyebrow ${textClass}`}
-                    value={section.title}
-                    fallback="Home"
-                    onActivate={() => onSelectSection?.(section.id)}
-                    onCommit={(nextValue) => onUpdateSectionTitle?.(section.id, nextValue)}
-                  />
-
-                  <EditableText
-                    editorMode={editorMode}
-                    as="h1"
-                    className={textClass}
-                    value={settings.staticText || ""}
-                    fallback="Let us help you grow your reach through"
-                    multiline
-                    onActivate={() => onSelectSection?.(section.id)}
-                    onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "staticText", nextValue)}
-                  />
-
-                  <div className={`lp-hero-dynamic ${textClass}`}>
+                  <h1 className={`lp-hero-headline ${textClass}`}>
                     <EditableText
                       editorMode={editorMode}
                       as="span"
-                      value={currentWord}
-                      fallback="Social media management"
+                      className="lp-hero-headline-static"
+                      value={settings.staticText || ""}
+                      fallback="Let us help you grow your reach through"
+                      multiline
                       onActivate={() => onSelectSection?.(section.id)}
-                      onCommit={(nextValue) => {
-                        const nextWords = [...wordsToUse];
-                        nextWords[dynamicWordIndex % wordsToUse.length] = nextValue;
-                        onUpdateSectionSetting?.(section.id, "dynamicWords", nextWords);
-                      }}
+                      onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "staticText", nextValue)}
                     />
-                  </div>
+                    {" "}
+                    <span className={`lp-hero-headline-dynamic${editorMode ? "" : " is-type-active"}`}>
+                      <EditableText
+                        editorMode={editorMode}
+                        as="span"
+                        value={displayedDynamicWord}
+                        fallback="Social media management"
+                        onActivate={() => onSelectSection?.(section.id)}
+                        onCommit={(nextValue) => {
+                          const nextWords = [...heroWords];
+                          nextWords[activeWordIndex] = nextValue;
+                          onUpdateSectionSetting?.(section.id, "dynamicWords", nextWords);
+                        }}
+                      />
+                    </span>
+                  </h1>
+
+                  {editorMode ? <p className="lp-hero-type-indicator">Dynamic text is editable.</p> : null}
 
                   <EditableText
                     editorMode={editorMode}
@@ -724,33 +803,18 @@ export default function PublicLanding({
                   </div>
                 </div>
 
-                <div className="lp-hero-media">
-                  {settings.imageUrl ? (
-                    <img src={settings.imageUrl} alt="Marketing growth visual" />
-                  ) : (
-                    <div className="lp-image-placeholder">No image selected</div>
-                  )}
-
-                  <div className="lp-hero-floating-card">
-                    <p>Today&apos;s revenue</p>
-                    <strong>
-                      {statPrimaryItem
-                        ? renderItemText(statsBandSection.id, statPrimaryItem, "title", "$1,280")
-                        : "$1,280"}
-                    </strong>
-                    <span>
-                      {statPrimaryItem
-                        ? renderItemText(statsBandSection.id, statPrimaryItem, "description", "Performance metric")
-                        : "Performance metric"}
-                    </span>
-                  </div>
-
-                  {editorMode ? (
-                    <InlineImageUploader
-                      label={settings.imageUrl ? "Replace Image" : "Add Image"}
-                      onUpload={(file) => handleSectionImageUpload(section.id, "imageUrl", file)}
-                    />
-                  ) : null}
+                <div className="lp-hero-floating-card">
+                  <p>Today&apos;s revenue</p>
+                  <strong>
+                    {statPrimaryItem
+                      ? renderItemText(statsBandSection.id, statPrimaryItem, "title", "$1,280")
+                      : "$1,280"}
+                  </strong>
+                  <span>
+                    {statPrimaryItem
+                      ? renderItemText(statsBandSection.id, statPrimaryItem, "description", "Performance metric")
+                      : "Performance metric"}
+                  </span>
                 </div>
               </motion.section>
             );
@@ -763,6 +827,7 @@ export default function PublicLanding({
                 key={section.id}
                 className={`lp-section lp-stats-band ${scrollClass}${sectionProps.className}`}
                 {...sectionMotion}
+                style={sectionTextVars}
                 draggable={sectionProps.draggable}
                 onClick={sectionProps.onClick}
                 onDragStart={sectionProps.onDragStart}
@@ -828,6 +893,7 @@ export default function PublicLanding({
                 key={section.id}
                 className={`lp-section lp-clients ${scrollClass}${sectionProps.className}`}
                 {...sectionMotion}
+                style={sectionTextVars}
                 draggable={sectionProps.draggable}
                 onClick={sectionProps.onClick}
                 onDragStart={sectionProps.onDragStart}
@@ -892,6 +958,7 @@ export default function PublicLanding({
                 key={section.id}
                 className={`lp-section lp-services ${scrollClass}${sectionProps.className}`}
                 {...sectionMotion}
+                style={sectionTextVars}
                 draggable={sectionProps.draggable}
                 onClick={sectionProps.onClick}
                 onDragStart={sectionProps.onDragStart}
@@ -981,6 +1048,7 @@ export default function PublicLanding({
                 key={section.id}
                 className={`lp-section lp-commentary ${scrollClass}${sectionProps.className}`}
                 {...sectionMotion}
+                style={sectionTextVars}
                 draggable={sectionProps.draggable}
                 onClick={sectionProps.onClick}
                 onDragStart={sectionProps.onDragStart}
@@ -995,7 +1063,22 @@ export default function PublicLanding({
               >
                 {renderSectionHeading(section, textClass)}
 
-                <div className="lp-commentary-grid">
+                <div className="lp-commentary-stage">
+                  <div className="lp-commentary-background">
+                    {commentaryItem?.imageUrl ? (
+                      <img src={commentaryItem.imageUrl} alt={commentaryItem.title || "Client commentary"} />
+                    ) : (
+                      <div className="lp-image-placeholder">No image</div>
+                    )}
+
+                    {editorMode && commentaryItem ? (
+                      <InlineImageUploader
+                        label={commentaryItem.imageUrl ? "Replace Image" : "Add Image"}
+                        onUpload={(file) => handleItemImageUpload(section.id, commentaryItem.id, file)}
+                      />
+                    ) : null}
+                  </div>
+
                   <div className="lp-commentary-quote">
                     {commentaryItem ? (
                       <>
@@ -1015,28 +1098,6 @@ export default function PublicLanding({
                       <p>No commentary item yet.</p>
                     )}
                   </div>
-
-                  <div className="lp-commentary-media">
-                    {commentaryItem?.imageUrl ? (
-                      <img src={commentaryItem.imageUrl} alt={commentaryItem.title || "Client commentary"} />
-                    ) : (
-                      <div className="lp-image-placeholder">No image</div>
-                    )}
-
-                    {editorMode && commentaryItem ? (
-                      <InlineImageUploader
-                        label={commentaryItem.imageUrl ? "Replace Image" : "Add Image"}
-                        onUpload={(file) => handleItemImageUpload(section.id, commentaryItem.id, file)}
-                      />
-                    ) : null}
-
-                    {commentaryItem ? (
-                      <div className="lp-commentary-overlay">
-                        <strong>{renderItemText(section.id, commentaryItem, "title", "Client Name")}</strong>
-                        <span>{renderItemText(section.id, commentaryItem, "label", "Role")}</span>
-                      </div>
-                    ) : null}
-                  </div>
                 </div>
               </motion.section>
             );
@@ -1051,6 +1112,7 @@ export default function PublicLanding({
                 key={section.id}
                 className={`lp-section lp-pricing ${scrollClass}${sectionProps.className}`}
                 {...sectionMotion}
+                style={sectionTextVars}
                 draggable={sectionProps.draggable}
                 onClick={sectionProps.onClick}
                 onDragStart={sectionProps.onDragStart}
@@ -1198,6 +1260,7 @@ export default function PublicLanding({
                 key={section.id}
                 className={`lp-section lp-faq ${scrollClass}${sectionProps.className}`}
                 {...sectionMotion}
+                style={sectionTextVars}
                 draggable={sectionProps.draggable}
                 onClick={sectionProps.onClick}
                 onDragStart={sectionProps.onDragStart}
@@ -1303,6 +1366,7 @@ export default function PublicLanding({
                 key={section.id}
                 className={`lp-section lp-campaign ${scrollClass}${sectionProps.className}`}
                 {...sectionMotion}
+                style={sectionTextVars}
                 draggable={sectionProps.draggable}
                 onClick={sectionProps.onClick}
                 onDragStart={sectionProps.onDragStart}
@@ -1441,6 +1505,7 @@ export default function PublicLanding({
                 key={section.id}
                 className={`lp-section lp-footer-wrap ${scrollClass}${sectionProps.className}`}
                 {...sectionMotion}
+                style={sectionTextVars}
                 draggable={sectionProps.draggable}
                 onClick={sectionProps.onClick}
                 onDragStart={sectionProps.onDragStart}
@@ -1545,6 +1610,7 @@ export default function PublicLanding({
               key={section.id}
               className={`lp-section ${scrollClass}${sectionProps.className}`}
               {...sectionMotion}
+              style={sectionTextVars}
               draggable={sectionProps.draggable}
               onClick={sectionProps.onClick}
               onDragStart={sectionProps.onDragStart}

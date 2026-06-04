@@ -71,6 +71,28 @@ function toStringArray(value) {
   return [];
 }
 
+function normalizeHexColor(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  const normalized = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(normalized) ? normalized.toLowerCase() : "";
+}
+
+function normalizeTextStyle(value) {
+  const raw = value && typeof value === "object" ? value : {};
+  const parsedSize = Number.parseInt(String(raw.fontSize ?? ""), 10);
+  const fontSize = Number.isFinite(parsedSize) ? Math.max(12, Math.min(120, parsedSize)) : null;
+  const color = normalizeHexColor(raw.color);
+
+  return {
+    fontSize,
+    color,
+    bold: Boolean(raw.bold),
+    italic: Boolean(raw.italic),
+    underline: Boolean(raw.underline),
+  };
+}
+
 export default function LandingEditor() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -98,6 +120,11 @@ export default function LandingEditor() {
     if (!config || !sectionOptionsMenu?.sectionId) return null;
     return config.sections.find((section) => section.id === sectionOptionsMenu.sectionId) || null;
   }, [config, sectionOptionsMenu]);
+
+  const menuTextStyle = useMemo(
+    () => normalizeTextStyle(menuSection?.settings?.textStyle),
+    [menuSection]
+  );
 
   const selectedFormField = useMemo(() => {
     if (!config) return null;
@@ -594,6 +621,8 @@ export default function LandingEditor() {
       } else if (key === "maxHomeItems") {
         const parsed = Number.parseInt(String(value), 10);
         nextSettings.maxHomeItems = Number.isFinite(parsed) ? Math.max(1, Math.min(24, parsed)) : 6;
+      } else if (key === "textStyle") {
+        nextSettings.textStyle = normalizeTextStyle(value);
       } else {
         nextSettings[key] = value;
       }
@@ -620,6 +649,14 @@ export default function LandingEditor() {
         ...current,
         [key]: value,
       };
+    });
+  }
+
+  function updateMenuTextStyle(nextPatch) {
+    if (!menuSection) return;
+    updateSectionSettingFromPreview(menuSection.id, "textStyle", {
+      ...menuTextStyle,
+      ...(nextPatch || {}),
     });
   }
 
@@ -865,6 +902,99 @@ export default function LandingEditor() {
                     </option>
                   ))}
                 </select>
+              </label>
+
+              <label>
+                Font Size (px)
+                <input
+                  type="number"
+                  min={12}
+                  max={120}
+                  value={menuTextStyle.fontSize ?? ""}
+                  placeholder="Default"
+                  onChange={(event) => {
+                    const rawValue = event.target.value;
+                    updateMenuTextStyle({
+                      fontSize: rawValue === "" ? null : rawValue,
+                    });
+                  }}
+                />
+              </label>
+
+              <label>
+                Color Picker
+                <input
+                  type="color"
+                  value={menuTextStyle.color || "#10254e"}
+                  onChange={(event) =>
+                    updateMenuTextStyle({
+                      color: event.target.value,
+                    })
+                  }
+                />
+              </label>
+
+              <label>
+                Bold
+                <select
+                  value={menuTextStyle.bold ? "yes" : "no"}
+                  onChange={(event) =>
+                    updateMenuTextStyle({
+                      bold: event.target.value === "yes",
+                    })
+                  }
+                >
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </label>
+
+              <label>
+                Italic
+                <select
+                  value={menuTextStyle.italic ? "yes" : "no"}
+                  onChange={(event) =>
+                    updateMenuTextStyle({
+                      italic: event.target.value === "yes",
+                    })
+                  }
+                >
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </label>
+
+              <label>
+                Underline
+                <select
+                  value={menuTextStyle.underline ? "yes" : "no"}
+                  onChange={(event) =>
+                    updateMenuTextStyle({
+                      underline: event.target.value === "yes",
+                    })
+                  }
+                >
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </label>
+
+              <label className="field-full">
+                Text Style Reset
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateSectionSettingFromPreview(menuSection.id, "textStyle", {
+                      fontSize: null,
+                      color: "",
+                      bold: false,
+                      italic: false,
+                      underline: false,
+                    })
+                  }
+                >
+                  Reset Text Style
+                </button>
               </label>
 
               {menuSection.type === "HERO" ? (

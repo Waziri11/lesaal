@@ -112,6 +112,10 @@ function formatDateTime(value) {
   return parsed.toLocaleString();
 }
 
+function formatCount(value) {
+  return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(Number(value) || 0);
+}
+
 export default function CampaignsManager() {
   const [campaigns, setCampaigns] = useState([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
@@ -124,11 +128,40 @@ export default function CampaignsManager() {
   const [responseQuestions, setResponseQuestions] = useState([]);
   const [statusError, setStatusError] = useState("");
   const [statusSuccess, setStatusSuccess] = useState("");
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const selectedCampaign = useMemo(
     () => campaigns.find((campaign) => campaign.id === selectedCampaignId) || null,
     [campaigns, selectedCampaignId]
   );
+
+  const campaignStats = useMemo(() => {
+    const total = campaigns.length;
+    const published = campaigns.filter((campaign) => campaign.isPublished).length;
+    const drafts = total - published;
+    const responsesCount = campaigns.reduce((sum, campaign) => sum + Number(campaign.responseCount || 0), 0);
+    return { total, published, drafts, responsesCount };
+  }, [campaigns]);
+
+  const filteredCampaigns = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const sorted = [...campaigns].sort((a, b) => {
+      const aTime = Number(new Date(a.updatedAt || a.createdAt || 0));
+      const bTime = Number(new Date(b.updatedAt || b.createdAt || 0));
+      return bTime - aTime;
+    });
+
+    if (!query) return sorted;
+
+    return sorted.filter((campaign) => {
+      const searchable = [campaign.title, campaign.slug, campaign.description]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchable.includes(query);
+    });
+  }, [campaigns, searchQuery]);
 
   async function loadCampaigns(preferredCampaignId = null) {
     setLoadingCampaigns(true);
@@ -209,6 +242,19 @@ export default function CampaignsManager() {
     setDraft(createEmptyCampaignDraft(campaigns.length));
     setResponses([]);
     setResponseQuestions([]);
+    setIsEditorOpen(true);
+  }
+
+  function openEditorForCampaign(campaignId) {
+    setSelectedCampaignId(campaignId);
+    setStatusError("");
+    setStatusSuccess("");
+    setIsEditorOpen(true);
+  }
+
+  function closeEditor() {
+    setIsEditorOpen(false);
+    setStatusError("");
   }
 
   function handleDraftValue(key, value) {
@@ -341,7 +387,9 @@ export default function CampaignsManager() {
       }
 
       setStatusSuccess(isEditing ? "Campaign updated successfully." : "Campaign created successfully.");
-      await loadCampaigns(payload.campaign?.id || selectedCampaignId);
+      const nextCampaignId = payload.campaign?.id || selectedCampaignId || null;
+      await loadCampaigns(nextCampaignId);
+      setIsEditorOpen(true);
     } catch (error) {
       setStatusError(error.message || "Unable to save campaign.");
     } finally {
@@ -372,6 +420,7 @@ export default function CampaignsManager() {
 
       setStatusSuccess("Campaign deleted.");
       await loadCampaigns();
+      setIsEditorOpen(false);
     } catch (error) {
       setStatusError(error.message || "Unable to delete campaign.");
     } finally {
@@ -385,70 +434,161 @@ export default function CampaignsManager() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Campaigns</CardTitle>
           <CardDescription>Create outreach campaigns, publish forms, and manage incoming responses.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-lg border border-slate-700/70 bg-slate-900/70 p-4">
+              <p className="text-xs uppercase tracking-wide text-slate-400">Total campaigns</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-100">{campaignStats.total}</p>
+            </div>
+            <div className="rounded-lg border border-slate-700/70 bg-slate-900/70 p-4">
+              <p className="text-xs uppercase tracking-wide text-slate-400">Published</p>
+              <p className="mt-2 text-2xl font-semibold text-emerald-300">{campaignStats.published}</p>
+            </div>
+            <div className="rounded-lg border border-slate-700/70 bg-slate-900/70 p-4">
+              <p className="text-xs uppercase tracking-wide text-slate-400">Drafts</p>
+              <p className="mt-2 text-2xl font-semibold text-amber-300">{campaignStats.drafts}</p>
+            </div>
+            <div className="rounded-lg border border-slate-700/70 bg-slate-900/70 p-4">
+              <p className="text-xs uppercase tracking-wide text-slate-400">Total responses</p>
+              <p className="mt-2 text-2xl font-semibold text-blue-300">{formatCount(campaignStats.responsesCount)}</p>
+            </div>
+          </div>
+
           {statusError ? <p className="text-sm text-red-300">{statusError}</p> : null}
           {statusSuccess ? <p className="text-sm text-emerald-300">{statusSuccess}</p> : null}
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+      <Card>
+        <CardHeader className="space-y-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <CardTitle className="text-base">All Campaigns</CardTitle>
-              <CardDescription>Pick one to edit or create a new one.</CardDescription>
+              <CardTitle className="text-xl">Campaign Library</CardTitle>
+              <CardDescription>Browse, edit, and publish outreach campaigns from one table.</CardDescription>
             </div>
             <Button size="sm" onClick={startCreatingCampaign}>
-              New Campaign
+              + New Campaign
             </Button>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {loadingCampaigns ? <p className="text-sm text-slate-300">Loading campaigns...</p> : null}
+          </div>
 
-            {!loadingCampaigns && !campaigns.length ? <p className="text-sm text-slate-300">No campaigns yet.</p> : null}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="w-full max-w-md">
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search campaigns by title, slug, or description"
+              />
+            </div>
+            <Badge variant="secondary">{filteredCampaigns.length} listed</Badge>
+          </div>
+        </CardHeader>
 
-            {campaigns.map((campaign) => (
-              <button
-                key={campaign.id}
-                type="button"
-                className={`w-full rounded-md border p-3 text-left transition-colors ${
-                  selectedCampaignId === campaign.id
-                    ? "border-blue-500 bg-blue-500/10"
-                    : "border-slate-700 bg-slate-900/40 hover:bg-slate-800/40"
-                }`}
-                onClick={() => setSelectedCampaignId(campaign.id)}
-              >
-                <p className="font-semibold text-slate-100">{campaign.title}</p>
-                <p className="text-xs text-slate-300">{campaign.responseCount || 0} responses</p>
-                <div className="mt-2">
-                  <Badge variant={campaign.isPublished ? "success" : "default"}>
-                    {campaign.isPublished ? "Published" : "Draft"}
-                  </Badge>
-                </div>
-              </button>
-            ))}
-          </CardContent>
-        </Card>
+        <CardContent className="pt-0">
+          {loadingCampaigns ? <p className="text-sm text-slate-300">Loading campaigns...</p> : null}
 
+          {!loadingCampaigns && !campaigns.length ? (
+            <div className="rounded-lg border border-dashed border-slate-700/80 bg-slate-900/50 p-8 text-center">
+              <p className="text-sm text-slate-200">No campaigns yet.</p>
+              <p className="mt-1 text-sm text-slate-400">Create your first campaign to start collecting responses.</p>
+            </div>
+          ) : null}
+
+          {!loadingCampaigns && campaigns.length ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Campaign</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Questions</TableHead>
+                  <TableHead>Responses</TableHead>
+                  <TableHead>Last Updated</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredCampaigns.map((campaign) => (
+                  <TableRow
+                    key={campaign.id}
+                    className={`cursor-pointer ${selectedCampaignId === campaign.id ? "bg-blue-500/10 hover:bg-blue-500/15" : ""}`}
+                    onClick={() => setSelectedCampaignId(campaign.id)}
+                  >
+                    <TableCell>
+                      <div>
+                        <p className="font-semibold text-slate-100">{campaign.title}</p>
+                        <p className="text-xs text-slate-400">/{campaign.slug}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={campaign.isPublished ? "success" : "default"}>
+                        {campaign.isPublished ? "Published" : "Draft"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{campaign.questionCount || 0}</TableCell>
+                    <TableCell>{campaign.responseCount || 0}</TableCell>
+                    <TableCell>{formatDateTime(campaign.updatedAt || campaign.createdAt)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openEditorForCampaign(campaign.id);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setSelectedCampaignId(campaign.id);
+                          }}
+                        >
+                          Responses
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : null}
+
+          {!loadingCampaigns && campaigns.length && !filteredCampaigns.length ? (
+            <p className="mt-3 text-sm text-slate-300">No campaigns matched that search.</p>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      {isEditorOpen ? (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>{selectedCampaignId ? "Edit Campaign" : "Create Campaign"}</CardTitle>
-              <CardDescription>Configure campaign content and form fields.</CardDescription>
+              <CardDescription>Configure campaign details and its response form.</CardDescription>
             </div>
-            {selectedCampaign ? (
-              <Button asChild variant="outline" size="sm">
-                <a href={`/campaigns/${selectedCampaign.slug}`} target="_blank" rel="noreferrer">
-                  Open Public Page
-                </a>
+            <div className="flex flex-wrap items-center gap-2">
+              {selectedCampaign ? (
+                <Button asChild variant="outline" size="sm">
+                  <a href={`/campaigns/${selectedCampaign.slug}`} target="_blank" rel="noreferrer">
+                    Open Public Page
+                  </a>
+                </Button>
+              ) : null}
+              <Button type="button" variant="ghost" size="sm" onClick={closeEditor}>
+                Close
               </Button>
-            ) : null}
+            </div>
           </CardHeader>
 
           <CardContent>
@@ -670,7 +810,7 @@ export default function CampaignsManager() {
             </form>
           </CardContent>
         </Card>
-      </div>
+      ) : null}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

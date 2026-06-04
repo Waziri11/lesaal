@@ -80,6 +80,11 @@
   box-shadow: 0 0 0 3px rgba(85, 144, 224, 0.2);
 }
 
+.field input:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
 .passwordRow {
   position: relative;
 }
@@ -119,6 +124,11 @@
   height: 1.05rem;
 }
 
+.passwordToggle:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .error {
   margin: 0;
   color: #ff9f9f;
@@ -145,6 +155,28 @@
 .button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.buttonContent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.spinner {
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 640px) {

@@ -14,6 +14,8 @@ export default function AdminLoginPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (loading) return;
+
     setError("");
     setLoading(true);
 
@@ -28,6 +30,7 @@ export default function AdminLoginPage() {
 
       if (!response.ok) {
         setError(payload.error || "Login failed.");
+        setLoading(false);
         return;
       }
 
@@ -36,7 +39,6 @@ export default function AdminLoginPage() {
     } catch (submitError) {
       setError("Unable to connect right now.");
       console.error(submitError);
-    } finally {
       setLoading(false);
     }
   }
@@ -46,7 +48,7 @@ export default function AdminLoginPage() {
       <div className={styles.bgOrbOne} aria-hidden="true" />
       <div className={styles.bgOrbTwo} aria-hidden="true" />
 
-      <form className={styles.card} onSubmit={handleSubmit}>
+      <form className={styles.card} onSubmit={handleSubmit} aria-busy={loading}>
         <h1>Sign in</h1>
 
         <div className={styles.field}>
@@ -57,6 +59,7 @@ export default function AdminLoginPage() {
             onChange={(event) => setEmail(event.target.value)}
             placeholder="admin@example.com"
             aria-label="Email"
+            disabled={loading}
             required
           />
         </div>
@@ -71,6 +74,7 @@ export default function AdminLoginPage() {
               placeholder="********"
               aria-label="Password"
               className={styles.passwordInput}
+              disabled={loading}
               required
             />
             <button
@@ -79,6 +83,7 @@ export default function AdminLoginPage() {
               onClick={() => setShowPassword((current) => !current)}
               aria-label={showPassword ? "Hide password" : "Show password"}
               aria-pressed={showPassword}
+              disabled={loading}
             >
               {showPassword ? (
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -118,7 +123,14 @@ export default function AdminLoginPage() {
         {error ? <p className={styles.error}>{error}</p> : null}
 
         <button type="submit" className={styles.button} disabled={loading}>
-          {loading ? "Signing in..." : "Login"}
+          {loading ? (
+            <span className={styles.buttonContent}>
+              <span className={styles.spinner} aria-hidden="true" />
+              Signing in...
+            </span>
+          ) : (
+            "Login"
+          )}
         </button>
       </form>
     </div>

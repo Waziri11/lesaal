@@ -14,7 +14,7 @@ export function middleware(request) {
     if (pathname === "/admin/login") {
       response = NextResponse.next();
     } else if (!sessionToken) {
-      response = NextResponse.redirect(new URL("/admin/login", request.url));
+      response = NextResponse.redirect(new URL("/", request.url));
     } else {
       response = NextResponse.next();
     }

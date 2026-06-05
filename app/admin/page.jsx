@@ -10,5 +10,5 @@ export default async function AdminRootPage() {
     redirect("/admin/dashboard");
   }
 
-  redirect("/admin/login");
+  redirect("/");
 }

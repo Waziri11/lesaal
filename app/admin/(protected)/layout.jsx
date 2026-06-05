@@ -8,7 +8,7 @@ export default async function AdminProtectedLayout({ children }) {
   const admin = await getAuthenticatedAdminFromCookies();
 
   if (!admin) {
-    redirect("/admin/login");
+    redirect("/");
   }
 
   return (

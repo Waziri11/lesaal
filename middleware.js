@@ -12,11 +12,7 @@ export function middleware(request) {
 
   if (isAdminPath) {
     if (pathname === "/admin/login") {
-      if (sessionToken) {
-        response = NextResponse.redirect(new URL("/admin/dashboard", request.url));
-      } else {
-        response = NextResponse.next();
-      }
+      response = NextResponse.next();
     } else if (!sessionToken) {
       response = NextResponse.redirect(new URL("/admin/login", request.url));
     } else {

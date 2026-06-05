@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
-import { createSessionExpiryDate, setAdminSessionCookie } from "../../../../lib/auth";
+import { createSessionCookieExpiryDate, createSessionExpiryDate, setAdminSessionCookie } from "../../../../lib/auth";
 import { generateSessionToken, hashToken, verifyPassword } from "../../../../lib/security";
 import { ensureEnvSeededAdminExists } from "../../../../lib/admin-bootstrap";
 import { consumeRateLimit, clearRateLimit } from "../../../../lib/rate-limit";
@@ -96,7 +96,7 @@ export async function POST(request) {
       },
     });
 
-    setAdminSessionCookie(response, rawToken, expiresAt);
+    setAdminSessionCookie(response, rawToken, createSessionCookieExpiryDate());
 
     return response;
   } catch (error) {

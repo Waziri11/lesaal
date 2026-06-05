@@ -135,6 +135,17 @@
   font-size: 0.9rem;
 }
 
+.turnstileWrap {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.turnstileHint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #cddaf5;
+}
+
 .button {
   border: 0;
   border-radius: 0.7rem;

@@ -507,10 +507,6 @@ export type AdminNotificationUncheckedUpdateManyWithoutCampaignResponseNestedInp
   deleteMany?: Prisma.AdminNotificationScalarWhereInput | Prisma.AdminNotificationScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type AdminNotificationCreateWithoutCampaignInput = {
   id?: string
   type: string

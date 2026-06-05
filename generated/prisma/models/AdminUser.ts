@@ -28,6 +28,15 @@ export type AdminUserMinAggregateOutputType = {
   id: string | null
   email: string | null
   passwordHash: string | null
+  firstName: string | null
+  lastName: string | null
+  birthDate: Date | null
+  companyName: string | null
+  companyDescription: string | null
+  gender: string | null
+  region: string | null
+  district: string | null
+  ward: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -36,6 +45,15 @@ export type AdminUserMaxAggregateOutputType = {
   id: string | null
   email: string | null
   passwordHash: string | null
+  firstName: string | null
+  lastName: string | null
+  birthDate: Date | null
+  companyName: string | null
+  companyDescription: string | null
+  gender: string | null
+  region: string | null
+  district: string | null
+  ward: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +62,15 @@ export type AdminUserCountAggregateOutputType = {
   id: number
   email: number
   passwordHash: number
+  firstName: number
+  lastName: number
+  birthDate: number
+  companyName: number
+  companyDescription: number
+  gender: number
+  region: number
+  district: number
+  ward: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -54,6 +81,15 @@ export type AdminUserMinAggregateInputType = {
   id?: true
   email?: true
   passwordHash?: true
+  firstName?: true
+  lastName?: true
+  birthDate?: true
+  companyName?: true
+  companyDescription?: true
+  gender?: true
+  region?: true
+  district?: true
+  ward?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -62,6 +98,15 @@ export type AdminUserMaxAggregateInputType = {
   id?: true
   email?: true
   passwordHash?: true
+  firstName?: true
+  lastName?: true
+  birthDate?: true
+  companyName?: true
+  companyDescription?: true
+  gender?: true
+  region?: true
+  district?: true
+  ward?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -70,6 +115,15 @@ export type AdminUserCountAggregateInputType = {
   id?: true
   email?: true
   passwordHash?: true
+  firstName?: true
+  lastName?: true
+  birthDate?: true
+  companyName?: true
+  companyDescription?: true
+  gender?: true
+  region?: true
+  district?: true
+  ward?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -151,6 +205,15 @@ export type AdminUserGroupByOutputType = {
   id: string
   email: string
   passwordHash: string
+  firstName: string | null
+  lastName: string | null
+  birthDate: Date | null
+  companyName: string
+  companyDescription: string | null
+  gender: string | null
+  region: string | null
+  district: string | null
+  ward: string | null
   createdAt: Date
   updatedAt: Date
   _count: AdminUserCountAggregateOutputType | null
@@ -180,6 +243,15 @@ export type AdminUserWhereInput = {
   id?: Prisma.StringFilter<"AdminUser"> | string
   email?: Prisma.StringFilter<"AdminUser"> | string
   passwordHash?: Prisma.StringFilter<"AdminUser"> | string
+  firstName?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  lastName?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  birthDate?: Prisma.DateTimeNullableFilter<"AdminUser"> | Date | string | null
+  companyName?: Prisma.StringFilter<"AdminUser"> | string
+  companyDescription?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  gender?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  region?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  district?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  ward?: Prisma.StringNullableFilter<"AdminUser"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   sessions?: Prisma.AdminSessionListRelationFilter
@@ -191,6 +263,15 @@ export type AdminUserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  firstName?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastName?: Prisma.SortOrderInput | Prisma.SortOrder
+  birthDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyName?: Prisma.SortOrder
+  companyDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  gender?: Prisma.SortOrderInput | Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
+  district?: Prisma.SortOrderInput | Prisma.SortOrder
+  ward?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.AdminSessionOrderByRelationAggregateInput
@@ -205,6 +286,15 @@ export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.AdminUserWhereInput[]
   NOT?: Prisma.AdminUserWhereInput | Prisma.AdminUserWhereInput[]
   passwordHash?: Prisma.StringFilter<"AdminUser"> | string
+  firstName?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  lastName?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  birthDate?: Prisma.DateTimeNullableFilter<"AdminUser"> | Date | string | null
+  companyName?: Prisma.StringFilter<"AdminUser"> | string
+  companyDescription?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  gender?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  region?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  district?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  ward?: Prisma.StringNullableFilter<"AdminUser"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   sessions?: Prisma.AdminSessionListRelationFilter
@@ -216,6 +306,15 @@ export type AdminUserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  firstName?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastName?: Prisma.SortOrderInput | Prisma.SortOrder
+  birthDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyName?: Prisma.SortOrder
+  companyDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  gender?: Prisma.SortOrderInput | Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
+  district?: Prisma.SortOrderInput | Prisma.SortOrder
+  ward?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AdminUserCountOrderByAggregateInput
@@ -230,6 +329,15 @@ export type AdminUserScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"AdminUser"> | string
   email?: Prisma.StringWithAggregatesFilter<"AdminUser"> | string
   passwordHash?: Prisma.StringWithAggregatesFilter<"AdminUser"> | string
+  firstName?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+  lastName?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+  birthDate?: Prisma.DateTimeNullableWithAggregatesFilter<"AdminUser"> | Date | string | null
+  companyName?: Prisma.StringWithAggregatesFilter<"AdminUser"> | string
+  companyDescription?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+  gender?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+  region?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+  district?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+  ward?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AdminUser"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AdminUser"> | Date | string
 }
@@ -238,6 +346,15 @@ export type AdminUserCreateInput = {
   id?: string
   email: string
   passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
@@ -249,6 +366,15 @@ export type AdminUserUncheckedCreateInput = {
   id?: string
   email: string
   passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
@@ -260,6 +386,15 @@ export type AdminUserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
@@ -271,6 +406,15 @@ export type AdminUserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
@@ -282,6 +426,15 @@ export type AdminUserCreateManyInput = {
   id?: string
   email: string
   passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -290,6 +443,15 @@ export type AdminUserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -298,6 +460,15 @@ export type AdminUserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -306,6 +477,15 @@ export type AdminUserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  firstName?: Prisma.SortOrder
+  lastName?: Prisma.SortOrder
+  birthDate?: Prisma.SortOrder
+  companyName?: Prisma.SortOrder
+  companyDescription?: Prisma.SortOrder
+  gender?: Prisma.SortOrder
+  region?: Prisma.SortOrder
+  district?: Prisma.SortOrder
+  ward?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -314,6 +494,15 @@ export type AdminUserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  firstName?: Prisma.SortOrder
+  lastName?: Prisma.SortOrder
+  birthDate?: Prisma.SortOrder
+  companyName?: Prisma.SortOrder
+  companyDescription?: Prisma.SortOrder
+  gender?: Prisma.SortOrder
+  region?: Prisma.SortOrder
+  district?: Prisma.SortOrder
+  ward?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -322,6 +511,15 @@ export type AdminUserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  firstName?: Prisma.SortOrder
+  lastName?: Prisma.SortOrder
+  birthDate?: Prisma.SortOrder
+  companyName?: Prisma.SortOrder
+  companyDescription?: Prisma.SortOrder
+  gender?: Prisma.SortOrder
+  region?: Prisma.SortOrder
+  district?: Prisma.SortOrder
+  ward?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -338,6 +536,14 @@ export type AdminUserNullableScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -392,6 +598,15 @@ export type AdminUserCreateWithoutSessionsInput = {
   id?: string
   email: string
   passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
@@ -402,6 +617,15 @@ export type AdminUserUncheckedCreateWithoutSessionsInput = {
   id?: string
   email: string
   passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
@@ -428,6 +652,15 @@ export type AdminUserUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
@@ -438,6 +671,15 @@ export type AdminUserUncheckedUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
@@ -448,6 +690,15 @@ export type AdminUserCreateWithoutOtpCodesInput = {
   id?: string
   email: string
   passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
@@ -458,6 +709,15 @@ export type AdminUserUncheckedCreateWithoutOtpCodesInput = {
   id?: string
   email: string
   passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
@@ -484,6 +744,15 @@ export type AdminUserUpdateWithoutOtpCodesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
@@ -494,6 +763,15 @@ export type AdminUserUncheckedUpdateWithoutOtpCodesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
@@ -504,6 +782,15 @@ export type AdminUserCreateWithoutMediaAssetsInput = {
   id?: string
   email: string
   passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
@@ -514,6 +801,15 @@ export type AdminUserUncheckedCreateWithoutMediaAssetsInput = {
   id?: string
   email: string
   passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
@@ -540,6 +836,15 @@ export type AdminUserUpdateWithoutMediaAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
@@ -550,6 +855,15 @@ export type AdminUserUncheckedUpdateWithoutMediaAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
@@ -609,6 +923,15 @@ export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   id?: boolean
   email?: boolean
   passwordHash?: boolean
+  firstName?: boolean
+  lastName?: boolean
+  birthDate?: boolean
+  companyName?: boolean
+  companyDescription?: boolean
+  gender?: boolean
+  region?: boolean
+  district?: boolean
+  ward?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   sessions?: boolean | Prisma.AdminUser$sessionsArgs<ExtArgs>
@@ -621,6 +944,15 @@ export type AdminUserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   email?: boolean
   passwordHash?: boolean
+  firstName?: boolean
+  lastName?: boolean
+  birthDate?: boolean
+  companyName?: boolean
+  companyDescription?: boolean
+  gender?: boolean
+  region?: boolean
+  district?: boolean
+  ward?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["adminUser"]>
@@ -629,6 +961,15 @@ export type AdminUserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   email?: boolean
   passwordHash?: boolean
+  firstName?: boolean
+  lastName?: boolean
+  birthDate?: boolean
+  companyName?: boolean
+  companyDescription?: boolean
+  gender?: boolean
+  region?: boolean
+  district?: boolean
+  ward?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["adminUser"]>
@@ -637,11 +978,20 @@ export type AdminUserSelectScalar = {
   id?: boolean
   email?: boolean
   passwordHash?: boolean
+  firstName?: boolean
+  lastName?: boolean
+  birthDate?: boolean
+  companyName?: boolean
+  companyDescription?: boolean
+  gender?: boolean
+  region?: boolean
+  district?: boolean
+  ward?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AdminUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "createdAt" | "updatedAt", ExtArgs["result"]["adminUser"]>
+export type AdminUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "firstName" | "lastName" | "birthDate" | "companyName" | "companyDescription" | "gender" | "region" | "district" | "ward" | "createdAt" | "updatedAt", ExtArgs["result"]["adminUser"]>
 export type AdminUserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.AdminUser$sessionsArgs<ExtArgs>
   otpCodes?: boolean | Prisma.AdminUser$otpCodesArgs<ExtArgs>
@@ -662,6 +1012,15 @@ export type $AdminUserPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     id: string
     email: string
     passwordHash: string
+    firstName: string | null
+    lastName: string | null
+    birthDate: Date | null
+    companyName: string
+    companyDescription: string | null
+    gender: string | null
+    region: string | null
+    district: string | null
+    ward: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["adminUser"]>
@@ -1093,6 +1452,15 @@ export interface AdminUserFieldRefs {
   readonly id: Prisma.FieldRef<"AdminUser", 'String'>
   readonly email: Prisma.FieldRef<"AdminUser", 'String'>
   readonly passwordHash: Prisma.FieldRef<"AdminUser", 'String'>
+  readonly firstName: Prisma.FieldRef<"AdminUser", 'String'>
+  readonly lastName: Prisma.FieldRef<"AdminUser", 'String'>
+  readonly birthDate: Prisma.FieldRef<"AdminUser", 'DateTime'>
+  readonly companyName: Prisma.FieldRef<"AdminUser", 'String'>
+  readonly companyDescription: Prisma.FieldRef<"AdminUser", 'String'>
+  readonly gender: Prisma.FieldRef<"AdminUser", 'String'>
+  readonly region: Prisma.FieldRef<"AdminUser", 'String'>
+  readonly district: Prisma.FieldRef<"AdminUser", 'String'>
+  readonly ward: Prisma.FieldRef<"AdminUser", 'String'>
   readonly createdAt: Prisma.FieldRef<"AdminUser", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AdminUser", 'DateTime'>
 }

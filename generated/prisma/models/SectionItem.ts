@@ -485,10 +485,6 @@ export type SectionItemUncheckedUpdateManyWithoutSectionNestedInput = {
   deleteMany?: Prisma.SectionItemScalarWhereInput | Prisma.SectionItemScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type SectionItemCreateWithoutSectionInput = {
   id?: string
   order: number

@@ -66,11 +66,20 @@ model AdminUser {
   id           String         @id @default(cuid())
   email        String         @unique
   passwordHash String
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  sessions     AdminSession[]
-  otpCodes     EmailOtpCode[]
-  mediaAssets  MediaAsset[]
+  firstName          String?
+  lastName           String?
+  birthDate          DateTime?
+  companyName        String         @default("Lesaal")
+  companyDescription String?
+  gender             String?
+  region             String?
+  district           String?
+  ward               String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  sessions           AdminSession[]
+  otpCodes           EmailOtpCode[]
+  mediaAssets        MediaAsset[]
 }
 
 model AdminSession {

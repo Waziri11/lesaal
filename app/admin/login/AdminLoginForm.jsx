@@ -274,7 +274,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
         return;
       }
 
-      router.push("/admin/dashboard");
+      router.push(payload.requiresProfileSetup ? "/admin/profile?setup=1" : "/admin/dashboard");
       router.refresh();
     } catch (submitError) {
       setError("Unable to connect right now.");

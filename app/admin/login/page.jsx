@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import AdminLoginForm from "./AdminLoginForm";
 import { getAuthenticatedAdminFromCookies } from "../../../lib/auth";
 import { getSecurityConfig } from "../../../lib/security-config";
+import { isAdminProfileComplete } from "../../../lib/admin-profile";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,7 @@ export default async function AdminLoginPage() {
   const admin = await getAuthenticatedAdminFromCookies();
 
   if (admin) {
-    redirect("/admin/dashboard");
+    redirect(isAdminProfileComplete(admin) ? "/admin/dashboard" : "/admin/profile?setup=1");
   }
 
   const { turnstileSiteKey } = getSecurityConfig();
@@ -17,4 +18,3 @@ export default async function AdminLoginPage() {
 
   return <AdminLoginForm turnstileSiteKey={turnstileSiteKey} />;
 }
-

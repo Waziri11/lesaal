@@ -8,6 +8,7 @@ import { consumeRateLimit, clearRateLimit } from "../../../../lib/rate-limit";
 import { getClientIpAddress } from "../../../../lib/request-utils";
 import { createRateLimitResponse, validateAdminMutationRequest } from "../../../../lib/request-security";
 import { getSecurityConfig } from "../../../../lib/security-config";
+import { isAdminProfileComplete } from "../../../../lib/admin-profile";
 
 export async function POST(request) {
   try {
@@ -98,9 +99,12 @@ export async function POST(request) {
 
     const response = NextResponse.json({
       success: true,
+      requiresProfileSetup: !isAdminProfileComplete(admin),
       admin: {
         id: admin.id,
         email: admin.email,
+        firstName: admin.firstName,
+        companyName: admin.companyName,
       },
     });
 

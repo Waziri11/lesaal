@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
-import { createSessionExpiryDate, setAdminSessionCookie } from "../../../../lib/auth";
+import { createSessionCookieExpiryDate, createSessionExpiryDate, setAdminSessionCookie } from "../../../../lib/auth";
 import { generateSessionToken, hashToken, verifyPassword } from "../../../../lib/security";
 import { ensureEnvSeededAdminExists } from "../../../../lib/admin-bootstrap";
+import { verifyTurnstileToken } from "../../../../lib/captcha";
 import { consumeRateLimit, clearRateLimit } from "../../../../lib/rate-limit";
 import { getClientIpAddress } from "../../../../lib/request-utils";
 import { createRateLimitResponse, validateAdminMutationRequest } from "../../../../lib/request-security";
@@ -20,9 +21,10 @@ export async function POST(request) {
     const body = await request.json();
     const email = String(body?.email || "").trim().toLowerCase();
     const password = String(body?.password || "");
+    const captchaToken = String(body?.captchaToken || "").trim();
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
+    if (!email || !password || !captchaToken) {
+      return NextResponse.json({ error: "Email, password, and captcha are required." }, { status: 400 });
     }
 
     const clientIp = getClientIpAddress(request);
@@ -54,6 +56,12 @@ export async function POST(request) {
     if (!ipRateLimit.allowed || !emailRateLimit.allowed) {
       const retryAfterSeconds = Math.max(ipRateLimit.retryAfterSeconds, emailRateLimit.retryAfterSeconds);
       return createRateLimitResponse("Too many login attempts. Please try again later.", retryAfterSeconds);
+    }
+
+    const captchaResult = await verifyTurnstileToken({ token: captchaToken, remoteIp: clientIp });
+
+    if (!captchaResult.success) {
+      return NextResponse.json({ error: "Captcha validation failed." }, { status: 400 });
     }
 
     const admin = await prisma.adminUser.findUnique({ where: { email } });
@@ -96,7 +104,7 @@ export async function POST(request) {
       },
     });
 
-    setAdminSessionCookie(response, rawToken, expiresAt);
+    setAdminSessionCookie(response, rawToken, createSessionCookieExpiryDate());
 
     return response;
   } catch (error) {

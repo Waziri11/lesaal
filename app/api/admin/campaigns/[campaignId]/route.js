@@ -2,6 +2,36 @@ import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../../lib/auth";
 import { deleteCampaign, getCampaignByIdForAdmin, isCampaignTableMissingError, updateCampaign } from "../../../../../lib/campaigns";
 
+export async function GET(request, { params }) {
+  try {
+    const admin = await getAdminFromApiRequest(request);
+
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const campaignId = String(params?.campaignId || "");
+    const campaign = await getCampaignByIdForAdmin(campaignId);
+
+    if (!campaign) {
+      return NextResponse.json({ error: "Campaign not found." }, { status: 404 });
+    }
+
+    return NextResponse.json({ campaign });
+  } catch (error) {
+    console.error("Failed to load campaign", error);
+
+    if (isCampaignTableMissingError(error)) {
+      return NextResponse.json(
+        { error: "Campaign tables are not initialized. Run database migrations and retry." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ error: "Unable to load campaign." }, { status: 500 });
+  }
+}
+
 export async function PUT(request, { params }) {
   try {
     const admin = await getAdminFromApiRequest(request);

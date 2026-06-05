@@ -7,6 +7,26 @@ import styles from "./login.module.css";
 import { createCsrfHeaders } from "../../../lib/csrf-client";
 
 const MIN_PASSWORD_LENGTH = 8;
+const CAPTCHA_LOAD_ERROR_MESSAGE =
+  "Captcha failed to load. Please disable blockers and refresh the page.";
+
+function getCaptchaErrorMessage(errorCode) {
+  const code = String(errorCode || "").trim();
+
+  if (code === "400020" || code === "110100" || code === "110110") {
+    return "Turnstile site key is invalid. Update TURNSTILE_SITE_KEY.";
+  }
+
+  if (code === "110200") {
+    return "This domain is not allowed for the Turnstile widget. Add localhost in Turnstile Hostname Management.";
+  }
+
+  if (!code) {
+    return CAPTCHA_LOAD_ERROR_MESSAGE;
+  }
+
+  return `Captcha failed to load (Turnstile error ${code}).`;
+}
 
 
 export default function AdminLoginForm({ turnstileSiteKey }) {
@@ -25,8 +45,14 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
   const [notice, setNotice] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaReady, setCaptchaReady] = useState(false);
+  const [captchaLoadError, setCaptchaLoadError] = useState("");
   const captchaRef = useRef(null);
   const widgetIdRef = useRef(null);
+  const captchaTokenRef = useRef("");
+
+  useEffect(() => {
+    captchaTokenRef.current = captchaToken;
+  }, [captchaToken]);
 
   useEffect(() => {
     if (!turnstileSiteKey || typeof window === "undefined") {
@@ -34,6 +60,15 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
     }
 
     let isCancelled = false;
+    let timeoutId = null;
+
+    function markCaptchaLoadError() {
+      if (isCancelled) {
+        return;
+      }
+      setCaptchaReady(false);
+      setCaptchaLoadError(CAPTCHA_LOAD_ERROR_MESSAGE);
+    }
 
     function renderTurnstile() {
       if (
@@ -45,20 +80,32 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
         return;
       }
 
-      widgetIdRef.current = window.turnstile.render(captchaRef.current, {
-        sitekey: turnstileSiteKey,
-        callback: (token) => {
-          setCaptchaToken(token || "");
-        },
-        "expired-callback": () => {
-          setCaptchaToken("");
-        },
-        "error-callback": () => {
-          setCaptchaToken("");
-        },
-      });
+      try {
+        widgetIdRef.current = window.turnstile.render(captchaRef.current, {
+          sitekey: turnstileSiteKey,
+          appearance: "always",
+          callback: (token) => {
+            const normalizedToken = token || "";
+            captchaTokenRef.current = normalizedToken;
+            setCaptchaToken(normalizedToken);
+          },
+          "expired-callback": () => {
+            captchaTokenRef.current = "";
+            setCaptchaToken("");
+          },
+          "error-callback": (errorCode) => {
+            captchaTokenRef.current = "";
+            setCaptchaToken("");
+            setCaptchaLoadError(getCaptchaErrorMessage(errorCode));
+          },
+        });
 
-      setCaptchaReady(true);
+        setCaptchaReady(true);
+        setCaptchaLoadError("");
+      } catch (captchaError) {
+        console.error("Failed to render captcha widget.", captchaError);
+        markCaptchaLoadError();
+      }
     }
 
     if (window.turnstile) {
@@ -69,12 +116,29 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
     }
 
     const existingScript = document.querySelector('script[data-turnstile-script="true"]');
+    const handleScriptError = () => {
+      markCaptchaLoadError();
+    };
+    const startLoadTimeout = () => {
+      timeoutId = window.setTimeout(() => {
+        if (!window.turnstile && !widgetIdRef.current) {
+          markCaptchaLoadError();
+        }
+      }, 6000);
+    };
 
     if (existingScript) {
       existingScript.addEventListener("load", renderTurnstile);
+      existingScript.addEventListener("error", handleScriptError);
+      renderTurnstile();
+      startLoadTimeout();
       return () => {
         isCancelled = true;
         existingScript.removeEventListener("load", renderTurnstile);
+        existingScript.removeEventListener("error", handleScriptError);
+        if (timeoutId) {
+          window.clearTimeout(timeoutId);
+        }
       };
     }
 
@@ -84,17 +148,24 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
     script.defer = true;
     script.dataset.turnstileScript = "true";
     script.addEventListener("load", renderTurnstile);
+    script.addEventListener("error", handleScriptError);
     document.head.appendChild(script);
+    startLoadTimeout();
 
     return () => {
       isCancelled = true;
       script.removeEventListener("load", renderTurnstile);
+      script.removeEventListener("error", handleScriptError);
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
     };
   }, [turnstileSiteKey]);
 
   function resetCaptcha() {
     if (widgetIdRef.current !== null && window.turnstile?.reset) {
       window.turnstile.reset(widgetIdRef.current);
+      captchaTokenRef.current = "";
       setCaptchaToken("");
     }
   }
@@ -102,6 +173,49 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
   function clearMessages() {
     setError("");
     setNotice("");
+  }
+
+  async function waitForCaptchaToken(timeoutMs = 8000) {
+    if (captchaTokenRef.current) {
+      return captchaTokenRef.current;
+    }
+
+    return new Promise((resolve, reject) => {
+      const startedAt = Date.now();
+      const intervalId = window.setInterval(() => {
+        if (captchaTokenRef.current) {
+          window.clearInterval(intervalId);
+          resolve(captchaTokenRef.current);
+          return;
+        }
+
+        if (Date.now() - startedAt >= timeoutMs) {
+          window.clearInterval(intervalId);
+          reject(new Error("Captcha token timeout"));
+        }
+      }, 150);
+    });
+  }
+
+  async function getCaptchaTokenForSubmission() {
+    if (!turnstileSiteKey) {
+      return "";
+    }
+
+    if (captchaTokenRef.current) {
+      return captchaTokenRef.current;
+    }
+
+    if (widgetIdRef.current !== null && window.turnstile?.execute) {
+      try {
+        window.turnstile.execute(widgetIdRef.current);
+        return await waitForCaptchaToken();
+      } catch (executionError) {
+        console.error("Failed to execute captcha challenge.", executionError);
+      }
+    }
+
+    return captchaTokenRef.current || "";
   }
 
   function openForgotMode() {
@@ -135,8 +249,10 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
       return;
     }
 
-    if (!captchaToken) {
-      setError("Please complete the captcha challenge.");
+    const submissionCaptchaToken = await getCaptchaTokenForSubmission();
+
+    if (!submissionCaptchaToken) {
+      setError(captchaLoadError || "Please complete the captcha challenge.");
       return;
     }
 
@@ -146,7 +262,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: createCsrfHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ email, password, captchaToken }),
+        body: JSON.stringify({ email, password, captchaToken: submissionCaptchaToken }),
       });
 
       const payload = await response.json();
@@ -179,8 +295,10 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
       return;
     }
 
-    if (!captchaToken) {
-      setError("Please complete the captcha challenge.");
+    const submissionCaptchaToken = await getCaptchaTokenForSubmission();
+
+    if (!submissionCaptchaToken) {
+      setError(captchaLoadError || "Please complete the captcha challenge.");
       return;
     }
 
@@ -197,7 +315,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
       const response = await fetch("/api/admin/forgot-password/request-otp", {
         method: "POST",
         headers: createCsrfHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ email: normalizedEmail, captchaToken }),
+        body: JSON.stringify({ email: normalizedEmail, captchaToken: submissionCaptchaToken }),
       });
 
       const payload = await response.json();
@@ -234,8 +352,10 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
       return;
     }
 
-    if (!captchaToken) {
-      setError("Please complete the captcha challenge.");
+    const submissionCaptchaToken = await getCaptchaTokenForSubmission();
+
+    if (!submissionCaptchaToken) {
+      setError(captchaLoadError || "Please complete the captcha challenge.");
       return;
     }
 
@@ -259,7 +379,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
           email: forgotEmail.trim().toLowerCase(),
           otp: forgotOtp,
           newPassword: forgotPassword,
-          captchaToken,
+          captchaToken: submissionCaptchaToken,
         }),
       });
 
@@ -295,6 +415,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
       <div className={styles.turnstileWrap}>
         <div ref={captchaRef} />
         {!captchaReady ? <p className={styles.turnstileHint}>Loading captcha challenge...</p> : null}
+        {captchaLoadError ? <p className={styles.error}>{captchaLoadError}</p> : null}
       </div>
     );
   }
@@ -324,7 +445,6 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
         </div>
 
         <h1>{isForgotMode ? "Forgot password" : "Sign in"}</h1>
-        {renderCaptcha()}
 
         {!isForgotMode ? (
           <form className={styles.form} onSubmit={handleSubmit}>
@@ -410,6 +530,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
                 "Login"
               )}
             </button>
+            {renderCaptcha()}
 
             <button
               type="button"
@@ -452,6 +573,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
                 "Send OTP"
               )}
             </button>
+            {renderCaptcha()}
           </form>
         ) : null}
 
@@ -525,6 +647,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
                 "Reset password"
               )}
             </button>
+            {renderCaptcha()}
 
             <button
               type="button"

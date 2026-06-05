@@ -49,10 +49,50 @@
   z-index: 2;
 }
 
+.topActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.secondaryLink,
+.secondaryButton {
+  color: #cddaf5;
+  font-size: 0.82rem;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.secondaryLink:hover,
+.secondaryButton:hover {
+  color: #eef4ff;
+  text-decoration: underline;
+}
+
+.secondaryButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .card h1 {
   margin: 0;
   color: #eef4ff;
   font-size: clamp(1.8rem, 4vw, 2.2rem);
+}
+
+.form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.helperText {
+  margin: 0;
+  color: #cddaf5;
+  font-size: 0.9rem;
 }
 
 .field {
@@ -135,6 +175,23 @@
   font-size: 0.9rem;
 }
 
+.notice {
+  margin: 0;
+  color: #87efac;
+  font-size: 0.9rem;
+}
+
+.turnstileWrap {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.turnstileHint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #cddaf5;
+}
+
 .button {
   border: 0;
   border-radius: 0.7rem;
@@ -164,6 +221,26 @@
   gap: 0.45rem;
 }
 
+.inlineAction {
+  border: 0;
+  background: transparent;
+  color: #9dbbe9;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.inlineAction:hover {
+  color: #eef4ff;
+  text-decoration: underline;
+}
+
+.inlineAction:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .spinner {
   width: 0.95rem;
   height: 0.95rem;
@@ -171,6 +248,22 @@
   border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #ffffff;
   animation: spin 0.7s linear infinite;
+}
+
+.footerText {
+  margin: 0.35rem 0 0;
+  color: #cddaf5;
+  font-size: 0.88rem;
+}
+
+.footerLink {
+  color: #eef4ff;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.footerLink:hover {
+  color: #ffffff;
 }
 
 @keyframes spin {
@@ -186,5 +279,10 @@
 
   .card {
     padding: 1rem;
+  }
+
+  .topActions {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

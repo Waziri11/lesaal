@@ -14,7 +14,7 @@ export default function AdminSidebar() {
       method: "POST",
       headers: createCsrfHeaders(),
     });
-    router.push("/admin/login");
+    router.push("/");
     router.refresh();
   }
 

@@ -11,6 +11,7 @@ import {
   TEMPLATE_SECTIONS,
   TEXT_ANIMATION_OPTIONS,
 } from "../../lib/constants";
+import { createCsrfHeaders } from "../../lib/csrf-client";
 
 function createTempId(prefix) {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -688,7 +689,7 @@ export default function LandingEditor() {
     try {
       const response = await fetch("/api/admin/landing-config", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: createCsrfHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(config),
       });
 
@@ -714,7 +715,7 @@ export default function LandingEditor() {
     try {
       const response = await fetch("/api/admin/landing-config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: createCsrfHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ templateType }),
       });
       const payload = await response.json();
@@ -736,6 +737,7 @@ export default function LandingEditor() {
 
     const response = await fetch("/api/admin/upload", {
       method: "POST",
+      headers: createCsrfHeaders(),
       body: formData,
     });
 

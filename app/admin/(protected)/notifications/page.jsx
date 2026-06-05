@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
+import { createCsrfHeaders } from "../../../../lib/csrf-client";
 
 function formatDateTime(value) {
   if (!value) return "-";
@@ -49,9 +50,9 @@ export default function NotificationsPage() {
     try {
       const response = await fetch("/api/admin/notifications", {
         method: "PATCH",
-        headers: {
+        headers: createCsrfHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         body: JSON.stringify(notificationId ? { notificationId } : {}),
       });
       const payload = await response.json();

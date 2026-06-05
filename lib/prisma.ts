@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
+import { requireEnv } from "./env";
 
 type PrismaGlobal = {
   prisma?: PrismaClient;
@@ -8,20 +9,11 @@ type PrismaGlobal = {
     isReady: boolean;
     promise: Promise<void> | null;
   };
-  warnedMissingDatabaseUrl?: boolean;
 };
 
 const globalForPrisma = globalThis as unknown as PrismaGlobal;
 
-const fallbackConnectionString = "postgresql://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable";
-const connectionString = process.env.DATABASE_URL || fallbackConnectionString;
-
-if (!process.env.DATABASE_URL && !globalForPrisma.warnedMissingDatabaseUrl) {
-  console.warn(
-    "DATABASE_URL is not set. Using fallback URL for build-time initialization. Set DATABASE_URL in deployment environment."
-  );
-  globalForPrisma.warnedMissingDatabaseUrl = true;
-}
+const connectionString = requireEnv("DATABASE_URL");
 
 const adapter = globalForPrisma.prismaAdapter ?? new PrismaPg({ connectionString });
 

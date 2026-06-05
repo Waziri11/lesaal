@@ -4,8 +4,8 @@ import bcrypt from "bcryptjs";
 import { DEFAULT_SITE_TITLE, getDefaultFormFields, getDefaultLandingSections } from "../lib/landing-defaults";
 
 async function seedAdmin() {
-  const email = String(process.env.ADMIN_EMAIL || "admin@example.com").trim().toLowerCase();
-  const password = String(process.env.ADMIN_PASSWORD || "change-me-strong");
+  const email = String(process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  const password = String(process.env.ADMIN_PASSWORD || "");
 
   if (!email || !password || password.length < 8) {
     throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD (min 8 chars) are required for seeding admin user.");

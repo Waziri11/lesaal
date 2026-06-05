@@ -9,6 +9,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
+import { createCsrfHeaders } from "../../lib/csrf-client";
 
 const LIGHT_INPUT_CLASS =
   "border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-violet-500 focus-visible:ring-offset-white";
@@ -385,6 +386,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
 
       const response = await fetch("/api/admin/upload", {
         method: "POST",
+        headers: createCsrfHeaders(),
         body: formData,
       });
       const payload = await response.json();
@@ -447,9 +449,9 @@ export default function CampaignBuilderPage({ campaignId = null }) {
 
       const response = await fetch(endpoint, {
         method,
-        headers: {
+        headers: createCsrfHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         body: JSON.stringify({
           ...draft,
           slug: draft.slug || slugify(draft.title),
@@ -489,6 +491,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
     try {
       const response = await fetch(`/api/admin/campaigns/${campaignId}`, {
         method: "DELETE",
+        headers: createCsrfHeaders(),
       });
       const payload = await response.json();
 

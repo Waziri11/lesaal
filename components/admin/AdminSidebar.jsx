@@ -3,13 +3,17 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ADMIN_NAV_ITEMS } from "../../lib/constants";
+import { createCsrfHeaders } from "../../lib/csrf-client";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
   async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
+    await fetch("/api/admin/logout", {
+      method: "POST",
+      headers: createCsrfHeaders(),
+    });
     router.push("/admin/login");
     router.refresh();
   }

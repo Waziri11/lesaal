@@ -3,9 +3,18 @@ import { prisma } from "../../../../lib/prisma";
 import { createSessionExpiryDate, setAdminSessionCookie } from "../../../../lib/auth";
 import { generateSessionToken, hashToken, verifyPassword } from "../../../../lib/security";
 import { ensureEnvSeededAdminExists } from "../../../../lib/admin-bootstrap";
+import { consumeRateLimit, clearRateLimit } from "../../../../lib/rate-limit";
+import { getClientIpAddress } from "../../../../lib/request-utils";
+import { createRateLimitResponse, validateAdminMutationRequest } from "../../../../lib/request-security";
+import { getSecurityConfig } from "../../../../lib/security-config";
 
 export async function POST(request) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     await ensureEnvSeededAdminExists();
 
     const body = await request.json();
@@ -14,6 +23,37 @@ export async function POST(request) {
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
+    }
+
+    const clientIp = getClientIpAddress(request);
+    const {
+      rateLimitWindowMinutes,
+      rateLimitMaxLoginIp,
+      rateLimitMaxLoginEmail,
+    } = getSecurityConfig();
+    const windowMs = rateLimitWindowMinutes * 60 * 1000;
+    const lockMs = 30 * 60 * 1000;
+    const ipKey = `admin-login:ip:${clientIp}`;
+    const emailKey = `admin-login:email:${email}`;
+
+    const [ipRateLimit, emailRateLimit] = await Promise.all([
+      consumeRateLimit({
+        key: ipKey,
+        limit: rateLimitMaxLoginIp,
+        windowMs,
+        lockMs,
+      }),
+      consumeRateLimit({
+        key: emailKey,
+        limit: rateLimitMaxLoginEmail,
+        windowMs,
+        lockMs,
+      }),
+    ]);
+
+    if (!ipRateLimit.allowed || !emailRateLimit.allowed) {
+      const retryAfterSeconds = Math.max(ipRateLimit.retryAfterSeconds, emailRateLimit.retryAfterSeconds);
+      return createRateLimitResponse("Too many login attempts. Please try again later.", retryAfterSeconds);
     }
 
     const admin = await prisma.adminUser.findUnique({ where: { email } });
@@ -45,6 +85,8 @@ export async function POST(request) {
         expiresAt: { lte: new Date() },
       },
     });
+
+    await Promise.all([clearRateLimit(ipKey), clearRateLimit(emailKey)]);
 
     const response = NextResponse.json({
       success: true,

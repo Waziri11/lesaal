@@ -396,7 +396,8 @@ export const ModelName = {
   CampaignResponse: 'CampaignResponse',
   AdminNotification: 'AdminNotification',
   EmailOtpCode: 'EmailOtpCode',
-  MediaAsset: 'MediaAsset'
+  MediaAsset: 'MediaAsset',
+  RateLimitEntry: 'RateLimitEntry'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -412,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset"
+    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset" | "rateLimitEntry"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1378,6 +1379,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RateLimitEntry: {
+      payload: Prisma.$RateLimitEntryPayload<ExtArgs>
+      fields: Prisma.RateLimitEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RateLimitEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RateLimitEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.RateLimitEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RateLimitEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        findMany: {
+          args: Prisma.RateLimitEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>[]
+        }
+        create: {
+          args: Prisma.RateLimitEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        createMany: {
+          args: Prisma.RateLimitEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RateLimitEntryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>[]
+        }
+        delete: {
+          args: Prisma.RateLimitEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        update: {
+          args: Prisma.RateLimitEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.RateLimitEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RateLimitEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RateLimitEntryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>[]
+        }
+        upsert: {
+          args: Prisma.RateLimitEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.RateLimitEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRateLimitEntry>
+        }
+        groupBy: {
+          args: Prisma.RateLimitEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RateLimitEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RateLimitEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RateLimitEntryCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1593,6 +1668,19 @@ export const MediaAssetScalarFieldEnum = {
 } as const
 
 export type MediaAssetScalarFieldEnum = (typeof MediaAssetScalarFieldEnum)[keyof typeof MediaAssetScalarFieldEnum]
+
+
+export const RateLimitEntryScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  count: 'count',
+  windowStart: 'windowStart',
+  lockedUntil: 'lockedUntil',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RateLimitEntryScalarFieldEnum = (typeof RateLimitEntryScalarFieldEnum)[keyof typeof RateLimitEntryScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1918,6 +2006,7 @@ export type GlobalOmitConfig = {
   adminNotification?: Prisma.AdminNotificationOmit
   emailOtpCode?: Prisma.EmailOtpCodeOmit
   mediaAsset?: Prisma.MediaAssetOmit
+  rateLimitEntry?: Prisma.RateLimitEntryOmit
 }
 
 /* Types for Logging */

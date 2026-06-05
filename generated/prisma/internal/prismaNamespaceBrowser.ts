@@ -63,7 +63,8 @@ export const ModelName = {
   CampaignResponse: 'CampaignResponse',
   AdminNotification: 'AdminNotification',
   EmailOtpCode: 'EmailOtpCode',
-  MediaAsset: 'MediaAsset'
+  MediaAsset: 'MediaAsset',
+  RateLimitEntry: 'RateLimitEntry'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -258,6 +259,19 @@ export const MediaAssetScalarFieldEnum = {
 } as const
 
 export type MediaAssetScalarFieldEnum = (typeof MediaAssetScalarFieldEnum)[keyof typeof MediaAssetScalarFieldEnum]
+
+
+export const RateLimitEntryScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  count: 'count',
+  windowStart: 'windowStart',
+  lockedUntil: 'lockedUntil',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RateLimitEntryScalarFieldEnum = (typeof RateLimitEntryScalarFieldEnum)[keyof typeof RateLimitEntryScalarFieldEnum]
 
 
 export const SortOrder = {

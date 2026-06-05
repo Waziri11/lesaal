@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../../lib/auth";
 import { deleteCampaign, getCampaignByIdForAdmin, isCampaignTableMissingError, updateCampaign } from "../../../../../lib/campaigns";
+import { validateAdminMutationRequest } from "../../../../../lib/request-security";
 
 export async function GET(request, { params }) {
   try {
@@ -34,6 +35,11 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     const admin = await getAdminFromApiRequest(request);
 
     if (!admin) {
@@ -69,6 +75,11 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     const admin = await getAdminFromApiRequest(request);
 
     if (!admin) {

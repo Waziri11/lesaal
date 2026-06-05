@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../lib/auth";
 import { addTemplateSectionToConfig, getLandingConfig, updateLandingConfig } from "../../../../lib/landing-config";
+import { validateAdminMutationRequest } from "../../../../lib/request-security";
 
 export async function GET(request) {
   try {
@@ -20,6 +21,11 @@ export async function GET(request) {
 
 export async function PUT(request) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     const admin = await getAdminFromApiRequest(request);
 
     if (!admin) {
@@ -38,6 +44,11 @@ export async function PUT(request) {
 
 export async function POST(request) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     const admin = await getAdminFromApiRequest(request);
 
     if (!admin) {

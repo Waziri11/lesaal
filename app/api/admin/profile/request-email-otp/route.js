@@ -4,6 +4,10 @@ import { getAdminFromApiRequest } from "../../../../../lib/auth";
 import { prisma } from "../../../../../lib/prisma";
 import { generateOtpCode, hashToken, verifyPassword } from "../../../../../lib/security";
 import { sendOtpEmail } from "../../../../../lib/mailer";
+import { consumeRateLimit } from "../../../../../lib/rate-limit";
+import { getClientIpAddress } from "../../../../../lib/request-utils";
+import { createRateLimitResponse, validateAdminMutationRequest } from "../../../../../lib/request-security";
+import { getSecurityConfig } from "../../../../../lib/security-config";
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -11,6 +15,11 @@ function isValidEmail(email) {
 
 export async function POST(request) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     const admin = await getAdminFromApiRequest(request);
 
     if (!admin) {
@@ -27,6 +36,21 @@ export async function POST(request) {
 
     if (!isValidEmail(newEmail)) {
       return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 });
+    }
+
+    const clientIp = getClientIpAddress(request);
+    const { rateLimitWindowMinutes, rateLimitMaxOtpRequests } = getSecurityConfig();
+    const otpRequestRateLimit = await consumeRateLimit({
+      key: `admin-otp-request:${admin.id}:${newEmail}:${clientIp}`,
+      limit: rateLimitMaxOtpRequests,
+      windowMs: rateLimitWindowMinutes * 60 * 1000,
+    });
+
+    if (!otpRequestRateLimit.allowed) {
+      return createRateLimitResponse(
+        "Too many OTP requests. Please wait before requesting another code.",
+        otpRequestRateLimit.retryAfterSeconds
+      );
     }
 
     if (newEmail === admin.email) {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../lib/auth";
 import { isCampaignTableMissingError } from "../../../../lib/campaigns";
 import { ensureDatabaseReady, prisma } from "../../../../lib/prisma";
+import { validateAdminMutationRequest } from "../../../../lib/request-security";
 
 function serializeNotification(notification) {
   return {
@@ -84,6 +85,11 @@ export async function GET(request) {
 
 export async function PATCH(request) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     await ensureDatabaseReady();
 
     const admin = await getAdminFromApiRequest(request);

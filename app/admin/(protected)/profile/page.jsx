@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createCsrfHeaders } from "../../../../lib/csrf-client";
 
 export default function ProfilePage() {
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
@@ -27,7 +28,7 @@ export default function ProfilePage() {
     try {
       const response = await fetch("/api/admin/profile/change-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: createCsrfHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
@@ -58,7 +59,7 @@ export default function ProfilePage() {
     try {
       const response = await fetch("/api/admin/profile/request-email-otp", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: createCsrfHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           currentPassword: emailForm.currentPassword,
           newEmail: emailForm.newEmail,
@@ -92,7 +93,7 @@ export default function ProfilePage() {
     try {
       const response = await fetch("/api/admin/profile/verify-email-otp", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: createCsrfHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           newEmail: emailForm.newEmail,
           otp: emailForm.otp,

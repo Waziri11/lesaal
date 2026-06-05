@@ -1,18 +1,75 @@
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
+import { validateAdminMutationRequest } from "../../../../lib/request-security";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const EXTENSION_TO_MIME = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+};
+const MIME_TO_EXTENSION = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+};
 
 function sanitizeFilename(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
+function detectMimeTypeFromMagic(buffer) {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "image/jpeg";
+  }
+
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+
+  if (
+    buffer.length >= 12 &&
+    buffer.toString("ascii", 0, 4) === "RIFF" &&
+    buffer.toString("ascii", 8, 12) === "WEBP"
+  ) {
+    return "image/webp";
+  }
+
+  if (buffer.length >= 6) {
+    const signature = buffer.toString("ascii", 0, 6);
+    if (signature === "GIF87a" || signature === "GIF89a") {
+      return "image/gif";
+    }
+  }
+
+  return "";
+}
+
 export async function POST(request) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     const admin = await getAdminFromApiRequest(request);
 
     if (!admin) {
@@ -36,10 +93,22 @@ export async function POST(request) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const detectedMimeType = detectMimeTypeFromMagic(buffer);
+    const cleanedOriginalFilename = sanitizeFilename(file.name || "upload");
+    const extension = path.extname(cleanedOriginalFilename).toLowerCase();
+    const extensionMimeType = EXTENSION_TO_MIME[extension];
 
-    const timestamp = Date.now();
-    const cleaned = sanitizeFilename(file.name);
-    const filename = `${timestamp}-${Math.random().toString(36).slice(2, 8)}-${cleaned}`;
+    if (!detectedMimeType || !extensionMimeType || detectedMimeType !== extensionMimeType) {
+      return NextResponse.json({ error: "File type validation failed." }, { status: 400 });
+    }
+
+    if (file.type && file.type !== detectedMimeType) {
+      return NextResponse.json({ error: "File MIME type mismatch." }, { status: 400 });
+    }
+
+    const generatedExtension = MIME_TO_EXTENSION[detectedMimeType];
+    const randomPart = crypto.randomBytes(16).toString("hex");
+    const filename = `${Date.now()}-${randomPart}${generatedExtension}`;
     const uploadDir = path.join(process.cwd(), "public", "uploads");
     const filePath = path.join(uploadDir, filename);
 

@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
+import { OTP_MAX_ATTEMPTS } from "../../../../../lib/constants";
 import { getAdminFromApiRequest } from "../../../../../lib/auth";
 import { prisma } from "../../../../../lib/prisma";
 import { hashToken } from "../../../../../lib/security";
+import { consumeRateLimit } from "../../../../../lib/rate-limit";
+import { getClientIpAddress } from "../../../../../lib/request-utils";
+import { createRateLimitResponse, validateAdminMutationRequest } from "../../../../../lib/request-security";
+import { getSecurityConfig } from "../../../../../lib/security-config";
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -9,6 +14,11 @@ function isValidEmail(email) {
 
 export async function POST(request) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     const admin = await getAdminFromApiRequest(request);
 
     if (!admin) {
@@ -25,6 +35,18 @@ export async function POST(request) {
 
     if (!isValidEmail(newEmail)) {
       return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 });
+    }
+
+    const clientIp = getClientIpAddress(request);
+    const { rateLimitWindowMinutes } = getSecurityConfig();
+    const verifyRateLimit = await consumeRateLimit({
+      key: `admin-otp-verify:${admin.id}:${newEmail}:${clientIp}`,
+      limit: OTP_MAX_ATTEMPTS,
+      windowMs: rateLimitWindowMinutes * 60 * 1000,
+    });
+
+    if (!verifyRateLimit.allowed) {
+      return createRateLimitResponse("Too many OTP verification attempts. Please try again later.", verifyRateLimit.retryAfterSeconds);
     }
 
     const code = await prisma.emailOtpCode.findFirst({
@@ -80,6 +102,9 @@ export async function POST(request) {
       prisma.adminUser.update({
         where: { id: admin.id },
         data: { email: newEmail },
+      }),
+      prisma.adminSession.deleteMany({
+        where: { adminId: admin.id },
       }),
       prisma.emailOtpCode.update({
         where: { id: code.id },

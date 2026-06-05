@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./login.module.css";
+import { createCsrfHeaders } from "../../../lib/csrf-client";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function AdminLoginPage() {
     try {
       const response = await fetch("/api/admin/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: createCsrfHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ email, password }),
       });
 

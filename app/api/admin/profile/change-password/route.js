@@ -2,11 +2,17 @@ import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../../lib/auth";
 import { prisma } from "../../../../../lib/prisma";
 import { hashPassword, verifyPassword } from "../../../../../lib/security";
+import { validateAdminMutationRequest } from "../../../../../lib/request-security";
 
 const MIN_PASSWORD_LENGTH = 8;
 
 export async function POST(request) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     const admin = await getAdminFromApiRequest(request);
 
     if (!admin) {
@@ -45,6 +51,10 @@ export async function POST(request) {
     await prisma.adminUser.update({
       where: { id: admin.id },
       data: { passwordHash },
+    });
+
+    await prisma.adminSession.deleteMany({
+      where: { adminId: admin.id },
     });
 
     return NextResponse.json({ success: true });

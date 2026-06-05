@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CampaignResponseForm from "../../../components/CampaignResponseForm";
 import { getCampaignBySlugForPublic, isCampaignTableMissingError } from "../../../lib/campaigns";
+import { getSecurityConfig } from "../../../lib/security-config";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,7 @@ export async function generateMetadata({ params }) {
 export default async function CampaignDetailPage({ params }) {
   const slug = String(params?.slug || "");
   const campaign = await loadCampaign(slug);
+  const { turnstileSiteKey } = getSecurityConfig();
 
   if (!campaign) {
     notFound();
@@ -63,7 +65,7 @@ export default async function CampaignDetailPage({ params }) {
           {campaign.imageUrl ? <img src={campaign.imageUrl} alt={campaign.title} /> : <div className="lp-image-placeholder">Campaign image</div>}
         </article>
 
-        <CampaignResponseForm campaign={campaign} />
+        <CampaignResponseForm campaign={campaign} turnstileSiteKey={turnstileSiteKey} />
       </section>
     </div>
   );

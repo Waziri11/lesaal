@@ -106,3 +106,8 @@ export type EmailOtpCode = Prisma.EmailOtpCodeModel
  * 
  */
 export type MediaAsset = Prisma.MediaAssetModel
+/**
+ * Model RateLimitEntry
+ * 
+ */
+export type RateLimitEntry = Prisma.RateLimitEntryModel

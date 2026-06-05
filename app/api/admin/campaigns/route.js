@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../lib/auth";
 import { createCampaign, getAdminCampaigns, isCampaignTableMissingError } from "../../../../lib/campaigns";
+import { validateAdminMutationRequest } from "../../../../lib/request-security";
 
 export async function GET(request) {
   try {
@@ -25,6 +26,11 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
     const admin = await getAdminFromApiRequest(request);
 
     if (!admin) {

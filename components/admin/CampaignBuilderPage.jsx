@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -127,6 +127,18 @@ function getQuestionTypeLabel(type) {
   }
 }
 
+function getImageName(imageUrl) {
+  if (!imageUrl) return "";
+
+  try {
+    const normalized = imageUrl.split("?")[0];
+    const parts = normalized.split("/");
+    return parts[parts.length - 1] || "campaign-image";
+  } catch {
+    return "campaign-image";
+  }
+}
+
 function renderQuestionPreview(question) {
   const placeholder = question?.placeholder || (question?.type === "textarea" ? "Long answer text" : "Short answer text");
 
@@ -154,11 +166,14 @@ function renderQuestionPreview(question) {
 export default function CampaignBuilderPage({ campaignId = null }) {
   const router = useRouter();
   const isEditing = Boolean(campaignId);
+  const imageInputRef = useRef(null);
 
   const [draft, setDraft] = useState(createEmptyCampaignDraft());
   const [editorStep, setEditorStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [loadingCampaign, setLoadingCampaign] = useState(isEditing);
   const [notFound, setNotFound] = useState(false);
   const [statusError, setStatusError] = useState("");
@@ -355,9 +370,14 @@ export default function CampaignBuilderPage({ campaignId = null }) {
 
   async function handleImageUpload(file) {
     if (!(file instanceof File)) return;
+    if (!file.type?.startsWith("image/")) {
+      setStatusError("Only image files can be uploaded.");
+      return;
+    }
 
     setStatusError("");
     setStatusSuccess("");
+    setIsUploadingImage(true);
 
     try {
       const formData = new FormData();
@@ -380,7 +400,31 @@ export default function CampaignBuilderPage({ campaignId = null }) {
       setStatusSuccess("Campaign image uploaded.");
     } catch (error) {
       setStatusError(error.message || "Image upload failed.");
+    } finally {
+      setIsUploadingImage(false);
     }
+  }
+
+  function handleImageDrop(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDraggingImage(false);
+    handleImageUpload(event.dataTransfer?.files?.[0]);
+  }
+
+  function handleImageInputChange(event) {
+    const file = event.target.files?.[0];
+    handleImageUpload(file);
+    event.target.value = "";
+  }
+
+  function clearImage() {
+    setDraft((current) => ({
+      ...current,
+      imageUrl: "",
+    }));
+    setStatusSuccess("Campaign image removed.");
+    setStatusError("");
   }
 
   async function saveCampaign(event) {
@@ -588,32 +632,74 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                       />
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label className="text-slate-700" htmlFor="campaign-image-url">
-                          Campaign Image URL
-                        </Label>
-                        <Input
-                          id="campaign-image-url"
-                          className={LIGHT_INPUT_CLASS}
-                          value={draft.imageUrl}
-                          onChange={(event) => handleDraftValue("imageUrl", event.target.value)}
-                          placeholder="/uploads/campaign-image.webp"
-                        />
+                    <div className="space-y-2">
+                      <Label className="text-slate-700">Campaign Image</Label>
+                      <input
+                        ref={imageInputRef}
+                        className="hidden"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageInputChange}
+                      />
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        className={`rounded-xl border-2 border-dashed p-6 text-center transition ${
+                          isDraggingImage
+                            ? "border-violet-500 bg-violet-50"
+                            : "border-slate-300 bg-slate-50 hover:border-violet-400 hover:bg-violet-50/60"
+                        }`}
+                        onClick={() => imageInputRef.current?.click()}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            imageInputRef.current?.click();
+                          }
+                        }}
+                        onDragEnter={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setIsDraggingImage(true);
+                        }}
+                        onDragOver={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setIsDraggingImage(true);
+                        }}
+                        onDragLeave={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setIsDraggingImage(false);
+                        }}
+                        onDrop={handleImageDrop}
+                      >
+                        <p className="text-sm font-semibold text-slate-700">
+                          {isUploadingImage ? "Uploading image..." : "Drag and drop image here"}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">or click to browse files</p>
+                        <p className="mt-2 text-xs text-slate-400">PNG, JPG, WEBP supported</p>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-slate-700" htmlFor="campaign-image-upload">
-                          Upload Campaign Image
-                        </Label>
-                        <Input
-                          id="campaign-image-upload"
-                          className={LIGHT_INPUT_CLASS}
-                          type="file"
-                          accept="image/*"
-                          onChange={(event) => handleImageUpload(event.target.files?.[0])}
-                        />
-                      </div>
+                      {draft.imageUrl ? (
+                        <div className="rounded-xl border border-slate-200 bg-white p-3">
+                          <p className="text-xs text-slate-500">Uploaded image</p>
+                          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-slate-700">{getImageName(draft.imageUrl)}</p>
+                              <p className="truncate text-xs text-slate-500">{draft.imageUrl}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button type="button" size="sm" variant="outline" onClick={() => imageInputRef.current?.click()}>
+                                Replace
+                              </Button>
+                              <Button type="button" size="sm" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50" onClick={clearImage}>
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                          <img src={draft.imageUrl} alt="Campaign" className="mt-3 h-32 w-full rounded-md border border-slate-200 object-cover" />
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2">

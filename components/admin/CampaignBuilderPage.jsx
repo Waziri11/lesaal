@@ -2,6 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowUpDown } from "lucide-react";
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import PageState from "../shared/PageState";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -11,6 +20,7 @@ import { DatePicker } from "../ui/date-picker";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Spinner } from "../ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Textarea } from "../ui/textarea";
 import { createCsrfHeaders } from "../../lib/csrf-client";
@@ -236,6 +246,52 @@ function getImageName(imageUrl) {
   }
 }
 
+function uploadImageFileWithProgress(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/admin/upload");
+
+    const headers = createCsrfHeaders();
+    for (const [name, value] of Object.entries(headers)) {
+      xhr.setRequestHeader(name, value);
+    }
+
+    xhr.upload.addEventListener("progress", (event) => {
+      if (!event.lengthComputable) {
+        return;
+      }
+
+      const nextProgress = Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100)));
+      onProgress(nextProgress);
+    });
+
+    xhr.addEventListener("error", () => {
+      reject(new Error("Network error while uploading image."));
+    });
+
+    xhr.addEventListener("load", () => {
+      let payload = null;
+
+      try {
+        payload = xhr.responseText ? JSON.parse(xhr.responseText) : null;
+      } catch {
+        payload = null;
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(payload || {});
+        return;
+      }
+
+      reject(new Error(payload?.error || "Image upload failed."));
+    });
+
+    const formData = new FormData();
+    formData.append("file", file);
+    xhr.send(formData);
+  });
+}
+
 function renderQuestionPreview(question) {
   const placeholder = question?.placeholder || (question?.type === "textarea" ? "Long answer text" : "Short answer text");
 
@@ -271,6 +327,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
   const [deleting, setDeleting] = useState(false);
   const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUploadProgress, setImageUploadProgress] = useState(0);
   const [loadingCampaign, setLoadingCampaign] = useState(isEditing);
   const [loadingResponses, setLoadingResponses] = useState(isEditing);
   const [loadingMoreResponses, setLoadingMoreResponses] = useState(false);
@@ -282,11 +339,73 @@ export default function CampaignBuilderPage({ campaignId = null }) {
   const [responseQuestions, setResponseQuestions] = useState([]);
   const [responsesNextCursor, setResponsesNextCursor] = useState(null);
   const [responsesHasMore, setResponsesHasMore] = useState(false);
+  const [responsesGlobalFilter, setResponsesGlobalFilter] = useState("");
+  const [responsesSorting, setResponsesSorting] = useState([{ id: "submittedAt", desc: true }]);
 
   const flatQuestionCount = useMemo(
     () => draft.sections.reduce((total, section) => total + (Array.isArray(section.questions) ? section.questions.length : 0), 0),
     [draft.sections]
   );
+
+  const responseColumns = useMemo(() => {
+    return [
+      {
+        id: "submittedAt",
+        accessorFn: (row) => Number(new Date(row.submittedAt || 0)),
+        header: ({ column }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            className="-ml-3 h-8 px-3"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Submitted At
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => formatDateTime(row.original.submittedAt),
+      },
+      ...responseQuestions.map((question) => ({
+        id: question.key,
+        accessorFn: (row) => String(row.data?.[question.key] || "-"),
+        header: question.label,
+        cell: ({ row }) => String(row.original.data?.[question.key] || "-"),
+      })),
+    ];
+  }, [responseQuestions]);
+
+  const responsesTable = useReactTable({
+    data: responses,
+    columns: responseColumns,
+    state: {
+      sorting: responsesSorting,
+      globalFilter: responsesGlobalFilter,
+    },
+    onSortingChange: setResponsesSorting,
+    onGlobalFilterChange: setResponsesGlobalFilter,
+    globalFilterFn: (row, _, filterValue) => {
+      const query = String(filterValue || "").trim().toLowerCase();
+      if (!query) return true;
+
+      const searchable = [
+        formatDateTime(row.original.submittedAt),
+        ...responseQuestions.map((question) => String(row.original.data?.[question.key] || "")),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return searchable.includes(query);
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+  });
 
   async function fetchResponsePage(cursor = null) {
     const query = new URLSearchParams({ limit: String(RESPONSE_PAGE_LIMIT) });
@@ -356,6 +475,8 @@ export default function CampaignBuilderPage({ campaignId = null }) {
       setLoadingMoreResponses(false);
       setResponsesHasMore(false);
       setResponsesNextCursor(null);
+      setResponsesGlobalFilter("");
+      setResponsesSorting([{ id: "submittedAt", desc: true }]);
       return;
     }
 
@@ -679,21 +800,10 @@ export default function CampaignBuilderPage({ campaignId = null }) {
     setStatusError("");
     setStatusSuccess("");
     setIsUploadingImage(true);
+    setImageUploadProgress(0);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/admin/upload", {
-        method: "POST",
-        headers: createCsrfHeaders(),
-        body: formData,
-      });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error || "Image upload failed.");
-      }
+      const payload = await uploadImageFileWithProgress(file, setImageUploadProgress);
 
       setDraft((current) => ({
         ...current,
@@ -704,6 +814,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
       setStatusError(error.message || "Image upload failed.");
     } finally {
       setIsUploadingImage(false);
+      setImageUploadProgress(0);
     }
   }
 
@@ -729,9 +840,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
     setStatusError("");
   }
 
-  async function saveCampaign(event) {
-    event.preventDefault();
-
+  async function saveCampaign() {
     if (editorStep === 1) {
       goToQuestionsStep();
       return;
@@ -844,6 +953,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
             <Button
               type="button"
               variant="outline"
+              disabled={isUploadingImage}
               className={`rounded-lg border px-4 py-3 text-left text-sm transition ${
                 editorStep === 2
                   ? "border-[color:var(--ui-primary)] bg-[color:var(--ui-primary-soft)] text-[color:var(--ui-primary)]"
@@ -879,7 +989,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
       ) : null}
 
       {!loadingCampaign && !notFound ? (
-        <form className="space-y-4" onSubmit={saveCampaign}>
+        <div className="space-y-4">
           <div className="rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-4 md:p-6">
             {editorStep === 1 ? (
               <div className="mx-auto w-full max-w-3xl space-y-4">
@@ -959,13 +1069,18 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                       <div
                         role="button"
                         tabIndex={0}
+                        aria-disabled={isUploadingImage}
                         className={`rounded-xl border-2 border-dashed p-10 text-center transition ${
                           isDraggingImage
                             ? "border-[color:var(--ui-primary)] bg-[color:var(--ui-primary-soft)]"
                             : "border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] hover:border-[color:var(--ui-primary)] hover:bg-[color:var(--ui-primary-soft)]"
                         }`}
-                        onClick={() => imageInputRef.current?.click()}
+                        onClick={() => {
+                          if (isUploadingImage) return;
+                          imageInputRef.current?.click();
+                        }}
                         onKeyDown={(event) => {
+                          if (isUploadingImage) return;
                           if (event.key === "Enter" || event.key === " ") {
                             event.preventDefault();
                             imageInputRef.current?.click();
@@ -993,6 +1108,20 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                         </p>
                         <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">or click to browse files</p>
                         <p className="mt-2 text-xs text-[color:var(--ui-muted-foreground)]">PNG, JPG, WEBP supported</p>
+                        {isUploadingImage ? (
+                          <div className="mx-auto mt-4 w-full max-w-sm space-y-2">
+                            <div className="flex items-center justify-between text-xs text-[color:var(--ui-muted-foreground)]">
+                              <span>Upload progress</span>
+                              <span>{imageUploadProgress}%</span>
+                            </div>
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-[color:var(--ui-border)]/60">
+                              <div
+                                className="h-full rounded-full bg-[color:var(--ui-primary)] transition-[width] duration-200"
+                                style={{ width: `${imageUploadProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
 
                       {draft.imageUrl ? (
@@ -1004,7 +1133,13 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                               <p className="truncate text-xs text-[color:var(--ui-muted-foreground)]">{draft.imageUrl}</p>
                             </div>
                             <div className="flex gap-2">
-                              <Button type="button" size="sm" variant="outline" onClick={() => imageInputRef.current?.click()}>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={isUploadingImage}
+                                onClick={() => imageInputRef.current?.click()}
+                              >
                                 Replace
                               </Button>
                               <Button
@@ -1013,6 +1148,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                                 variant="outline"
                                 className="border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
                                 onClick={clearImage}
+                                disabled={isUploadingImage}
                               >
                                 Remove
                               </Button>
@@ -1332,6 +1468,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                 <div className="flex items-center gap-2">
                   {isEditing ? (
                     <Button type="button" variant="destructive" onClick={handleDeleteCampaign} disabled={deleting}>
+                      {deleting ? <Spinner className="mr-2 h-4 w-4" /> : null}
                       {deleting ? "Deleting..." : "Delete Campaign"}
                     </Button>
                   ) : null}
@@ -1347,11 +1484,13 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                     </Button>
                   ) : null}
                   {editorStep === 1 ? (
-                    <Button type="button" onClick={goToQuestionsStep}>
-                      Continue to Form Builder
+                    <Button type="button" onClick={goToQuestionsStep} disabled={isUploadingImage}>
+                      {isUploadingImage ? <Spinner className="mr-2 h-4 w-4" /> : null}
+                      {isUploadingImage ? "Uploading Image..." : "Continue to Form Builder"}
                     </Button>
                   ) : (
-                    <Button type="submit" disabled={saving}>
+                    <Button type="button" disabled={saving} onClick={saveCampaign}>
+                      {saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
                       {saving ? "Saving..." : isEditing ? "Update Campaign" : "Create Campaign"}
                     </Button>
                   )}
@@ -1368,7 +1507,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
               {statusSuccess ? <p className="mt-3 text-sm text-[color:var(--ui-success)]">{statusSuccess}</p> : null}
             </CardContent>
           </Card>
-        </form>
+        </div>
       ) : null}
 
       {isEditing && !loadingCampaign && !notFound ? (
@@ -1392,30 +1531,81 @@ export default function CampaignBuilderPage({ campaignId = null }) {
               resourceLabel="campaign responses"
               errorMessage={responsesError}
             >
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Submitted At</TableHead>
-                    {responseQuestions.map((question) => (
-                      <TableHead key={question.id || question.key}>{question.label}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {responses.map((response) => (
-                    <TableRow key={response.id}>
-                      <TableCell>{formatDateTime(response.submittedAt)}</TableCell>
-                      {responseQuestions.map((question) => (
-                        <TableCell key={`${response.id}_${question.key}`}>{String(response.data?.[question.key] || "-")}</TableCell>
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <Input
+                    value={responsesGlobalFilter}
+                    onChange={(event) => setResponsesGlobalFilter(event.target.value)}
+                    placeholder="Search responses"
+                    className="w-full max-w-md"
+                  />
+                  <Badge variant="secondary">{responsesTable.getFilteredRowModel().rows.length} matching</Badge>
+                </div>
+
+                <div className="overflow-hidden rounded-md border border-[color:var(--ui-border)]">
+                  <Table>
+                    <TableHeader>
+                      {responsesTable.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => (
+                            <TableHead key={header.id}>
+                              {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                            </TableHead>
+                          ))}
+                        </TableRow>
                       ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {responsesTable.getRowModel().rows.length ? (
+                        responsesTable.getRowModel().rows.map((row) => (
+                          <TableRow key={row.id}>
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={responseColumns.length} className="h-24 text-center text-[color:var(--ui-muted-foreground)]">
+                            No responses match the current search.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs text-[color:var(--ui-muted-foreground)]">
+                    Page {responsesTable.getState().pagination.pageIndex + 1} of {Math.max(1, responsesTable.getPageCount())}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => responsesTable.previousPage()}
+                      disabled={!responsesTable.getCanPreviousPage()}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => responsesTable.nextPage()}
+                      disabled={!responsesTable.getCanNextPage()}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              </div>
 
               {responsesHasMore ? (
                 <div className="mt-4 flex justify-center">
                   <Button type="button" variant="outline" onClick={handleLoadMoreResponses} disabled={loadingMoreResponses}>
+                    {loadingMoreResponses ? <Spinner className="mr-2 h-4 w-4" /> : null}
                     {loadingMoreResponses ? "Loading..." : "Load More Responses"}
                   </Button>
                 </div>

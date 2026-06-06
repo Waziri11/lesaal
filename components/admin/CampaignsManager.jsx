@@ -2,11 +2,22 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowUpDown } from "lucide-react";
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import PageState from "../shared/PageState";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Spinner } from "../ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { createCsrfHeaders } from "../../lib/csrf-client";
 
@@ -43,14 +54,14 @@ function getStatus(campaign) {
   const isExpired = deadline && !Number.isNaN(deadline.getTime()) && deadline.getTime() < Date.now();
 
   if (!campaign.isPublished) {
-    return { label: "Disabled", variant: "default" };
+    return { value: "disabled", label: "Disabled", variant: "default" };
   }
 
   if (isExpired) {
-    return { label: "Expired", variant: "secondary" };
+    return { value: "expired", label: "Expired", variant: "secondary" };
   }
 
-  return { label: "Active", variant: "success" };
+  return { value: "active", label: "Active", variant: "success" };
 }
 
 export default function CampaignsManager() {
@@ -59,9 +70,20 @@ export default function CampaignsManager() {
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
   const [campaignError, setCampaignError] = useState("");
   const [statusSuccess, setStatusSuccess] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
   const [updatingCampaignId, setUpdatingCampaignId] = useState(null);
   const [deletingCampaignId, setDeletingCampaignId] = useState(null);
+
+  const campaignsForTable = useMemo(() => {
+    return [...campaigns].sort((a, b) => {
+      const aTime = Number(new Date(a.updatedAt || a.createdAt || 0));
+      const bTime = Number(new Date(b.updatedAt || b.createdAt || 0));
+      return bTime - aTime;
+    });
+  }, [campaigns]);
 
   const campaignStats = useMemo(() => {
     const total = campaigns.length;
@@ -70,25 +92,6 @@ export default function CampaignsManager() {
     const responsesCount = campaigns.reduce((sum, campaign) => sum + Number(campaign.responseCount || 0), 0);
     return { total, active, disabled, responsesCount };
   }, [campaigns]);
-
-  const filteredCampaigns = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    const sorted = [...campaigns].sort((a, b) => {
-      const aTime = Number(new Date(a.updatedAt || a.createdAt || 0));
-      const bTime = Number(new Date(b.updatedAt || b.createdAt || 0));
-      return bTime - aTime;
-    });
-
-    if (!query) return sorted;
-
-    return sorted.filter((campaign) => {
-      const searchable = [campaign.title, campaign.slug, campaign.description, campaign.targetMarket]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return searchable.includes(query);
-    });
-  }, [campaigns, searchQuery]);
 
   async function loadCampaigns() {
     setLoadingCampaigns(true);
@@ -179,6 +182,162 @@ export default function CampaignsManager() {
     }
   }
 
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "title",
+        header: ({ column }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            className="-ml-3 h-8 px-3"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Campaign Title
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div className="space-y-0.5">
+            <p className="font-semibold">{row.original.title}</p>
+            <p className="text-xs text-[color:var(--ui-muted-foreground)]">/{row.original.slug}</p>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "targetMarket",
+        header: "Target Market",
+        cell: ({ row }) => row.original.targetMarket || "-",
+      },
+      {
+        id: "duration",
+        header: "Duration",
+        cell: ({ row }) => getDurationLabel(row.original),
+      },
+      {
+        accessorKey: "responseCount",
+        header: ({ column }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            className="-ml-3 h-8 px-3"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Responses
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => Number(row.original.responseCount || 0),
+      },
+      {
+        id: "status",
+        accessorFn: (row) => getStatus(row).value,
+        filterFn: (row, columnId, value) => {
+          const expected = String(value || "").trim().toLowerCase();
+          if (!expected) return true;
+          return String(row.getValue(columnId) || "").toLowerCase() === expected;
+        },
+        header: "Status",
+        cell: ({ row }) => {
+          const status = getStatus(row.original);
+          return <Badge variant={status.variant}>{status.label}</Badge>;
+        },
+      },
+      {
+        id: "actions",
+        header: () => <div className="text-right">Actions</div>,
+        enableSorting: false,
+        cell: ({ row }) => {
+          const campaign = row.original;
+          const isUpdating = updatingCampaignId === campaign.id;
+          const isDeleting = deletingCampaignId === campaign.id;
+
+          return (
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  router.push(`/admin/campaigns/${campaign.id}`);
+                }}
+              >
+                View
+              </Button>
+
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={isUpdating || isDeleting}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  toggleCampaignState(campaign);
+                }}
+              >
+                {isUpdating ? <Spinner className="mr-2 h-4 w-4" /> : null}
+                {isUpdating ? "Updating..." : campaign.isPublished ? "Disable" : "Enable"}
+              </Button>
+
+              <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                disabled={isDeleting || isUpdating}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  deleteCampaign(campaign);
+                }}
+              >
+                {isDeleting ? <Spinner className="mr-2 h-4 w-4" /> : null}
+                {isDeleting ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          );
+        },
+      },
+    ],
+    [deletingCampaignId, router, updatingCampaignId]
+  );
+
+  const table = useReactTable({
+    data: campaignsForTable,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, _, filterValue) => {
+      const query = String(filterValue || "").trim().toLowerCase();
+      if (!query) return true;
+
+      const campaign = row.original;
+      const searchable = [campaign.title, campaign.slug, campaign.description, campaign.targetMarket]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchable.includes(query);
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+  });
+
+  const hasCampaigns = campaigns.length > 0;
+  const filteredRowsCount = table.getFilteredRowModel().rows.length;
+
   return (
     <div className="space-y-6">
       <Card>
@@ -216,26 +375,15 @@ export default function CampaignsManager() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <CardTitle className="text-xl">Campaign Library</CardTitle>
-              <CardDescription>Click a row to open campaign details and responses.</CardDescription>
+              <CardDescription>Sort, filter, and search campaigns, then open details from the table.</CardDescription>
             </div>
             <Button size="sm" onClick={() => router.push("/admin/campaigns/new")}>+ New Campaign</Button>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="w-full max-w-md">
-              <Input
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search campaigns by title, target market, or description"
-              />
-            </div>
-            <Badge variant="secondary">{filteredCampaigns.length} listed</Badge>
           </div>
         </CardHeader>
 
         <CardContent className="pt-0">
           <PageState
-            status={loadingCampaigns ? "loading" : campaignError ? "error" : !campaigns.length ? "empty" : "loaded"}
+            status={loadingCampaigns ? "loading" : campaignError ? "error" : !hasCampaigns ? "empty" : "loaded"}
             resourceLabel="campaigns"
             errorMessage={campaignError}
             onRetry={loadCampaigns}
@@ -243,89 +391,91 @@ export default function CampaignsManager() {
               <Button type="button" size="sm" onClick={() => router.push("/admin/campaigns/new")}>Add Campaign</Button>
             }
           >
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Campaign Title</TableHead>
-                    <TableHead>Target Market</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Responses</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCampaigns.map((campaign) => {
-                    const status = getStatus(campaign);
-                    const isUpdating = updatingCampaignId === campaign.id;
-                    const isDeleting = deletingCampaignId === campaign.id;
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <Input
+                  value={globalFilter}
+                  onChange={(event) => setGlobalFilter(event.target.value)}
+                  placeholder="Search by title, slug, market, or description"
+                  className="w-full max-w-md"
+                />
 
-                    return (
-                      <TableRow key={campaign.id} className="cursor-pointer" onClick={() => router.push(`/admin/campaigns/${campaign.id}`)}>
-                        <TableCell>
-                          <div>
-                            <p className="font-semibold">{campaign.title}</p>
-                            <p className="text-xs text-[color:var(--ui-muted-foreground)]">/{campaign.slug}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>{campaign.targetMarket || "-"}</TableCell>
-                        <TableCell>{getDurationLabel(campaign)}</TableCell>
-                        <TableCell>{campaign.responseCount || 0}</TableCell>
-                        <TableCell>
-                          <Badge variant={status.variant}>{status.label}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex flex-wrap justify-end gap-2">
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                router.push(`/admin/campaigns/${campaign.id}`);
-                              }}
-                            >
-                              View
-                            </Button>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={statusFilter}
+                    onValueChange={(value) => {
+                      setStatusFilter(value);
+                      table.getColumn("status")?.setFilterValue(value === "all" ? undefined : value);
+                    }}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All statuses</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="disabled">Disabled</SelectItem>
+                      <SelectItem value="expired">Expired</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              disabled={isUpdating || isDeleting}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                toggleCampaignState(campaign);
-                              }}
-                            >
-                              {isUpdating ? "Updating..." : campaign.isPublished ? "Disable" : "Enable"}
-                            </Button>
+                  <Badge variant="secondary">{filteredRowsCount} listed</Badge>
+                </div>
+              </div>
 
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="destructive"
-                              disabled={isDeleting || isUpdating}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                deleteCampaign(campaign);
-                              }}
-                            >
-                              {isDeleting ? "Deleting..." : "Delete"}
-                            </Button>
-                          </div>
+              <div className="overflow-hidden rounded-md border border-[color:var(--ui-border)]">
+                <Table>
+                  <TableHeader>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <TableHead key={header.id}>
+                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableHeader>
+                  <TableBody>
+                    {table.getRowModel().rows.length ? (
+                      table.getRowModel().rows.map((row) => (
+                        <TableRow
+                          key={row.id}
+                          className="cursor-pointer"
+                          onClick={() => router.push(`/admin/campaigns/${row.original.id}`)}
+                        >
+                          {row.getVisibleCells().map((cell) => (
+                            <TableCell key={cell.id}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="h-24 text-center text-[color:var(--ui-muted-foreground)]">
+                          No campaigns match your filters.
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
 
-              {!filteredCampaigns.length ? (
-                <p className="mt-3 text-sm text-[color:var(--ui-muted-foreground)]">No campaigns matched that search.</p>
-              ) : null}
-            </>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs text-[color:var(--ui-muted-foreground)]">
+                  Page {table.getState().pagination.pageIndex + 1} of {Math.max(1, table.getPageCount())}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                    Previous
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </div>
           </PageState>
         </CardContent>
       </Card>

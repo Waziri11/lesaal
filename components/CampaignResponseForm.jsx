@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import PageState from "./shared/PageState";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Spinner } from "./ui/spinner";
+import { Textarea } from "./ui/textarea";
 
 function toOptionsArray(value) {
   return Array.isArray(value) ? value : [];
@@ -37,12 +45,7 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
     let isCancelled = false;
 
     function renderTurnstile() {
-      if (
-        isCancelled ||
-        !window.turnstile ||
-        !captchaRef.current ||
-        widgetIdRef.current !== null
-      ) {
+      if (isCancelled || !window.turnstile || !captchaRef.current || widgetIdRef.current !== null) {
         return;
       }
 
@@ -143,103 +146,110 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
   }
 
   if (!questions.length) {
-    return (
-      <section className="campaign-form-card">
-        <h2>Form unavailable</h2>
-        <p>This campaign has no visible questions yet. Please check back later.</p>
-      </section>
-    );
+    return <PageState status="empty" resourceLabel="campaign form fields" />;
   }
 
   return (
-    <section className="campaign-form-card">
-      <h2>{campaign.title}</h2>
-      <p>{campaign.description}</p>
+    <Card>
+      <CardHeader>
+        <CardTitle>{campaign.title}</CardTitle>
+        <CardDescription>{campaign.description}</CardDescription>
+      </CardHeader>
 
-      <form className="campaign-form-grid" onSubmit={handleSubmit}>
-        <div style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}>
-          <label htmlFor="website-field">
-            Website
-            <input
-              id="website-field"
-              type="text"
-              name="website"
-              tabIndex={-1}
-              autoComplete="off"
-              value={honeypotWebsite}
-              onChange={(event) => setHoneypotWebsite(event.target.value)}
-            />
-          </label>
-        </div>
+      <CardContent>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden">
+            <label htmlFor="website-field">
+              Website
+              <Input
+                id="website-field"
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypotWebsite}
+                onChange={(event) => setHoneypotWebsite(event.target.value)}
+              />
+            </label>
+          </div>
 
-        {questions.map((question) => {
-          const value = formData[question.key] || "";
-          const options = toOptionsArray(question.options);
+          {questions.map((question) => {
+            const value = formData[question.key] || "";
+            const options = toOptionsArray(question.options);
+            const key = question.id || question.key;
 
-          if (question.type === "textarea") {
+            if (question.type === "textarea") {
+              return (
+                <div key={key} className="space-y-2">
+                  <Label htmlFor={key}>{question.label}</Label>
+                  <Textarea
+                    id={key}
+                    value={value}
+                    required={question.required}
+                    placeholder={question.placeholder || ""}
+                    onChange={(event) => setValue(question.key, event.target.value)}
+                  />
+                </div>
+              );
+            }
+
+            if (question.type === "select") {
+              return (
+                <div key={key} className="space-y-2">
+                  <Label>{question.label}</Label>
+                  <Select value={value} onValueChange={(nextValue) => setValue(question.key, nextValue)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {options.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            }
+
             return (
-              <label key={question.id || question.key}>
-                {question.label}
-                <textarea
+              <div key={key} className="space-y-2">
+                <Label htmlFor={key}>{question.label}</Label>
+                <Input
+                  id={key}
+                  type={question.type || "text"}
                   value={value}
                   required={question.required}
                   placeholder={question.placeholder || ""}
                   onChange={(event) => setValue(question.key, event.target.value)}
                 />
-              </label>
+              </div>
             );
-          }
+          })}
 
-          if (question.type === "select") {
-            return (
-              <label key={question.id || question.key}>
-                {question.label}
-                <select
-                  value={value}
-                  required={question.required}
-                  onChange={(event) => setValue(question.key, event.target.value)}
-                >
-                  <option value="">Select an option</option>
-                  {options.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            );
-          }
+          {turnstileSiteKey ? (
+            <div className="space-y-2 rounded-lg border border-[color:var(--ui-border)] p-3">
+              <div ref={captchaRef} />
+              {!captchaReady ? (
+                <p className="flex items-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
+                  <Spinner />
+                  Loading captcha challenge...
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-sm text-[color:var(--ui-destructive)]">Captcha is not configured.</p>
+          )}
 
-          return (
-            <label key={question.id || question.key}>
-              {question.label}
-              <input
-                type={question.type || "text"}
-                value={value}
-                required={question.required}
-                placeholder={question.placeholder || ""}
-                onChange={(event) => setValue(question.key, event.target.value)}
-              />
-            </label>
-          );
-        })}
+          {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
+          {success ? <p className="text-sm text-[color:var(--ui-success)]">{success}</p> : null}
 
-        {turnstileSiteKey ? (
-          <div className="campaign-turnstile-block">
-            <div ref={captchaRef} />
-            {!captchaReady ? <p className="text-sm text-slate-300">Loading captcha challenge...</p> : null}
-          </div>
-        ) : (
-          <p className="form-error">Captcha is not configured.</p>
-        )}
-
-        {error ? <p className="form-error">{error}</p> : null}
-        {success ? <p className="form-success">{success}</p> : null}
-
-        <button type="submit" className="lp-btn lp-btn-primary" disabled={submitting}>
-          {submitting ? "Submitting..." : "Submit Response"}
-        </button>
-      </form>
-    </section>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit Response"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

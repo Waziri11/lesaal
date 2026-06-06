@@ -2,6 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import PageState from "../../../../components/shared/PageState";
+import { Button } from "../../../../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
+import { Input } from "../../../../components/ui/input";
+import { Label } from "../../../../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
+import { Textarea } from "../../../../components/ui/textarea";
 import { createCsrfHeaders } from "../../../../lib/csrf-client";
 
 const FALLBACK_GENDER_OPTIONS = [
@@ -49,6 +56,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setupMode = searchParams.get("setup") === "1";
+
+  const [reloadKey, setReloadKey] = useState(0);
 
   const [profileForm, setProfileForm] = useState(EMPTY_PROFILE_FORM);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -112,7 +121,11 @@ export default function ProfilePage() {
           ward: payload.profile.ward || "",
         });
         setLocationHierarchy(Array.isArray(payload.locationHierarchy) ? payload.locationHierarchy : []);
-        setGenderOptions(Array.isArray(payload.genderOptions) && payload.genderOptions.length > 0 ? payload.genderOptions : FALLBACK_GENDER_OPTIONS);
+        setGenderOptions(
+          Array.isArray(payload.genderOptions) && payload.genderOptions.length > 0
+            ? payload.genderOptions
+            : FALLBACK_GENDER_OPTIONS
+        );
       } catch (requestError) {
         if (isMounted) {
           setProfileError(requestError.message || "Unable to load profile.");
@@ -129,7 +142,7 @@ export default function ProfilePage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   function handleProfileChange(field, value) {
     setProfileMessage("");
@@ -313,263 +326,298 @@ export default function ProfilePage() {
     }
   }
 
+  if (profileLoading) {
+    return <PageState status="loading" resourceLabel="profile" />;
+  }
+
+  if (profileError) {
+    return (
+      <PageState
+        status="error"
+        errorMessage={profileError}
+        onRetry={() => setReloadKey((current) => current + 1)}
+      />
+    );
+  }
+
   return (
-    <section className="profile-shell">
-      <article className="admin-page-card">
-        <h1>{setupMode ? "Complete Your Profile" : "Profile"}</h1>
-        <p>
-          {setupMode
-            ? "Please finish your details before continuing to the dashboard."
-            : "Manage your personal details and security settings."}
-        </p>
-        {profileMessage ? <p className="form-success">{profileMessage}</p> : null}
-        {profileError ? <p className="form-error">{profileError}</p> : null}
-      </article>
+    <section className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>{setupMode ? "Complete Your Profile" : "Profile"}</CardTitle>
+          <CardDescription>
+            {setupMode
+              ? "Please finish your details before continuing to the dashboard."
+              : "Manage your personal details and security settings."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {profileMessage ? <p className="text-sm text-[color:var(--ui-success)]">{profileMessage}</p> : null}
+        </CardContent>
+      </Card>
 
-      <article className="admin-page-card">
-        <h2>Personal Information</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>Personal Information</CardTitle>
+        </CardHeader>
 
-        {profileLoading ? (
-          <p>Loading profile details...</p>
-        ) : (
-          <form onSubmit={handleSaveProfile} className="profile-form-grid">
-            <label>
-              First Name
-              <input
-                type="text"
-                value={profileForm.firstName}
-                onChange={(event) => handleProfileChange("firstName", event.target.value)}
-                required
-              />
-            </label>
+        <CardContent>
+          <form onSubmit={handleSaveProfile} className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="first-name">First Name</Label>
+              <Input id="first-name" type="text" value={profileForm.firstName} onChange={(event) => handleProfileChange("firstName", event.target.value)} required />
+            </div>
 
-            <label>
-              Last Name
-              <input
-                type="text"
-                value={profileForm.lastName}
-                onChange={(event) => handleProfileChange("lastName", event.target.value)}
-                required
-              />
-            </label>
+            <div className="space-y-2">
+              <Label htmlFor="last-name">Last Name</Label>
+              <Input id="last-name" type="text" value={profileForm.lastName} onChange={(event) => handleProfileChange("lastName", event.target.value)} required />
+            </div>
 
-            <label>
-              Birth Date
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="birth-date">Birth Date</Label>
+              <Input
+                id="birth-date"
                 type="date"
                 value={profileForm.birthDate}
                 max={new Date().toISOString().slice(0, 10)}
                 onChange={(event) => handleProfileChange("birthDate", event.target.value)}
                 required
               />
-            </label>
+            </div>
 
-            <label>
-              Age (auto-calculated)
-              <input type="text" value={age === null ? "" : String(age)} readOnly placeholder="Will auto-fill from birth date" />
-            </label>
+            <div className="space-y-2">
+              <Label htmlFor="age">Age (auto-calculated)</Label>
+              <Input id="age" type="text" value={age === null ? "" : String(age)} readOnly placeholder="Will auto-fill from birth date" />
+            </div>
 
-            <label>
-              Company Name
-              <input
-                type="text"
-                value={profileForm.companyName}
-                onChange={(event) => handleProfileChange("companyName", event.target.value)}
-                required
-              />
-            </label>
+            <div className="space-y-2">
+              <Label htmlFor="company-name">Company Name</Label>
+              <Input id="company-name" type="text" value={profileForm.companyName} onChange={(event) => handleProfileChange("companyName", event.target.value)} required />
+            </div>
 
-            <label>
-              Gender
-              <select
-                value={profileForm.gender}
-                onChange={(event) => handleProfileChange("gender", event.target.value)}
-                required
-              >
-                <option value="">Select gender</option>
-                {genderOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="space-y-2">
+              <Label>Gender</Label>
+              <Select value={profileForm.gender || "__empty"} onValueChange={(value) => handleProfileChange("gender", value === "__empty" ? "" : value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__empty">Select gender</SelectItem>
+                  {genderOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <label style={{ gridColumn: "1 / -1" }}>
-              Company Description
-              <textarea
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="company-description">Company Description</Label>
+              <Textarea
+                id="company-description"
                 rows={4}
                 value={profileForm.companyDescription}
                 onChange={(event) => handleProfileChange("companyDescription", event.target.value)}
                 required
               />
-            </label>
+            </div>
 
-            <label>
-              Region
-              <select
-                value={profileForm.region}
-                onChange={(event) => handleProfileChange("region", event.target.value)}
-                required
-              >
-                <option value="">Select region</option>
-                {locationHierarchy.map((region) => (
-                  <option key={region.name} value={region.name}>
-                    {region.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="space-y-2">
+              <Label>Region</Label>
+              <Select value={profileForm.region || "__empty"} onValueChange={(value) => handleProfileChange("region", value === "__empty" ? "" : value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select region" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__empty">Select region</SelectItem>
+                  {locationHierarchy.map((region) => (
+                    <SelectItem key={region.name} value={region.name}>
+                      {region.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <label>
-              District
-              <select
-                value={profileForm.district}
-                onChange={(event) => handleProfileChange("district", event.target.value)}
+            <div className="space-y-2">
+              <Label>District</Label>
+              <Select
+                value={profileForm.district || "__empty"}
+                onValueChange={(value) => handleProfileChange("district", value === "__empty" ? "" : value)}
                 disabled={!profileForm.region}
-                required
               >
-                <option value="">Select district</option>
-                {districts.map((district) => (
-                  <option key={district.name} value={district.name}>
-                    {district.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select district" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__empty">Select district</SelectItem>
+                  {districts.map((district) => (
+                    <SelectItem key={district.name} value={district.name}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <label>
-              Ward
-              <select
-                value={profileForm.ward}
-                onChange={(event) => handleProfileChange("ward", event.target.value)}
+            <div className="space-y-2">
+              <Label>Ward</Label>
+              <Select
+                value={profileForm.ward || "__empty"}
+                onValueChange={(value) => handleProfileChange("ward", value === "__empty" ? "" : value)}
                 disabled={!profileForm.district}
-                required
               >
-                <option value="">Select ward</option>
-                {wards.map((ward) => (
-                  <option key={ward} value={ward}>
-                    {ward}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select ward" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__empty">Select ward</SelectItem>
+                  {wards.map((ward) => (
+                    <SelectItem key={ward} value={ward}>
+                      {ward}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <button type="submit" disabled={profileSaving}>
-              {profileSaving ? "Saving..." : setupMode ? "Complete Profile" : "Save Profile"}
-            </button>
+            <div className="md:col-span-2">
+              <Button type="submit" disabled={profileSaving}>
+                {profileSaving ? "Saving..." : setupMode ? "Complete Profile" : "Save Profile"}
+              </Button>
+            </div>
           </form>
-        )}
-      </article>
+        </CardContent>
+      </Card>
 
-      <article className="admin-page-card">
-        <h2>Security</h2>
-        <p>Change your password and update your email with OTP verification.</p>
-        {securityError ? <p className="form-error">{securityError}</p> : null}
-        {passwordMessage ? <p className="form-success">{passwordMessage}</p> : null}
-        {emailMessage ? <p className="form-success">{emailMessage}</p> : null}
-      </article>
+      <Card>
+        <CardHeader>
+          <CardTitle>Security</CardTitle>
+          <CardDescription>Change your password and update your email with OTP verification.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {securityError ? <p className="text-sm text-[color:var(--ui-destructive)]">{securityError}</p> : null}
+          {passwordMessage ? <p className="text-sm text-[color:var(--ui-success)]">{passwordMessage}</p> : null}
+          {emailMessage ? <p className="text-sm text-[color:var(--ui-success)]">{emailMessage}</p> : null}
+        </CardContent>
+      </Card>
 
-      <article className="admin-page-card">
-        <h2>Change Password</h2>
-        <form onSubmit={handleChangePassword} className="profile-form-grid">
-          <label>
-            Current Password
-            <input
-              type="password"
-              value={passwordForm.currentPassword}
-              onChange={(event) =>
-                setPasswordForm((current) => ({ ...current, currentPassword: event.target.value }))
-              }
-              required
-            />
-          </label>
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Password</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleChangePassword} className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="current-password">Current Password</Label>
+              <Input
+                id="current-password"
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={(event) => setPasswordForm((current) => ({ ...current, currentPassword: event.target.value }))}
+                required
+              />
+            </div>
 
-          <label>
-            New Password
-            <input
-              type="password"
-              value={passwordForm.newPassword}
-              onChange={(event) =>
-                setPasswordForm((current) => ({ ...current, newPassword: event.target.value }))
-              }
-              required
-            />
-          </label>
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={(event) => setPasswordForm((current) => ({ ...current, newPassword: event.target.value }))}
+                required
+              />
+            </div>
 
-          <label>
-            Confirm New Password
-            <input
-              type="password"
-              value={passwordForm.confirmPassword}
-              onChange={(event) =>
-                setPasswordForm((current) => ({ ...current, confirmPassword: event.target.value }))
-              }
-              required
-            />
-          </label>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={passwordForm.confirmPassword}
+                onChange={(event) => setPasswordForm((current) => ({ ...current, confirmPassword: event.target.value }))}
+                required
+              />
+            </div>
 
-          <button type="submit" disabled={loadingPassword}>
-            {loadingPassword ? "Updating..." : "Update Password"}
-          </button>
-        </form>
-      </article>
+            <div className="md:col-span-3">
+              <Button type="submit" disabled={loadingPassword}>
+                {loadingPassword ? "Updating..." : "Update Password"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
-      <article className="admin-page-card">
-        <h2>Change Email (OTP)</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Email (OTP)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <form onSubmit={handleRequestOtp} className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="otp-current-password">Current Password</Label>
+              <Input
+                id="otp-current-password"
+                type="password"
+                value={emailForm.currentPassword}
+                onChange={(event) => setEmailForm((current) => ({ ...current, currentPassword: event.target.value }))}
+                required
+              />
+            </div>
 
-        <form onSubmit={handleRequestOtp} className="profile-form-grid">
-          <label>
-            Current Password
-            <input
-              type="password"
-              value={emailForm.currentPassword}
-              onChange={(event) =>
-                setEmailForm((current) => ({ ...current, currentPassword: event.target.value }))
-              }
-              required
-            />
-          </label>
+            <div className="space-y-2">
+              <Label htmlFor="new-email">New Email</Label>
+              <Input
+                id="new-email"
+                type="email"
+                value={emailForm.newEmail}
+                onChange={(event) => setEmailForm((current) => ({ ...current, newEmail: event.target.value }))}
+                required
+              />
+            </div>
 
-          <label>
-            New Email
-            <input
-              type="email"
-              value={emailForm.newEmail}
-              onChange={(event) => setEmailForm((current) => ({ ...current, newEmail: event.target.value }))}
-              required
-            />
-          </label>
+            <div className="md:col-span-2">
+              <Button type="submit" disabled={loadingOtpRequest}>
+                {loadingOtpRequest ? "Sending OTP..." : "Send OTP"}
+              </Button>
+            </div>
+          </form>
 
-          <button type="submit" disabled={loadingOtpRequest}>
-            {loadingOtpRequest ? "Sending OTP..." : "Send OTP"}
-          </button>
-        </form>
+          <form onSubmit={handleVerifyOtp} className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="otp-code">OTP Code</Label>
+              <Input
+                id="otp-code"
+                type="text"
+                value={emailForm.otp}
+                onChange={(event) => setEmailForm((current) => ({ ...current, otp: event.target.value }))}
+                required
+              />
+            </div>
 
-        <form onSubmit={handleVerifyOtp} className="profile-form-grid">
-          <label>
-            OTP Code
-            <input
-              type="text"
-              value={emailForm.otp}
-              onChange={(event) => setEmailForm((current) => ({ ...current, otp: event.target.value }))}
-              required
-            />
-          </label>
+            <div className="flex items-end">
+              <Button type="submit" disabled={loadingOtpVerify}>
+                {loadingOtpVerify ? "Verifying..." : "Verify OTP & Update Email"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
-          <button type="submit" disabled={loadingOtpVerify}>
-            {loadingOtpVerify ? "Verifying..." : "Verify OTP & Update Email"}
-          </button>
-        </form>
-      </article>
-
-      <article className="admin-page-card">
-        <h2>SMTP Configuration</h2>
-        <p>
-          Configure Gmail SMTP in environment variables: <code>SMTP_HOST</code>, <code>SMTP_PORT</code>,
-          <code>SMTP_USER</code>, <code>SMTP_PASS</code>, and optional <code>NOTIFY_EMAIL</code>.
-        </p>
-      </article>
+      <Card>
+        <CardHeader>
+          <CardTitle>SMTP Configuration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-[color:var(--ui-muted-foreground)]">
+            Configure Gmail SMTP in environment variables: <code>SMTP_HOST</code>, <code>SMTP_PORT</code>,
+            <code>SMTP_USER</code>, <code>SMTP_PASS</code>, and optional <code>NOTIFY_EMAIL</code>.
+          </p>
+        </CardContent>
+      </Card>
     </section>
   );
 }

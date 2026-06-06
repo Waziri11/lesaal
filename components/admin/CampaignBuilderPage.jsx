@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import PageState from "../shared/PageState";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
@@ -12,11 +13,11 @@ import { Textarea } from "../ui/textarea";
 import { createCsrfHeaders } from "../../lib/csrf-client";
 
 const LIGHT_INPUT_CLASS =
-  "border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-violet-500 focus-visible:ring-offset-white";
+  "border-[color:var(--ui-border)] bg-[color:var(--ui-input)] text-[color:var(--ui-foreground)] placeholder:text-[color:var(--ui-muted-foreground)] focus-visible:ring-[color:var(--ui-ring)] focus-visible:ring-offset-[color:var(--ui-background)]";
 const LIGHT_TEXTAREA_CLASS =
-  "border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-violet-500 focus-visible:ring-offset-white";
+  "border-[color:var(--ui-border)] bg-[color:var(--ui-input)] text-[color:var(--ui-foreground)] placeholder:text-[color:var(--ui-muted-foreground)] focus-visible:ring-[color:var(--ui-ring)] focus-visible:ring-offset-[color:var(--ui-background)]";
 const LIGHT_SELECT_TRIGGER_CLASS =
-  "border-slate-300 bg-white text-slate-900 focus:ring-violet-500 focus:ring-offset-white ring-offset-white";
+  "border-[color:var(--ui-border)] bg-[color:var(--ui-input)] text-[color:var(--ui-foreground)] focus:ring-[color:var(--ui-ring)] focus:ring-offset-[color:var(--ui-background)] ring-offset-[color:var(--ui-background)]";
 
 function slugify(value) {
   return String(value || "")
@@ -152,8 +153,8 @@ function renderQuestionPreview(question) {
     return (
       <div className="space-y-2">
         {options.map((option, optionIndex) => (
-          <div key={`${option}_${optionIndex}`} className="flex items-center gap-2 text-sm text-slate-700">
-            <span className="h-4 w-4 rounded-full border border-slate-300 bg-white" />
+          <div key={`${option}_${optionIndex}`} className="flex items-center gap-2 text-sm text-[color:var(--ui-foreground)]">
+            <span className="h-4 w-4 rounded-full border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]" />
             <span>{option}</span>
           </div>
         ))}
@@ -523,24 +524,26 @@ export default function CampaignBuilderPage({ campaignId = null }) {
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
               className={`rounded-lg border px-4 py-3 text-left text-sm transition ${
                 editorStep === 1
-                  ? "border-violet-500 bg-violet-500/20 text-violet-100"
-                  : "border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800"
+                  ? "border-[color:var(--ui-primary)] bg-[color:var(--ui-primary-soft)] text-[color:var(--ui-primary)]"
+                  : "border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] text-[color:var(--ui-muted-foreground)] hover:bg-[color:var(--ui-accent)]"
               }`}
               onClick={() => setEditorStep(1)}
             >
               <p className="font-semibold">1. Campaign Information</p>
               <p className="mt-1 text-xs opacity-80">Title, slug, image, and publish settings</p>
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
               className={`rounded-lg border px-4 py-3 text-left text-sm transition ${
                 editorStep === 2
-                  ? "border-violet-500 bg-violet-500/20 text-violet-100"
-                  : "border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800"
+                  ? "border-[color:var(--ui-primary)] bg-[color:var(--ui-primary-soft)] text-[color:var(--ui-primary)]"
+                  : "border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] text-[color:var(--ui-muted-foreground)] hover:bg-[color:var(--ui-accent)]"
               }`}
               onClick={() => {
                 if (editorStep === 1) {
@@ -552,44 +555,39 @@ export default function CampaignBuilderPage({ campaignId = null }) {
             >
               <p className="font-semibold">2. Questions</p>
               <p className="mt-1 text-xs opacity-80">Google Forms-style question builder</p>
-            </button>
+            </Button>
           </div>
         </CardHeader>
       </Card>
 
-      {loadingCampaign ? (
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm text-slate-300">Loading campaign builder...</p>
-          </CardContent>
-        </Card>
-      ) : null}
+      {loadingCampaign ? <PageState status="loading" resourceLabel="campaign" /> : null}
 
       {!loadingCampaign && notFound ? (
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm text-slate-200">Campaign not found.</p>
-            <Button className="mt-4" type="button" onClick={() => router.push("/admin/campaigns")}>
+        <PageState
+          status="empty"
+          resourceLabel="campaign"
+          createAction={
+            <Button type="button" onClick={() => router.push("/admin/campaigns")}>
               Return to Campaigns
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : null}
 
       {!loadingCampaign && !notFound ? (
         <form className="space-y-4" onSubmit={saveCampaign}>
-          <div className="rounded-2xl border border-slate-700 bg-[#ede7f6] p-4 md:p-6">
+          <div className="rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-4 md:p-6">
             {editorStep === 1 ? (
               <div className="mx-auto w-full max-w-3xl space-y-4">
-                <div className="rounded-2xl border border-violet-200 bg-white p-6 shadow-sm">
-                  <div className="border-l-4 border-violet-500 pl-4">
-                    <h4 className="text-xl font-semibold text-slate-900">Campaign Information</h4>
-                    <p className="mt-1 text-sm text-slate-600">Start with the essentials, then move to question design.</p>
+                <div className="rounded-2xl border border-[color:var(--ui-primary)] bg-[color:var(--ui-card)] p-6 shadow-sm">
+                  <div className="border-l-4 border-[color:var(--ui-primary)] pl-4">
+                    <h4 className="text-xl font-semibold text-[color:var(--ui-foreground)]">Campaign Information</h4>
+                    <p className="mt-1 text-sm text-[color:var(--ui-muted-foreground)]">Start with the essentials, then move to question design.</p>
                   </div>
 
                   <div className="mt-6 space-y-4">
                     <div className="space-y-2">
-                      <Label className="text-slate-700" htmlFor="campaign-title">
+                      <Label className="text-[color:var(--ui-foreground)]" htmlFor="campaign-title">
                         Campaign Title
                       </Label>
                       <Input
@@ -609,7 +607,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-slate-700" htmlFor="campaign-slug">
+                      <Label className="text-[color:var(--ui-foreground)]" htmlFor="campaign-slug">
                         Campaign Slug
                       </Label>
                       <Input
@@ -623,7 +621,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-slate-700" htmlFor="campaign-description">
+                      <Label className="text-[color:var(--ui-foreground)]" htmlFor="campaign-description">
                         Description
                       </Label>
                       <Textarea
@@ -636,8 +634,8 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-slate-700">Campaign Image</Label>
-                      <input
+                      <Label className="text-[color:var(--ui-foreground)]">Campaign Image</Label>
+                      <Input
                         ref={imageInputRef}
                         className="hidden"
                         type="file"
@@ -649,8 +647,8 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                         tabIndex={0}
                         className={`rounded-xl border-2 border-dashed p-6 text-center transition ${
                           isDraggingImage
-                            ? "border-violet-500 bg-violet-50"
-                            : "border-slate-300 bg-slate-50 hover:border-violet-400 hover:bg-violet-50/60"
+                            ? "border-[color:var(--ui-primary)] bg-[color:var(--ui-primary-soft)]"
+                            : "border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] hover:border-[color:var(--ui-primary)] hover:bg-[color:var(--ui-primary-soft)]"
                         }`}
                         onClick={() => imageInputRef.current?.click()}
                         onKeyDown={(event) => {
@@ -676,38 +674,38 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                         }}
                         onDrop={handleImageDrop}
                       >
-                        <p className="text-sm font-semibold text-slate-700">
+                        <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">
                           {isUploadingImage ? "Uploading image..." : "Drag and drop image here"}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">or click to browse files</p>
-                        <p className="mt-2 text-xs text-slate-400">PNG, JPG, WEBP supported</p>
+                        <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">or click to browse files</p>
+                        <p className="mt-2 text-xs text-[color:var(--ui-muted-foreground)]">PNG, JPG, WEBP supported</p>
                       </div>
 
                       {draft.imageUrl ? (
-                        <div className="rounded-xl border border-slate-200 bg-white p-3">
-                          <p className="text-xs text-slate-500">Uploaded image</p>
+                        <div className="rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-3">
+                          <p className="text-xs text-[color:var(--ui-muted-foreground)]">Uploaded image</p>
                           <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-medium text-slate-700">{getImageName(draft.imageUrl)}</p>
-                              <p className="truncate text-xs text-slate-500">{draft.imageUrl}</p>
+                              <p className="truncate text-sm font-medium text-[color:var(--ui-foreground)]">{getImageName(draft.imageUrl)}</p>
+                              <p className="truncate text-xs text-[color:var(--ui-muted-foreground)]">{draft.imageUrl}</p>
                             </div>
                             <div className="flex gap-2">
                               <Button type="button" size="sm" variant="outline" onClick={() => imageInputRef.current?.click()}>
                                 Replace
                               </Button>
-                              <Button type="button" size="sm" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50" onClick={clearImage}>
+                              <Button type="button" size="sm" variant="outline" className="border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]" onClick={clearImage}>
                                 Remove
                               </Button>
                             </div>
                           </div>
-                          <img src={draft.imageUrl} alt="Campaign" className="mt-3 h-32 w-full rounded-md border border-slate-200 object-cover" />
+                          <img src={draft.imageUrl} alt="Campaign" className="mt-3 h-32 w-full rounded-md border border-[color:var(--ui-border)] object-cover" />
                         </div>
                       ) : null}
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label className="text-slate-700" htmlFor="campaign-order">
+                        <Label className="text-[color:var(--ui-foreground)]" htmlFor="campaign-order">
                           Display Order
                         </Label>
                         <Input
@@ -720,18 +718,18 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                         />
                       </div>
 
-                      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                        <Label className="text-slate-700" htmlFor="campaign-published">
+                      <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
+                        <Label className="text-[color:var(--ui-foreground)]" htmlFor="campaign-published">
                           Publish Status
                         </Label>
                         <div className="mt-3 flex items-center gap-3">
                           <Checkbox
                             id="campaign-published"
-                            className="border-slate-400 data-[state=checked]:border-violet-500 data-[state=checked]:bg-violet-600"
+                            className="border-[color:var(--ui-border)] data-[state=checked]:border-[color:var(--ui-primary)] data-[state=checked]:bg-[color:var(--ui-primary)]"
                             checked={draft.isPublished}
                             onCheckedChange={(checked) => handleDraftValue("isPublished", Boolean(checked))}
                           />
-                          <Label className="text-slate-700" htmlFor="campaign-published">
+                          <Label className="text-[color:var(--ui-foreground)]" htmlFor="campaign-published">
                             Published (visible on public pages)
                           </Label>
                         </div>
@@ -742,18 +740,18 @@ export default function CampaignBuilderPage({ campaignId = null }) {
               </div>
             ) : (
               <div className="mx-auto w-full max-w-4xl space-y-4">
-                <div className="rounded-2xl border border-violet-200 bg-white p-5 shadow-sm">
+                <div className="rounded-2xl border border-[color:var(--ui-primary)] bg-[color:var(--ui-card)] p-5 shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h4 className="text-xl font-semibold text-slate-900">Questions</h4>
-                      <p className="mt-1 text-sm text-slate-600">Build your form exactly how users will answer it.</p>
+                      <h4 className="text-xl font-semibold text-[color:var(--ui-foreground)]">Questions</h4>
+                      <p className="mt-1 text-sm text-[color:var(--ui-muted-foreground)]">Build your form exactly how users will answer it.</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
-                        className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                        className="border-[color:var(--ui-border)] bg-[color:var(--ui-card)] text-[color:var(--ui-foreground)] hover:bg-[color:var(--ui-muted)]"
                         onClick={() => addQuestion("text")}
                       >
                         + Short answer
@@ -762,7 +760,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                         type="button"
                         size="sm"
                         variant="outline"
-                        className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                        className="border-[color:var(--ui-border)] bg-[color:var(--ui-card)] text-[color:var(--ui-foreground)] hover:bg-[color:var(--ui-muted)]"
                         onClick={() => addQuestion("textarea")}
                       >
                         + Paragraph
@@ -771,7 +769,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                         type="button"
                         size="sm"
                         variant="outline"
-                        className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                        className="border-[color:var(--ui-border)] bg-[color:var(--ui-card)] text-[color:var(--ui-foreground)] hover:bg-[color:var(--ui-muted)]"
                         onClick={() => addQuestion("select")}
                       >
                         + Multiple choice
@@ -781,10 +779,10 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                 </div>
 
                 {draft.questions.map((question, index) => (
-                  <div key={question.id || `${question.key}_${index}`} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div key={question.id || `${question.key}_${index}`} className="rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-5 shadow-sm">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex-1 space-y-2">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-violet-600">Question {index + 1}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-primary)]">Question {index + 1}</p>
                         <Input
                           value={question.label}
                           className={LIGHT_INPUT_CLASS}
@@ -795,7 +793,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                       </div>
 
                       <div className="w-full space-y-2 sm:w-56">
-                        <Label className="text-slate-700">Response Type</Label>
+                        <Label className="text-[color:var(--ui-foreground)]">Response Type</Label>
                         <Select value={question.type} onValueChange={(value) => handleQuestionChange(index, "type", value)}>
                           <SelectTrigger className={LIGHT_SELECT_TRIGGER_CLASS}>
                             <SelectValue placeholder="Select type" />
@@ -813,7 +811,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
 
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label className="text-slate-700">Answer Key</Label>
+                        <Label className="text-[color:var(--ui-foreground)]">Answer Key</Label>
                         <Input
                           value={question.key}
                           className={LIGHT_INPUT_CLASS}
@@ -822,7 +820,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-slate-700">Placeholder Text</Label>
+                        <Label className="text-[color:var(--ui-foreground)]">Placeholder Text</Label>
                         <Input
                           value={question.placeholder || ""}
                           className={LIGHT_INPUT_CLASS}
@@ -833,7 +831,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
 
                     {question.type === "select" ? (
                       <div className="mt-4 space-y-2">
-                        <Label className="text-slate-700">Multiple Choice Options (comma or new line separated)</Label>
+                        <Label className="text-[color:var(--ui-foreground)]">Multiple Choice Options (comma or new line separated)</Label>
                         <Textarea
                           value={(question.options || []).join("\n")}
                           className={LIGHT_TEXTAREA_CLASS}
@@ -842,23 +840,23 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                       </div>
                     ) : null}
 
-                    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Preview</p>
-                      <p className="mt-2 text-sm font-medium text-slate-800">{question.label || "Untitled Question"}</p>
-                      <p className="mt-1 text-xs text-slate-500">{getQuestionTypeLabel(question.type)}</p>
+                    <div className="mt-4 rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Preview</p>
+                      <p className="mt-2 text-sm font-medium text-[color:var(--ui-foreground)]">{question.label || "Untitled Question"}</p>
+                      <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">{getQuestionTypeLabel(question.type)}</p>
                       <div className="mt-3">{renderQuestionPreview(question)}</div>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-3">
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--ui-border)] pt-3">
                       <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-2">
                           <Checkbox
                             id={`required-${index}`}
-                            className="border-slate-400 data-[state=checked]:border-violet-500 data-[state=checked]:bg-violet-600"
+                            className="border-[color:var(--ui-border)] data-[state=checked]:border-[color:var(--ui-primary)] data-[state=checked]:bg-[color:var(--ui-primary)]"
                             checked={Boolean(question.required)}
                             onCheckedChange={(checked) => handleQuestionChange(index, "required", Boolean(checked))}
                           />
-                          <Label className="text-slate-700" htmlFor={`required-${index}`}>
+                          <Label className="text-[color:var(--ui-foreground)]" htmlFor={`required-${index}`}>
                             Required
                           </Label>
                         </div>
@@ -866,11 +864,11 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                         <div className="flex items-center gap-2">
                           <Checkbox
                             id={`visible-${index}`}
-                            className="border-slate-400 data-[state=checked]:border-violet-500 data-[state=checked]:bg-violet-600"
+                            className="border-[color:var(--ui-border)] data-[state=checked]:border-[color:var(--ui-primary)] data-[state=checked]:bg-[color:var(--ui-primary)]"
                             checked={question.isVisible !== false}
                             onCheckedChange={(checked) => handleQuestionChange(index, "isVisible", Boolean(checked))}
                           />
-                          <Label className="text-slate-700" htmlFor={`visible-${index}`}>
+                          <Label className="text-[color:var(--ui-foreground)]" htmlFor={`visible-${index}`}>
                             Visible
                           </Label>
                         </div>
@@ -881,7 +879,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                           type="button"
                           size="sm"
                           variant="outline"
-                          className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                          className="border-[color:var(--ui-border)] bg-[color:var(--ui-card)] text-[color:var(--ui-foreground)] hover:bg-[color:var(--ui-muted)]"
                           onClick={() => moveQuestion(index, "up")}
                           disabled={index === 0}
                         >
@@ -891,7 +889,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                           type="button"
                           size="sm"
                           variant="outline"
-                          className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                          className="border-[color:var(--ui-border)] bg-[color:var(--ui-card)] text-[color:var(--ui-foreground)] hover:bg-[color:var(--ui-muted)]"
                           onClick={() => moveQuestion(index, "down")}
                           disabled={index === draft.questions.length - 1}
                         >
@@ -901,7 +899,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                           type="button"
                           size="sm"
                           variant="outline"
-                          className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                          className="border-[color:var(--ui-border)] bg-[color:var(--ui-card)] text-[color:var(--ui-foreground)] hover:bg-[color:var(--ui-muted)]"
                           onClick={() => duplicateQuestion(index)}
                         >
                           Duplicate
@@ -910,7 +908,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                           type="button"
                           size="sm"
                           variant="outline"
-                          className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                          className="border-[color:var(--ui-destructive)] bg-[color:var(--ui-destructive-soft)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
                           onClick={() => removeQuestion(index)}
                           disabled={draft.questions.length === 1}
                         >
@@ -956,8 +954,8 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                 </div>
               </div>
 
-              {statusError ? <p className="mt-3 text-sm text-red-400">{statusError}</p> : null}
-              {statusSuccess ? <p className="mt-3 text-sm text-emerald-400">{statusSuccess}</p> : null}
+              {statusError ? <p className="mt-3 text-sm text-[color:var(--ui-destructive)]">{statusError}</p> : null}
+              {statusSuccess ? <p className="mt-3 text-sm text-[color:var(--ui-success)]">{statusSuccess}</p> : null}
             </CardContent>
           </Card>
         </form>

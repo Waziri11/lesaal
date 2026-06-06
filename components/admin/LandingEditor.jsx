@@ -2,6 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import PublicLanding from "../PublicLanding";
+import PageState from "../shared/PageState";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { SelectNative } from "../ui/select-native";
+import { Textarea } from "../ui/textarea";
 import {
   COMPONENT_VARIANT_OPTIONS,
   FORM_FIELD_TYPES,
@@ -249,6 +254,7 @@ function createDefaultItemForSection(sectionType, order) {
 }
 
 export default function LandingEditor() {
+  const [reloadKey, setReloadKey] = useState(0);
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -385,7 +391,7 @@ export default function LandingEditor() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   useEffect(() => {
     if (!config) return;
@@ -888,11 +894,15 @@ export default function LandingEditor() {
   }
 
   if (loading) {
-    return <section className="admin-page-card">Loading landing configuration...</section>;
+    return <PageState status="loading" resourceLabel="landing configuration" />;
+  }
+
+  if (error && !config) {
+    return <PageState status="error" errorMessage={error} onRetry={() => setReloadKey((current) => current + 1)} />;
   }
 
   if (!config) {
-    return <section className="admin-page-card">No landing configuration found.</section>;
+    return <PageState status="empty" resourceLabel="landing configuration" />;
   }
 
   return (
@@ -906,7 +916,7 @@ export default function LandingEditor() {
         <div className="builder-topbar-controls">
           <label>
             Site Title
-            <input
+            <Input
               type="text"
               value={config.siteTitle}
               onChange={(event) =>
@@ -921,7 +931,7 @@ export default function LandingEditor() {
           <div className="template-add-box">
             <label htmlFor="templateType">Add Section Template</label>
             <div>
-              <select
+              <SelectNative
                 id="templateType"
                 value={templateType}
                 onChange={(event) => setTemplateType(event.target.value)}
@@ -931,16 +941,16 @@ export default function LandingEditor() {
                     {template.label}
                   </option>
                 ))}
-              </select>
-              <button type="button" onClick={addTemplateSection}>
+              </SelectNative>
+              <Button type="button" onClick={addTemplateSection}>
                 Add
-              </button>
+              </Button>
             </div>
           </div>
 
-          <button type="button" className="save-btn" onClick={handleSave} disabled={saving}>
+          <Button type="button" className="save-btn" onClick={handleSave} disabled={saving}>
             {saving ? "Saving..." : "Save Changes"}
-          </button>
+          </Button>
         </div>
 
         {error ? <p className="form-error">{error}</p> : null}
@@ -988,7 +998,7 @@ export default function LandingEditor() {
 
       {sectionOptionsMenu && menuSection ? (
         <>
-          <button
+          <Button
             type="button"
             className="section-context-backdrop"
             aria-label="Close section options"
@@ -1005,15 +1015,15 @@ export default function LandingEditor() {
                 <h3>{menuSection.title || "Section"}</h3>
                 <p>{menuSection.type}</p>
               </div>
-              <button type="button" onClick={closeSectionOptions}>
+              <Button type="button" onClick={closeSectionOptions}>
                 Close
-              </button>
+              </Button>
             </div>
 
             <div className="section-context-actions">
-              <button type="button" onClick={() => moveSection(menuSection.id, "up")}>Move Up</button>
-              <button type="button" onClick={() => moveSection(menuSection.id, "down")}>Move Down</button>
-              <button
+              <Button type="button" onClick={() => moveSection(menuSection.id, "up")}>Move Up</Button>
+              <Button type="button" onClick={() => moveSection(menuSection.id, "down")}>Move Down</Button>
+              <Button
                 type="button"
                 onClick={() =>
                   updateSection(menuSection.id, (current) => ({
@@ -1023,16 +1033,16 @@ export default function LandingEditor() {
                 }
               >
                 {menuSection.isVisible ? "Hide" : "Show"}
-              </button>
+              </Button>
               {sectionSupportsItems(menuSection.type) ? (
-                <button type="button" onClick={() => addItem(menuSection.id)}>Add Item</button>
+                <Button type="button" onClick={() => addItem(menuSection.id)}>Add Item</Button>
               ) : null}
               {menuSection.type === "CAMPAIGN_FORM" ? (
-                <button type="button" onClick={addFormField}>Add Form Field</button>
+                <Button type="button" onClick={addFormField}>Add Form Field</Button>
               ) : null}
-              <button type="button" className="danger-btn" onClick={() => removeSection(menuSection.id)}>
+              <Button type="button" className="danger-btn" onClick={() => removeSection(menuSection.id)}>
                 Remove Section
-              </button>
+              </Button>
             </div>
 
             <div className="section-context-body">
@@ -1042,7 +1052,7 @@ export default function LandingEditor() {
                   <div className="section-context-grid">
                 <label className="field-full">
                   Section Title
-                  <input
+                  <Input
                     type="text"
                     value={menuSection.title}
                     onChange={(event) =>
@@ -1056,7 +1066,7 @@ export default function LandingEditor() {
 
                 <label>
                   Component Variant
-                  <select
+                  <SelectNative
                     value={menuSection.componentVariant}
                     onChange={(event) =>
                       updateSection(menuSection.id, (current) => ({
@@ -1070,12 +1080,12 @@ export default function LandingEditor() {
                         {option}
                       </option>
                     ))}
-                  </select>
+                  </SelectNative>
                 </label>
 
                 <label>
                   Text Animation
-                  <select
+                  <SelectNative
                     value={menuSection.textAnimation}
                     onChange={(event) =>
                       updateSection(menuSection.id, (current) => ({
@@ -1089,12 +1099,12 @@ export default function LandingEditor() {
                         {option}
                       </option>
                     ))}
-                  </select>
+                  </SelectNative>
                 </label>
 
                 <label>
                   Section Animation
-                  <select
+                  <SelectNative
                     value={menuSection.sectionAnimation}
                     onChange={(event) =>
                       updateSection(menuSection.id, (current) => ({
@@ -1108,12 +1118,12 @@ export default function LandingEditor() {
                         {option}
                       </option>
                     ))}
-                  </select>
+                  </SelectNative>
                 </label>
 
                 <label>
                   Scroll Animation
-                  <select
+                  <SelectNative
                     value={menuSection.scrollAnimation}
                     onChange={(event) =>
                       updateSection(menuSection.id, (current) => ({
@@ -1127,7 +1137,7 @@ export default function LandingEditor() {
                         {option}
                       </option>
                     ))}
-                  </select>
+                  </SelectNative>
                 </label>
                   </div>
                 </div>
@@ -1137,7 +1147,7 @@ export default function LandingEditor() {
                   <div className="section-context-grid">
                 <label>
                   Font Size (px)
-                  <input
+                  <Input
                     type="number"
                     min={12}
                     max={120}
@@ -1154,7 +1164,7 @@ export default function LandingEditor() {
 
                 <label className="field-color">
                   Text Color
-                  <input
+                  <Input
                     type="color"
                     value={menuTextStyle.color || "#10254e"}
                     onChange={(event) =>
@@ -1167,7 +1177,7 @@ export default function LandingEditor() {
 
                 <label>
                   Bold
-                  <select
+                  <SelectNative
                     value={menuTextStyle.bold ? "yes" : "no"}
                     onChange={(event) =>
                       updateMenuTextStyle({
@@ -1177,12 +1187,12 @@ export default function LandingEditor() {
                   >
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
-                  </select>
+                  </SelectNative>
                 </label>
 
                 <label>
                   Italic
-                  <select
+                  <SelectNative
                     value={menuTextStyle.italic ? "yes" : "no"}
                     onChange={(event) =>
                       updateMenuTextStyle({
@@ -1192,12 +1202,12 @@ export default function LandingEditor() {
                   >
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
-                  </select>
+                  </SelectNative>
                 </label>
 
                 <label>
                   Underline
-                  <select
+                  <SelectNative
                     value={menuTextStyle.underline ? "yes" : "no"}
                     onChange={(event) =>
                       updateMenuTextStyle({
@@ -1207,12 +1217,12 @@ export default function LandingEditor() {
                   >
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
-                  </select>
+                  </SelectNative>
                 </label>
 
                 <label className="field-full">
                   Text Style Reset
-                  <button
+                  <Button
                     type="button"
                     className="section-reset-btn"
                     onClick={() =>
@@ -1226,7 +1236,7 @@ export default function LandingEditor() {
                     }
                   >
                     Reset Text Style
-                  </button>
+                  </Button>
                 </label>
                   </div>
                 </div>
@@ -1237,7 +1247,7 @@ export default function LandingEditor() {
                     <div className="section-context-grid">
                   <label className="field-full">
                     Static Hero Text
-                    <textarea
+                    <Textarea
                       value={menuSection.settings?.staticText || ""}
                       onChange={(event) =>
                         updateSectionSettingFromPreview(menuSection.id, "staticText", event.target.value)
@@ -1247,7 +1257,7 @@ export default function LandingEditor() {
 
                   <label className="field-full">
                     Dynamic Words (comma or new line separated)
-                    <textarea
+                    <Textarea
                       value={toStringArray(menuSection.settings?.dynamicWords).join("\n")}
                       onChange={(event) =>
                         updateSectionSettingFromPreview(menuSection.id, "dynamicWords", event.target.value)
@@ -1257,7 +1267,7 @@ export default function LandingEditor() {
 
                   <label>
                     Primary CTA Text
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.primaryCtaText || ""}
                       onChange={(event) =>
@@ -1268,7 +1278,7 @@ export default function LandingEditor() {
 
                   <label>
                     Primary CTA Link
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.primaryCtaLink || ""}
                       onChange={(event) =>
@@ -1279,7 +1289,7 @@ export default function LandingEditor() {
 
                   <label>
                     Secondary CTA Text
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.secondaryCtaText || ""}
                       onChange={(event) =>
@@ -1290,7 +1300,7 @@ export default function LandingEditor() {
 
                   <label>
                     Secondary CTA Link
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.secondaryCtaLink || ""}
                       onChange={(event) =>
@@ -1308,7 +1318,7 @@ export default function LandingEditor() {
                     <div className="section-context-grid">
                   <label>
                     Home Service Limit
-                    <input
+                    <Input
                       type="number"
                       min={1}
                       max={24}
@@ -1321,7 +1331,7 @@ export default function LandingEditor() {
 
                   <label>
                     See All Link
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.seeAllLink || "/services"}
                       onChange={(event) =>
@@ -1332,7 +1342,7 @@ export default function LandingEditor() {
 
                   <label className="field-full">
                     See All Button Text
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.seeAllText || "See all services"}
                       onChange={(event) =>
@@ -1350,7 +1360,7 @@ export default function LandingEditor() {
                     <div className="section-context-grid">
                   <label className="field-full">
                     Recommended Plan
-                    <select
+                    <SelectNative
                       value={menuSection.settings?.recommendedPlanKey || ""}
                       onChange={(event) =>
                         updateSectionSettingFromPreview(menuSection.id, "recommendedPlanKey", event.target.value)
@@ -1365,7 +1375,7 @@ export default function LandingEditor() {
                           </option>
                         );
                       })}
-                    </select>
+                    </SelectNative>
                   </label>
                     </div>
                   </div>
@@ -1377,7 +1387,7 @@ export default function LandingEditor() {
                     <div className="section-context-grid">
                   <label className="field-full">
                     Contact Email
-                    <input
+                    <Input
                       type="email"
                       value={menuSection.settings?.contactEmail || ""}
                       onChange={(event) =>
@@ -1388,7 +1398,7 @@ export default function LandingEditor() {
 
                   <label>
                     Footer CTA Text
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.ctaText || ""}
                       onChange={(event) =>
@@ -1399,7 +1409,7 @@ export default function LandingEditor() {
 
                   <label>
                     Footer CTA Link
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.ctaLink || ""}
                       onChange={(event) =>
@@ -1417,7 +1427,7 @@ export default function LandingEditor() {
                     <div className="section-context-grid">
                   <label>
                     Submit Button Text
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.submitText || ""}
                       onChange={(event) =>
@@ -1428,7 +1438,7 @@ export default function LandingEditor() {
 
                   <label>
                     Success Message
-                    <input
+                    <Input
                       type="text"
                       value={menuSection.settings?.successMessage || ""}
                       onChange={(event) =>
@@ -1444,14 +1454,14 @@ export default function LandingEditor() {
                   <div className="builder-subpanel">
                     <div className="builder-inline-head">
                       <h3>Form Field Controls</h3>
-                      <button type="button" onClick={addFormField}>Add Field</button>
+                      <Button type="button" onClick={addFormField}>Add Field</Button>
                     </div>
 
                 {selectedFormField ? (
                   <div className="section-context-grid">
                     <label className="field-full">
                       Active Field
-                      <select
+                      <SelectNative
                         value={selectedFormField.id}
                         onChange={(event) => setSelectedFormFieldId(event.target.value)}
                       >
@@ -1463,12 +1473,12 @@ export default function LandingEditor() {
                               {field.label || field.key}
                             </option>
                           ))}
-                      </select>
+                      </SelectNative>
                     </label>
 
                     <label>
                       Label
-                      <input
+                      <Input
                         type="text"
                         value={selectedFormField.label}
                         onChange={(event) =>
@@ -1482,7 +1492,7 @@ export default function LandingEditor() {
 
                     <label>
                       Key
-                      <input
+                      <Input
                         type="text"
                         value={selectedFormField.key}
                         onChange={(event) =>
@@ -1496,7 +1506,7 @@ export default function LandingEditor() {
 
                     <label>
                       Type
-                      <select
+                      <SelectNative
                         value={selectedFormField.type}
                         onChange={(event) =>
                           updateFormField(selectedFormField.id, (field) => ({
@@ -1510,12 +1520,12 @@ export default function LandingEditor() {
                             {type}
                           </option>
                         ))}
-                      </select>
+                      </SelectNative>
                     </label>
 
                     <label>
                       Placeholder
-                      <input
+                      <Input
                         type="text"
                         value={selectedFormField.placeholder || ""}
                         onChange={(event) =>
@@ -1529,7 +1539,7 @@ export default function LandingEditor() {
 
                     <label>
                       Required
-                      <select
+                      <SelectNative
                         value={selectedFormField.required ? "yes" : "no"}
                         onChange={(event) =>
                           updateFormField(selectedFormField.id, (field) => ({
@@ -1540,12 +1550,12 @@ export default function LandingEditor() {
                       >
                         <option value="yes">Yes</option>
                         <option value="no">No</option>
-                      </select>
+                      </SelectNative>
                     </label>
 
                     <label>
                       Visible
-                      <select
+                      <SelectNative
                         value={selectedFormField.isVisible ? "yes" : "no"}
                         onChange={(event) =>
                           updateFormField(selectedFormField.id, (field) => ({
@@ -1556,13 +1566,13 @@ export default function LandingEditor() {
                       >
                         <option value="yes">Yes</option>
                         <option value="no">No</option>
-                      </select>
+                      </SelectNative>
                     </label>
 
                     {selectedFormField.type === "select" ? (
                       <label className="field-full">
                         Select Options (comma separated)
-                        <input
+                        <Input
                           type="text"
                           value={Array.isArray(selectedFormField.options) ? selectedFormField.options.join(", ") : ""}
                           onChange={(event) =>
@@ -1584,15 +1594,15 @@ export default function LandingEditor() {
 
                     {selectedFormField ? (
                       <div className="section-context-actions">
-                        <button type="button" onClick={() => moveFormField(selectedFormField.id, "up")}>
+                        <Button type="button" onClick={() => moveFormField(selectedFormField.id, "up")}>
                           Move Field Up
-                        </button>
-                        <button type="button" onClick={() => moveFormField(selectedFormField.id, "down")}>
+                        </Button>
+                        <Button type="button" onClick={() => moveFormField(selectedFormField.id, "down")}>
                           Move Field Down
-                        </button>
-                        <button type="button" className="danger-btn" onClick={() => removeFormField(selectedFormField.id)}>
+                        </Button>
+                        <Button type="button" className="danger-btn" onClick={() => removeFormField(selectedFormField.id)}>
                           Remove Field
-                        </button>
+                        </Button>
                       </div>
                     ) : null}
                   </div>
@@ -1605,13 +1615,13 @@ export default function LandingEditor() {
                     <h4>Live Draft Preview</h4>
                     <p>Unsaved edits update here instantly</p>
                   </div>
-                  <button
+                  <Button
                     type="button"
                     className="section-context-preview-replay"
                     onClick={() => setPreviewReplayTick((current) => current + 1)}
                   >
                     Replay
-                  </button>
+                  </Button>
                 </div>
 
                 <div
@@ -1636,13 +1646,13 @@ export default function LandingEditor() {
                   </p>
 
                   <div className="section-context-preview-cta">
-                    <button type="button" className="section-context-preview-primary">
+                    <Button type="button" className="section-context-preview-primary">
                       {menuPreview?.primaryCtaText || "Primary Action"}
-                    </button>
+                    </Button>
                     {menuPreview?.secondaryCtaText ? (
-                      <button type="button" className="section-context-preview-secondary">
+                      <Button type="button" className="section-context-preview-secondary">
                         {menuPreview.secondaryCtaText}
-                      </button>
+                      </Button>
                     ) : null}
                   </div>
 

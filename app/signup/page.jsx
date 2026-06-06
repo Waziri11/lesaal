@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
 
 export const metadata = {
   title: "Lesaal | Sign up",
@@ -7,27 +10,31 @@ export const metadata = {
 
 export default function SignUpComingSoonPage() {
   return (
-    <div className="signup-page-shell">
-      <section className="signup-card">
-        <h1>Sign up is coming soon</h1>
-        <p>
-          We are preparing public accounts. Join the waitlist and we will notify you when signup is ready.
-        </p>
-        <form action="#">
-          <input type="email" placeholder="you@example.com" aria-label="Email address" />
-          <button type="submit" className="lp-btn lp-btn-primary">
-            Join waitlist
-          </button>
-        </form>
-        <div className="services-page-actions">
-          <Link href="/" className="lp-btn lp-btn-ghost">
-            Back to Homepage
-          </Link>
-          <Link href="/admin/login" className="lp-btn lp-btn-ghost">
-            Admin Log in
-          </Link>
-        </div>
-      </section>
+    <div className="mx-auto w-full max-w-2xl px-4 py-12">
+      <Card>
+        <CardHeader>
+          <CardTitle>Sign up is coming soon</CardTitle>
+          <CardDescription>
+            We are preparing public accounts. Join the waitlist and we will notify you when signup is ready.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form action="#" className="space-y-3">
+            <Input type="email" placeholder="you@example.com" aria-label="Email address" />
+            <Button type="submit" className="w-full">
+              Join waitlist
+            </Button>
+          </form>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline">
+              <Link href="/">Back to Homepage</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/admin/login">Admin Log in</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import CampaignResponseForm from "../../../components/CampaignResponseForm";
+import PageState from "../../../components/shared/PageState";
+import { Button } from "../../../components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
 import { getCampaignBySlugForPublic, isCampaignTableMissingError } from "../../../lib/campaigns";
 import { getSecurityConfig } from "../../../lib/security-config";
 
@@ -37,36 +39,74 @@ export async function generateMetadata({ params }) {
 
 export default async function CampaignDetailPage({ params }) {
   const slug = String(params?.slug || "");
-  const campaign = await loadCampaign(slug);
-  const { turnstileSiteKey } = getSecurityConfig();
+
+  let campaign = null;
+  let turnstileSiteKey = "";
+  let errorMessage = "";
+
+  try {
+    campaign = await loadCampaign(slug);
+    turnstileSiteKey = getSecurityConfig().turnstileSiteKey;
+  } catch (error) {
+    errorMessage = error?.message || "Unable to load campaign details.";
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="mx-auto w-full max-w-6xl px-4 py-8">
+        <PageState status="error" errorMessage={errorMessage} />
+      </div>
+    );
+  }
 
   if (!campaign) {
-    notFound();
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-8">
+        <PageState
+          status="empty"
+          resourceLabel="campaign details"
+          createAction={
+            <Button asChild>
+              <Link href="/campaigns">Back to campaigns</Link>
+            </Button>
+          }
+        />
+      </div>
+    );
   }
 
   return (
-    <div className="campaign-detail-shell">
-      <header className="campaign-detail-head">
-        <h1>{campaign.title}</h1>
-        <p>{campaign.description}</p>
+    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
+      <Card>
+        <CardHeader className="space-y-4">
+          <div>
+            <CardTitle>{campaign.title}</CardTitle>
+            <CardDescription>{campaign.description}</CardDescription>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href="/campaigns">View all campaigns</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/">Back to Homepage</Link>
+            </Button>
+          </div>
+        </CardHeader>
+      </Card>
 
-        <div className="services-page-actions">
-          <Link href="/campaigns" className="lp-btn lp-btn-primary">
-            View all campaigns
-          </Link>
-          <Link href="/" className="lp-btn lp-btn-ghost">
-            Back to Homepage
-          </Link>
-        </div>
-      </header>
-
-      <section className="campaign-detail-grid">
-        <article className="campaign-detail-media">
-          {campaign.imageUrl ? <img src={campaign.imageUrl} alt={campaign.title} /> : <div className="lp-image-placeholder">Campaign image</div>}
-        </article>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <div className="overflow-hidden rounded-xl">
+            {campaign.imageUrl ? (
+              <img src={campaign.imageUrl} alt={campaign.title} className="h-full min-h-[280px] w-full object-cover" />
+            ) : (
+              <div className="flex min-h-[280px] items-center justify-center text-sm text-[color:var(--ui-muted-foreground)]">Campaign image</div>
+            )}
+          </div>
+        </Card>
 
         <CampaignResponseForm campaign={campaign} turnstileSiteKey={turnstileSiteKey} />
-      </section>
+      </div>
     </div>
   );
 }

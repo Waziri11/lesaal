@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import PageState from "../shared/PageState";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -27,7 +28,8 @@ export default function CampaignsManager() {
   const [responsesLoading, setResponsesLoading] = useState(false);
   const [responses, setResponses] = useState([]);
   const [responseQuestions, setResponseQuestions] = useState([]);
-  const [statusError, setStatusError] = useState("");
+  const [campaignError, setCampaignError] = useState("");
+  const [responsesError, setResponsesError] = useState("");
   const [statusSuccess, setStatusSuccess] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -60,7 +62,7 @@ export default function CampaignsManager() {
 
   async function loadCampaigns(preferredCampaignId = null) {
     setLoadingCampaigns(true);
-    setStatusError("");
+    setCampaignError("");
 
     try {
       const response = await fetch("/api/admin/campaigns", { cache: "no-store" });
@@ -85,7 +87,7 @@ export default function CampaignsManager() {
         setResponseQuestions([]);
       }
     } catch (error) {
-      setStatusError(error.message || "Unable to load campaigns.");
+      setCampaignError(error.message || "Unable to load campaigns.");
     } finally {
       setLoadingCampaigns(false);
     }
@@ -99,6 +101,7 @@ export default function CampaignsManager() {
     }
 
     setResponsesLoading(true);
+    setResponsesError("");
 
     try {
       const response = await fetch(`/api/admin/campaigns/${campaignId}/responses`, { cache: "no-store" });
@@ -111,7 +114,7 @@ export default function CampaignsManager() {
       setResponses(Array.isArray(payload.responses) ? payload.responses : []);
       setResponseQuestions(Array.isArray(payload.questions) ? payload.questions : []);
     } catch (error) {
-      setStatusError(error.message || "Unable to load campaign responses.");
+      setResponsesError(error.message || "Unable to load campaign responses.");
       setResponses([]);
       setResponseQuestions([]);
     } finally {
@@ -142,26 +145,26 @@ export default function CampaignsManager() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-lg border border-slate-700/70 bg-slate-900/70 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Total campaigns</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-100">{campaignStats.total}</p>
+            <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Total campaigns</p>
+              <p className="mt-2 text-2xl font-semibold">{campaignStats.total}</p>
             </div>
-            <div className="rounded-lg border border-slate-700/70 bg-slate-900/70 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Published</p>
-              <p className="mt-2 text-2xl font-semibold text-emerald-300">{campaignStats.published}</p>
+            <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Published</p>
+              <p className="mt-2 text-2xl font-semibold text-[color:var(--ui-success)]">{campaignStats.published}</p>
             </div>
-            <div className="rounded-lg border border-slate-700/70 bg-slate-900/70 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Drafts</p>
-              <p className="mt-2 text-2xl font-semibold text-amber-300">{campaignStats.drafts}</p>
+            <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Drafts</p>
+              <p className="mt-2 text-2xl font-semibold">{campaignStats.drafts}</p>
             </div>
-            <div className="rounded-lg border border-slate-700/70 bg-slate-900/70 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Total responses</p>
-              <p className="mt-2 text-2xl font-semibold text-blue-300">{formatCount(campaignStats.responsesCount)}</p>
+            <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Total responses</p>
+              <p className="mt-2 text-2xl font-semibold">{formatCount(campaignStats.responsesCount)}</p>
             </div>
           </div>
 
-          {statusError ? <p className="text-sm text-red-300">{statusError}</p> : null}
-          {statusSuccess ? <p className="text-sm text-emerald-300">{statusSuccess}</p> : null}
+          {campaignError ? <p className="text-sm text-[color:var(--ui-destructive)]">{campaignError}</p> : null}
+          {statusSuccess ? <p className="text-sm text-[color:var(--ui-success)]">{statusSuccess}</p> : null}
         </CardContent>
       </Card>
 
@@ -190,83 +193,88 @@ export default function CampaignsManager() {
         </CardHeader>
 
         <CardContent className="pt-0">
-          {loadingCampaigns ? <p className="text-sm text-slate-300">Loading campaigns...</p> : null}
-
-          {!loadingCampaigns && !campaigns.length ? (
-            <div className="rounded-lg border border-dashed border-slate-700/80 bg-slate-900/50 p-8 text-center">
-              <p className="text-sm text-slate-200">No campaigns yet.</p>
-              <p className="mt-1 text-sm text-slate-400">Create your first campaign to start collecting responses.</p>
-            </div>
-          ) : null}
-
-          {!loadingCampaigns && campaigns.length ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Campaign</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Questions</TableHead>
-                  <TableHead>Responses</TableHead>
-                  <TableHead>Last Updated</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCampaigns.map((campaign) => (
-                  <TableRow
-                    key={campaign.id}
-                    className={`cursor-pointer ${selectedCampaignId === campaign.id ? "bg-blue-500/10 hover:bg-blue-500/15" : ""}`}
-                    onClick={() => setSelectedCampaignId(campaign.id)}
-                  >
-                    <TableCell>
-                      <div>
-                        <p className="font-semibold text-slate-100">{campaign.title}</p>
-                        <p className="text-xs text-slate-400">/{campaign.slug}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={campaign.isPublished ? "success" : "default"}>
-                        {campaign.isPublished ? "Published" : "Draft"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{campaign.questionCount || 0}</TableCell>
-                    <TableCell>{campaign.responseCount || 0}</TableCell>
-                    <TableCell>{formatDateTime(campaign.updatedAt || campaign.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex flex-wrap justify-end gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            router.push(`/admin/campaigns/${campaign.id}`);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setSelectedCampaignId(campaign.id);
-                          }}
-                        >
-                          Responses
-                        </Button>
-                      </div>
-                    </TableCell>
+          <PageState
+            status={loadingCampaigns ? "loading" : campaignError ? "error" : !campaigns.length ? "empty" : "loaded"}
+            resourceLabel="campaigns"
+            errorMessage={campaignError}
+            onRetry={loadCampaigns}
+            createAction={
+              <Button type="button" size="sm" onClick={() => router.push("/admin/campaigns/new")}>
+                Add Campaign
+              </Button>
+            }
+          >
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Campaign</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Questions</TableHead>
+                    <TableHead>Responses</TableHead>
+                    <TableHead>Last Updated</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : null}
+                </TableHeader>
+                <TableBody>
+                  {filteredCampaigns.map((campaign) => (
+                    <TableRow
+                      key={campaign.id}
+                      className={`cursor-pointer ${
+                        selectedCampaignId === campaign.id ? "bg-[color:var(--ui-primary-soft)] hover:bg-[color:var(--ui-primary-soft)]" : ""
+                      }`}
+                      onClick={() => setSelectedCampaignId(campaign.id)}
+                    >
+                      <TableCell>
+                        <div>
+                          <p className="font-semibold">{campaign.title}</p>
+                          <p className="text-xs text-[color:var(--ui-muted-foreground)]">/{campaign.slug}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={campaign.isPublished ? "success" : "default"}>
+                          {campaign.isPublished ? "Published" : "Draft"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{campaign.questionCount || 0}</TableCell>
+                      <TableCell>{campaign.responseCount || 0}</TableCell>
+                      <TableCell>{formatDateTime(campaign.updatedAt || campaign.createdAt)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex flex-wrap justify-end gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              router.push(`/admin/campaigns/${campaign.id}`);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setSelectedCampaignId(campaign.id);
+                            }}
+                          >
+                            Responses
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
-          {!loadingCampaigns && campaigns.length && !filteredCampaigns.length ? (
-            <p className="mt-3 text-sm text-slate-300">No campaigns matched that search.</p>
-          ) : null}
+              {!filteredCampaigns.length ? (
+                <p className="mt-3 text-sm text-[color:var(--ui-muted-foreground)]">No campaigns matched that search.</p>
+              ) : null}
+            </>
+          </PageState>
         </CardContent>
       </Card>
 
@@ -285,11 +293,22 @@ export default function CampaignsManager() {
         </CardHeader>
 
         <CardContent>
-          {responsesLoading ? <p className="text-sm text-slate-300">Loading responses...</p> : null}
-          {!responsesLoading && !selectedCampaignId ? <p className="text-sm text-slate-300">Select a campaign to view responses.</p> : null}
-          {!responsesLoading && selectedCampaignId && !responses.length ? <p className="text-sm text-slate-300">No responses yet for this campaign.</p> : null}
-
-          {!responsesLoading && responses.length ? (
+          <PageState
+            status={
+              responsesLoading
+                ? "loading"
+                : responsesError
+                  ? "error"
+                : !selectedCampaignId
+                  ? "empty"
+                  : responses.length
+                    ? "loaded"
+                    : "empty"
+            }
+            resourceLabel={selectedCampaignId ? "responses" : "selected campaign responses"}
+            errorMessage={responsesError}
+            onRetry={() => loadResponses(selectedCampaignId)}
+          >
             <Table>
               <TableHeader>
                 <TableRow>
@@ -310,7 +329,7 @@ export default function CampaignsManager() {
                 ))}
               </TableBody>
             </Table>
-          ) : null}
+          </PageState>
         </CardContent>
       </Card>
     </div>

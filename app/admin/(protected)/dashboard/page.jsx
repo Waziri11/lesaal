@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import PageState from "../../../../components/shared/PageState";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { prisma } from "../../../../lib/prisma";
 import { getAuthenticatedAdminFromCookies } from "../../../../lib/auth";
 import { isAdminProfileComplete } from "../../../../lib/admin-profile";
@@ -38,54 +40,69 @@ export default async function DashboardPage() {
   const companyName = String(admin.companyName || "Lesaal").trim() || "Lesaal";
   const todayStart = getTodayStartInDarEsSalaam();
 
-  const [campaignCount, responseCount, responsesTodayCount, unreadNotificationsCount] = await Promise.all([
-    prisma.campaign.count(),
-    prisma.campaignResponse.count(),
-    prisma.campaignResponse.count({
-      where: {
-        submittedAt: {
-          gte: todayStart,
+  try {
+    const [campaignCount, responseCount, responsesTodayCount, unreadNotificationsCount] = await Promise.all([
+      prisma.campaign.count(),
+      prisma.campaignResponse.count(),
+      prisma.campaignResponse.count({
+        where: {
+          submittedAt: {
+            gte: todayStart,
+          },
         },
-      },
-    }),
-    prisma.adminNotification.count({
-      where: {
-        isRead: false,
-      },
-    }),
-  ]);
+      }),
+      prisma.adminNotification.count({
+        where: {
+          isRead: false,
+        },
+      }),
+    ]);
 
-  return (
-    <section className="profile-shell">
-      <article className="admin-page-card">
-        <h1>{`${companyName} Day Summary`}</h1>
-        <p>Business activity for {companyName}, updated in real time.</p>
-      </article>
+    return (
+      <section className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>{`${companyName} Day Summary`}</CardTitle>
+            <CardDescription>Business activity for {companyName}, updated in real time.</CardDescription>
+          </CardHeader>
+        </Card>
 
-      <article className="admin-page-card">
-        <div className="profile-form-grid">
-          <div>
-            <p className="admin-header-eyebrow">Campaigns</p>
-            <h2>{formatNumber(campaignCount)}</h2>
-            <p>Total active and draft campaigns for {companyName}.</p>
-          </div>
-          <div>
-            <p className="admin-header-eyebrow">Responses Today</p>
-            <h2>{formatNumber(responsesTodayCount)}</h2>
-            <p>Responses received today for {companyName}.</p>
-          </div>
-          <div>
-            <p className="admin-header-eyebrow">All Responses</p>
-            <h2>{formatNumber(responseCount)}</h2>
-            <p>Total campaign responses stored for {companyName}.</p>
-          </div>
-          <div>
-            <p className="admin-header-eyebrow">Unread Alerts</p>
-            <h2>{formatNumber(unreadNotificationsCount)}</h2>
-            <p>Unread notifications waiting for {companyName}.</p>
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card>
+            <CardContent className="space-y-2 p-5">
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Campaigns</p>
+              <h2 className="text-2xl font-semibold">{formatNumber(campaignCount)}</h2>
+              <p className="text-sm text-[color:var(--ui-muted-foreground)]">Total active and draft campaigns for {companyName}.</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="space-y-2 p-5">
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Responses Today</p>
+              <h2 className="text-2xl font-semibold">{formatNumber(responsesTodayCount)}</h2>
+              <p className="text-sm text-[color:var(--ui-muted-foreground)]">Responses received today for {companyName}.</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="space-y-2 p-5">
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">All Responses</p>
+              <h2 className="text-2xl font-semibold">{formatNumber(responseCount)}</h2>
+              <p className="text-sm text-[color:var(--ui-muted-foreground)]">Total campaign responses stored for {companyName}.</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="space-y-2 p-5">
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Unread Alerts</p>
+              <h2 className="text-2xl font-semibold">{formatNumber(unreadNotificationsCount)}</h2>
+              <p className="text-sm text-[color:var(--ui-muted-foreground)]">Unread notifications waiting for {companyName}.</p>
+            </CardContent>
+          </Card>
         </div>
-      </article>
-    </section>
-  );
+      </section>
+    );
+  } catch (error) {
+    return <PageState status="error" errorMessage={error?.message || "Unable to load dashboard."} />;
+  }
 }

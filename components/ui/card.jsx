@@ -4,7 +4,7 @@ export function Card({ className, ...props }) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-slate-700/60 bg-slate-900/70 text-slate-100 shadow-[0_12px_36px_rgba(2,8,28,0.28)]",
+        "rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] text-[color:var(--ui-card-foreground)] shadow-sm",
         className
       )}
       {...props}
@@ -21,7 +21,7 @@ export function CardTitle({ className, ...props }) {
 }
 
 export function CardDescription({ className, ...props }) {
-  return <p className={cn("text-sm text-slate-300", className)} {...props} />;
+  return <p className={cn("text-sm text-[color:var(--ui-muted-foreground)]", className)} {...props} />;
 }
 
 export function CardContent({ className, ...props }) {

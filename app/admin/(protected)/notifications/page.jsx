@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PageState from "../../../../components/shared/PageState";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
@@ -90,30 +91,17 @@ export default function NotificationsPage() {
             </Button>
           </div>
         </CardHeader>
-
-        {error ? <CardContent><p className="text-sm text-red-300">{error}</p></CardContent> : null}
       </Card>
 
-      {loading ? (
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-slate-300">Loading notifications...</p>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {!loading && !notifications.length ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">No notifications yet</CardTitle>
-            <CardDescription>New campaign responses will appear here.</CardDescription>
-          </CardHeader>
-        </Card>
-      ) : null}
-
-      {!loading
-        ? notifications.map((notification) => (
-            <Card key={notification.id} className={notification.isRead ? "" : "border-blue-500/60"}>
+      <PageState
+        status={loading ? "loading" : error ? "error" : !notifications.length ? "empty" : "loaded"}
+        resourceLabel="notifications"
+        errorMessage={error}
+        onRetry={loadNotifications}
+      >
+        <div className="space-y-3">
+          {notifications.map((notification) => (
+            <Card key={notification.id} className={notification.isRead ? "" : "border-[color:var(--ui-primary)]"}>
               <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
                 <div>
                   <CardTitle className="text-base">{notification.title}</CardTitle>
@@ -129,7 +117,7 @@ export default function NotificationsPage() {
                 )}
               </CardHeader>
 
-              <CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300">
+              <CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm text-[color:var(--ui-muted-foreground)]">
                 <span>Received: {formatDateTime(notification.createdAt)}</span>
                 {notification.campaign ? (
                   <Button asChild variant="ghost" size="sm">
@@ -140,8 +128,9 @@ export default function NotificationsPage() {
                 ) : null}
               </CardContent>
             </Card>
-          ))
-        : null}
+          ))}
+        </div>
+      </PageState>
     </div>
   );
 }

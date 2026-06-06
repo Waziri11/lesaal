@@ -9,7 +9,7 @@ function SelectTrigger({ className, children, ...props }) {
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        "flex h-10 w-full items-center justify-between rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 ring-offset-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-10 w-full items-center justify-between rounded-md border border-[color:var(--ui-border)] bg-[color:var(--ui-input)] px-3 py-2 text-sm text-[color:var(--ui-foreground)] ring-offset-[color:var(--ui-background)] placeholder:text-[color:var(--ui-muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ui-ring)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -27,7 +27,7 @@ function SelectContent({ className, children, position = "popper", ...props }) {
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
         className={cn(
-          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-slate-700 bg-slate-900 text-slate-100 shadow-md",
+          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-[color:var(--ui-border)] bg-[color:var(--ui-popover)] text-[color:var(--ui-popover-foreground)] shadow-md",
           position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
           className
         )}
@@ -50,7 +50,7 @@ function SelectItem({ className, children, ...props }) {
   return (
     <SelectPrimitive.Item
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-slate-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-[color:var(--ui-accent)] focus:text-[color:var(--ui-accent-foreground)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       {...props}

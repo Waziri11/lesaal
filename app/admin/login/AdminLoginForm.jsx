@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./login.module.css";
+import { Button } from "../../../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Spinner } from "../../../components/ui/spinner";
 import { createCsrfHeaders } from "../../../lib/csrf-client";
 
 const MIN_PASSWORD_LENGTH = 8;
-const CAPTCHA_LOAD_ERROR_MESSAGE =
-  "Captcha failed to load. Please disable blockers and refresh the page.";
+const CAPTCHA_LOAD_ERROR_MESSAGE = "Captcha failed to load. Please disable blockers and refresh the page.";
 
 function getCaptchaErrorMessage(errorCode) {
   const code = String(errorCode || "").trim();
@@ -27,7 +30,6 @@ function getCaptchaErrorMessage(errorCode) {
 
   return `Captcha failed to load (Turnstile error ${code}).`;
 }
-
 
 export default function AdminLoginForm({ turnstileSiteKey }) {
   const router = useRouter();
@@ -71,12 +73,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
     }
 
     function renderTurnstile() {
-      if (
-        isCancelled ||
-        !window.turnstile ||
-        !captchaRef.current ||
-        widgetIdRef.current !== null
-      ) {
+      if (isCancelled || !window.turnstile || !captchaRef.current || widgetIdRef.current !== null) {
         return;
       }
 
@@ -119,6 +116,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
     const handleScriptError = () => {
       markCaptchaLoadError();
     };
+
     const startLoadTimeout = () => {
       timeoutId = window.setTimeout(() => {
         if (!window.turnstile && !widgetIdRef.current) {
@@ -236,7 +234,6 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
     setForgotPassword("");
     setConfirmForgotPassword("");
   }
-
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -412,267 +409,215 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
 
   function renderCaptcha() {
     return (
-      <div className={styles.turnstileWrap}>
+      <div className="space-y-2">
         <div ref={captchaRef} />
-        {!captchaReady ? <p className={styles.turnstileHint}>Loading captcha challenge...</p> : null}
-        {captchaLoadError ? <p className={styles.error}>{captchaLoadError}</p> : null}
+        {!captchaReady ? (
+          <p className="flex items-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
+            <Spinner />
+            Loading captcha challenge...
+          </p>
+        ) : null}
+        {captchaLoadError ? <p className="text-sm text-[color:var(--ui-destructive)]">{captchaLoadError}</p> : null}
       </div>
     );
   }
 
-
   return (
-    <div className={styles.shell}>
-      <div className={styles.bgOrbOne} aria-hidden="true" />
-      <div className={styles.bgOrbTwo} aria-hidden="true" />
+    <div className="mx-auto flex min-h-screen w-full max-w-2xl items-center px-4 py-8">
+      <Card className="w-full" aria-busy={loading}>
+        <CardHeader className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/">Back to Homepage</Link>
+            </Button>
+            {isForgotMode ? (
+              <Button type="button" variant="ghost" size="sm" onClick={closeForgotMode} disabled={loading}>
+                Back to Login
+              </Button>
+            ) : null}
+          </div>
 
+          <div>
+            <CardTitle>{isForgotMode ? "Forgot password" : "Sign in"}</CardTitle>
+            <CardDescription>
+              {isForgotMode
+                ? "Use OTP reset to recover your admin account."
+                : "Sign in with your admin email and password."}
+            </CardDescription>
+          </div>
+        </CardHeader>
 
-      <div className={styles.card} aria-busy={loading}>
-        <div className={styles.topActions}>
-          <Link href="/" className={styles.secondaryLink}>
-            Back to Homepage
-          </Link>
-          {isForgotMode ? (
-            <button
-              type="button"
-              className={styles.secondaryButton}
-              onClick={closeForgotMode}
-              disabled={loading}
-            >
-              Back to Login
-            </button>
-          ) : null}
-        </div>
-
-        <h1>{isForgotMode ? "Forgot password" : "Sign in"}</h1>
-
-        {!isForgotMode ? (
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <div className={styles.field}>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="admin@example.com"
-                aria-label="Email"
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className={styles.field}>
-              <div className={styles.passwordRow}>
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="********"
-                  aria-label="Password"
-                  className={styles.passwordInput}
+        <CardContent className="space-y-4">
+          {!isForgotMode ? (
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="admin@example.com"
                   disabled={loading}
                   required
                 />
-                <button
-                  type="button"
-                  className={styles.passwordToggle}
-                  onClick={() => setShowPassword((current) => !current)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  aria-pressed={showPassword}
-                  disabled={loading}
-                >
-                  {showPassword ? (
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        d="M4 4l16 16M10.7 10.7a2 2 0 102.6 2.6M9.9 5.1A10.7 10.7 0 0112 5c5.2 0 9 4.5 10 7-0.4 1-1.3 2.4-2.7 3.7M6 8.2C4.8 9.3 4.2 10.5 4 11c1 2.5 4.8 7 10 7 1.3 0 2.4-.2 3.5-.6"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7S2 12 2 12z"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="3"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                      />
-                    </svg>
-                  )}
-                </button>
               </div>
-            </div>
 
-            {error ? <p className={styles.error}>{error}</p> : null}
-            {notice ? <p className={styles.notice}>{notice}</p> : null}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="********"
+                    disabled={loading}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowPassword((current) => !current)}
+                    disabled={loading}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </Button>
+                </div>
+              </div>
 
-            <button type="submit" className={styles.button} disabled={loading}>
-              {loading ? (
-                <span className={styles.buttonContent}>
-                  <span className={styles.spinner} aria-hidden="true" />
-                  Signing in...
-                </span>
-              ) : (
-                "Login"
-              )}
-            </button>
-            {renderCaptcha()}
+              {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
+              {notice ? <p className="text-sm text-[color:var(--ui-success)]">{notice}</p> : null}
 
-            <button
-              type="button"
-              className={styles.inlineAction}
-              onClick={openForgotMode}
-              disabled={loading}
-            >
-              Forgot password? Reset with OTP
-            </button>
-          </form>
-        ) : null}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing in..." : "Login"}
+              </Button>
+              {renderCaptcha()}
 
-        {isForgotMode && forgotStep === "request" ? (
-          <form className={styles.form} onSubmit={handleRequestOtp}>
-            <p className={styles.helperText}>Enter your admin email and we will send you a reset OTP.</p>
+              <Button type="button" variant="ghost" className="w-full" onClick={openForgotMode} disabled={loading}>
+                Forgot password? Reset with OTP
+              </Button>
+            </form>
+          ) : null}
 
-            <div className={styles.field}>
-              <input
-                id="forgot-email"
-                type="email"
-                value={forgotEmail}
-                onChange={(event) => setForgotEmail(event.target.value)}
-                placeholder="admin@example.com"
-                aria-label="Admin email"
+          {isForgotMode && forgotStep === "request" ? (
+            <form className="space-y-4" onSubmit={handleRequestOtp}>
+              <p className="text-sm text-[color:var(--ui-muted-foreground)]">Enter your admin email and we will send you a reset OTP.</p>
+
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email">Admin Email</Label>
+                <Input
+                  id="forgot-email"
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(event) => setForgotEmail(event.target.value)}
+                  placeholder="admin@example.com"
+                  disabled={loading}
+                  required
+                />
+              </div>
+
+              {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
+              {notice ? <p className="text-sm text-[color:var(--ui-success)]">{notice}</p> : null}
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Sending OTP..." : "Send OTP"}
+              </Button>
+              {renderCaptcha()}
+            </form>
+          ) : null}
+
+          {isForgotMode && forgotStep === "reset" ? (
+            <form className="space-y-4" onSubmit={handleResetPassword}>
+              <p className="text-sm text-[color:var(--ui-muted-foreground)]">Enter the OTP from your email, then choose a new password.</p>
+
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Admin Email</Label>
+                <Input
+                  id="reset-email"
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(event) => setForgotEmail(event.target.value)}
+                  placeholder="admin@example.com"
+                  disabled={loading}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="otp">OTP Code</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  inputMode="numeric"
+                  value={forgotOtp}
+                  onChange={(event) => setForgotOtp(event.target.value)}
+                  placeholder="6-digit OTP"
+                  disabled={loading}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={forgotPassword}
+                  onChange={(event) => setForgotPassword(event.target.value)}
+                  placeholder="New password"
+                  disabled={loading}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmForgotPassword}
+                  onChange={(event) => setConfirmForgotPassword(event.target.value)}
+                  placeholder="Confirm new password"
+                  disabled={loading}
+                  required
+                />
+              </div>
+
+              {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
+              {notice ? <p className="text-sm text-[color:var(--ui-success)]">{notice}</p> : null}
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Resetting password..." : "Reset password"}
+              </Button>
+              {renderCaptcha()}
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  clearMessages();
+                  setForgotStep("request");
+                  setForgotOtp("");
+                  setForgotPassword("");
+                  setConfirmForgotPassword("");
+                }}
                 disabled={loading}
-                required
-              />
-            </div>
+              >
+                Request a new OTP
+              </Button>
+            </form>
+          ) : null}
 
-            {error ? <p className={styles.error}>{error}</p> : null}
-            {notice ? <p className={styles.notice}>{notice}</p> : null}
-
-            <button type="submit" className={styles.button} disabled={loading}>
-              {loading ? (
-                <span className={styles.buttonContent}>
-                  <span className={styles.spinner} aria-hidden="true" />
-                  Sending OTP...
-                </span>
-              ) : (
-                "Send OTP"
-              )}
-            </button>
-            {renderCaptcha()}
-          </form>
-        ) : null}
-
-        {isForgotMode && forgotStep === "reset" ? (
-          <form className={styles.form} onSubmit={handleResetPassword}>
-            <p className={styles.helperText}>Enter the OTP from your email, then choose a new password.</p>
-
-            <div className={styles.field}>
-              <input
-                id="reset-email"
-                type="email"
-                value={forgotEmail}
-                onChange={(event) => setForgotEmail(event.target.value)}
-                placeholder="admin@example.com"
-                aria-label="Admin email"
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className={styles.field}>
-              <input
-                id="otp"
-                type="text"
-                inputMode="numeric"
-                value={forgotOtp}
-                onChange={(event) => setForgotOtp(event.target.value)}
-                placeholder="6-digit OTP"
-                aria-label="OTP"
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className={styles.field}>
-              <input
-                id="new-password"
-                type="password"
-                value={forgotPassword}
-                onChange={(event) => setForgotPassword(event.target.value)}
-                placeholder="New password"
-                aria-label="New password"
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className={styles.field}>
-              <input
-                id="confirm-password"
-                type="password"
-                value={confirmForgotPassword}
-                onChange={(event) => setConfirmForgotPassword(event.target.value)}
-                placeholder="Confirm new password"
-                aria-label="Confirm new password"
-                disabled={loading}
-                required
-              />
-            </div>
-
-            {error ? <p className={styles.error}>{error}</p> : null}
-            {notice ? <p className={styles.notice}>{notice}</p> : null}
-
-            <button type="submit" className={styles.button} disabled={loading}>
-              {loading ? (
-                <span className={styles.buttonContent}>
-                  <span className={styles.spinner} aria-hidden="true" />
-                  Resetting password...
-                </span>
-              ) : (
-                "Reset password"
-              )}
-            </button>
-            {renderCaptcha()}
-
-            <button
-              type="button"
-              className={styles.inlineAction}
-              onClick={() => {
-                clearMessages();
-                setForgotStep("request");
-                setForgotOtp("");
-                setForgotPassword("");
-                setConfirmForgotPassword("");
-              }}
-              disabled={loading}
-            >
-              Request a new OTP
-            </button>
-          </form>
-        ) : null}
-
-        <p className={styles.footerText}>
-          Don&apos;t have an account yet?{" "}
-          <Link href="/signup" className={styles.footerLink}>
-            Sign up
-          </Link>
-        </p>
-      </div>
+          <p className="text-sm text-[color:var(--ui-muted-foreground)]">
+            Don&apos;t have an account yet?{" "}
+            <Link href="/signup" className="font-semibold text-[color:var(--ui-primary)] underline">
+              Sign up
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

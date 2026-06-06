@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
+import { AdminThemeProvider } from "../../../components/admin/AdminThemeProvider";
+import { Badge } from "../../../components/ui/badge";
+import { Card } from "../../../components/ui/card";
 import { getAuthenticatedAdminFromCookies } from "../../../lib/auth";
 import { getGreetingForTime } from "../../../lib/admin-profile";
 
@@ -17,18 +20,22 @@ export default async function AdminProtectedLayout({ children }) {
   const userChip = admin.firstName && admin.lastName ? `${admin.firstName} ${admin.lastName}` : admin.email;
 
   return (
-    <div className="admin-layout">
-      <AdminSidebar />
-      <div className="admin-content">
-        <header className="admin-header">
-          <div>
-            <p className="admin-header-eyebrow">Admin Dashboard</p>
-            <h1>{`${greeting} ${displayName}`}</h1>
-          </div>
-          <div className="admin-user-chip">{userChip}</div>
-        </header>
-        <main>{children}</main>
+    <AdminThemeProvider>
+      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <AdminSidebar />
+        <div className="px-4 py-4 sm:px-6">
+          <Card className="mb-4 border-[color:var(--ui-border)]">
+            <header className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Admin Dashboard</p>
+                <h1 className="text-2xl font-semibold">{`${greeting} ${displayName}`}</h1>
+              </div>
+              <Badge>{userChip}</Badge>
+            </header>
+          </Card>
+          <main>{children}</main>
+        </div>
       </div>
-    </div>
+    </AdminThemeProvider>
   );
 }

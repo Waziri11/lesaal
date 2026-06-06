@@ -33,6 +33,7 @@ export type AdminUserMinAggregateOutputType = {
   birthDate: Date | null
   companyName: string | null
   companyDescription: string | null
+  profileImageUrl: string | null
   gender: string | null
   region: string | null
   district: string | null
@@ -50,6 +51,7 @@ export type AdminUserMaxAggregateOutputType = {
   birthDate: Date | null
   companyName: string | null
   companyDescription: string | null
+  profileImageUrl: string | null
   gender: string | null
   region: string | null
   district: string | null
@@ -67,6 +69,7 @@ export type AdminUserCountAggregateOutputType = {
   birthDate: number
   companyName: number
   companyDescription: number
+  profileImageUrl: number
   gender: number
   region: number
   district: number
@@ -86,6 +89,7 @@ export type AdminUserMinAggregateInputType = {
   birthDate?: true
   companyName?: true
   companyDescription?: true
+  profileImageUrl?: true
   gender?: true
   region?: true
   district?: true
@@ -103,6 +107,7 @@ export type AdminUserMaxAggregateInputType = {
   birthDate?: true
   companyName?: true
   companyDescription?: true
+  profileImageUrl?: true
   gender?: true
   region?: true
   district?: true
@@ -120,6 +125,7 @@ export type AdminUserCountAggregateInputType = {
   birthDate?: true
   companyName?: true
   companyDescription?: true
+  profileImageUrl?: true
   gender?: true
   region?: true
   district?: true
@@ -210,6 +216,7 @@ export type AdminUserGroupByOutputType = {
   birthDate: Date | null
   companyName: string
   companyDescription: string | null
+  profileImageUrl: string | null
   gender: string | null
   region: string | null
   district: string | null
@@ -248,6 +255,7 @@ export type AdminUserWhereInput = {
   birthDate?: Prisma.DateTimeNullableFilter<"AdminUser"> | Date | string | null
   companyName?: Prisma.StringFilter<"AdminUser"> | string
   companyDescription?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  profileImageUrl?: Prisma.StringNullableFilter<"AdminUser"> | string | null
   gender?: Prisma.StringNullableFilter<"AdminUser"> | string | null
   region?: Prisma.StringNullableFilter<"AdminUser"> | string | null
   district?: Prisma.StringNullableFilter<"AdminUser"> | string | null
@@ -257,6 +265,7 @@ export type AdminUserWhereInput = {
   sessions?: Prisma.AdminSessionListRelationFilter
   otpCodes?: Prisma.EmailOtpCodeListRelationFilter
   mediaAssets?: Prisma.MediaAssetListRelationFilter
+  notes?: Prisma.AdminNoteListRelationFilter
 }
 
 export type AdminUserOrderByWithRelationInput = {
@@ -268,6 +277,7 @@ export type AdminUserOrderByWithRelationInput = {
   birthDate?: Prisma.SortOrderInput | Prisma.SortOrder
   companyName?: Prisma.SortOrder
   companyDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   district?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -277,6 +287,7 @@ export type AdminUserOrderByWithRelationInput = {
   sessions?: Prisma.AdminSessionOrderByRelationAggregateInput
   otpCodes?: Prisma.EmailOtpCodeOrderByRelationAggregateInput
   mediaAssets?: Prisma.MediaAssetOrderByRelationAggregateInput
+  notes?: Prisma.AdminNoteOrderByRelationAggregateInput
 }
 
 export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
@@ -291,6 +302,7 @@ export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
   birthDate?: Prisma.DateTimeNullableFilter<"AdminUser"> | Date | string | null
   companyName?: Prisma.StringFilter<"AdminUser"> | string
   companyDescription?: Prisma.StringNullableFilter<"AdminUser"> | string | null
+  profileImageUrl?: Prisma.StringNullableFilter<"AdminUser"> | string | null
   gender?: Prisma.StringNullableFilter<"AdminUser"> | string | null
   region?: Prisma.StringNullableFilter<"AdminUser"> | string | null
   district?: Prisma.StringNullableFilter<"AdminUser"> | string | null
@@ -300,6 +312,7 @@ export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
   sessions?: Prisma.AdminSessionListRelationFilter
   otpCodes?: Prisma.EmailOtpCodeListRelationFilter
   mediaAssets?: Prisma.MediaAssetListRelationFilter
+  notes?: Prisma.AdminNoteListRelationFilter
 }, "id" | "email">
 
 export type AdminUserOrderByWithAggregationInput = {
@@ -311,6 +324,7 @@ export type AdminUserOrderByWithAggregationInput = {
   birthDate?: Prisma.SortOrderInput | Prisma.SortOrder
   companyName?: Prisma.SortOrder
   companyDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   district?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -334,6 +348,7 @@ export type AdminUserScalarWhereWithAggregatesInput = {
   birthDate?: Prisma.DateTimeNullableWithAggregatesFilter<"AdminUser"> | Date | string | null
   companyName?: Prisma.StringWithAggregatesFilter<"AdminUser"> | string
   companyDescription?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+  profileImageUrl?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
   gender?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
   region?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
   district?: Prisma.StringNullableWithAggregatesFilter<"AdminUser"> | string | null
@@ -351,6 +366,7 @@ export type AdminUserCreateInput = {
   birthDate?: Date | string | null
   companyName?: string
   companyDescription?: string | null
+  profileImageUrl?: string | null
   gender?: string | null
   region?: string | null
   district?: string | null
@@ -360,6 +376,7 @@ export type AdminUserCreateInput = {
   sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
   otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateInput = {
@@ -371,6 +388,7 @@ export type AdminUserUncheckedCreateInput = {
   birthDate?: Date | string | null
   companyName?: string
   companyDescription?: string | null
+  profileImageUrl?: string | null
   gender?: string | null
   region?: string | null
   district?: string | null
@@ -380,6 +398,7 @@ export type AdminUserUncheckedCreateInput = {
   sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
   otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUpdateInput = {
@@ -391,6 +410,7 @@ export type AdminUserUpdateInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -400,6 +420,7 @@ export type AdminUserUpdateInput = {
   sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
   otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateInput = {
@@ -411,6 +432,7 @@ export type AdminUserUncheckedUpdateInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -420,6 +442,7 @@ export type AdminUserUncheckedUpdateInput = {
   sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
   otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateManyInput = {
@@ -431,6 +454,7 @@ export type AdminUserCreateManyInput = {
   birthDate?: Date | string | null
   companyName?: string
   companyDescription?: string | null
+  profileImageUrl?: string | null
   gender?: string | null
   region?: string | null
   district?: string | null
@@ -448,6 +472,7 @@ export type AdminUserUpdateManyMutationInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -465,6 +490,7 @@ export type AdminUserUncheckedUpdateManyInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -482,6 +508,7 @@ export type AdminUserCountOrderByAggregateInput = {
   birthDate?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
   companyDescription?: Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   region?: Prisma.SortOrder
   district?: Prisma.SortOrder
@@ -499,6 +526,7 @@ export type AdminUserMaxOrderByAggregateInput = {
   birthDate?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
   companyDescription?: Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   region?: Prisma.SortOrder
   district?: Prisma.SortOrder
@@ -516,6 +544,7 @@ export type AdminUserMinOrderByAggregateInput = {
   birthDate?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
   companyDescription?: Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   region?: Prisma.SortOrder
   district?: Prisma.SortOrder
@@ -594,6 +623,20 @@ export type AdminUserUpdateOneWithoutMediaAssetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AdminUserUpdateToOneWithWhereWithoutMediaAssetsInput, Prisma.AdminUserUpdateWithoutMediaAssetsInput>, Prisma.AdminUserUncheckedUpdateWithoutMediaAssetsInput>
 }
 
+export type AdminUserCreateNestedOneWithoutNotesInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutNotesInput, Prisma.AdminUserUncheckedCreateWithoutNotesInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutNotesInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+}
+
+export type AdminUserUpdateOneRequiredWithoutNotesNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutNotesInput, Prisma.AdminUserUncheckedCreateWithoutNotesInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutNotesInput
+  upsert?: Prisma.AdminUserUpsertWithoutNotesInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdminUserUpdateToOneWithWhereWithoutNotesInput, Prisma.AdminUserUpdateWithoutNotesInput>, Prisma.AdminUserUncheckedUpdateWithoutNotesInput>
+}
+
 export type AdminUserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -603,6 +646,7 @@ export type AdminUserCreateWithoutSessionsInput = {
   birthDate?: Date | string | null
   companyName?: string
   companyDescription?: string | null
+  profileImageUrl?: string | null
   gender?: string | null
   region?: string | null
   district?: string | null
@@ -611,6 +655,7 @@ export type AdminUserCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutSessionsInput = {
@@ -622,6 +667,7 @@ export type AdminUserUncheckedCreateWithoutSessionsInput = {
   birthDate?: Date | string | null
   companyName?: string
   companyDescription?: string | null
+  profileImageUrl?: string | null
   gender?: string | null
   region?: string | null
   district?: string | null
@@ -630,6 +676,7 @@ export type AdminUserUncheckedCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutSessionsInput = {
@@ -657,6 +704,7 @@ export type AdminUserUpdateWithoutSessionsInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -665,6 +713,7 @@ export type AdminUserUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutSessionsInput = {
@@ -676,6 +725,7 @@ export type AdminUserUncheckedUpdateWithoutSessionsInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -684,6 +734,7 @@ export type AdminUserUncheckedUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutOtpCodesInput = {
@@ -695,6 +746,7 @@ export type AdminUserCreateWithoutOtpCodesInput = {
   birthDate?: Date | string | null
   companyName?: string
   companyDescription?: string | null
+  profileImageUrl?: string | null
   gender?: string | null
   region?: string | null
   district?: string | null
@@ -703,6 +755,7 @@ export type AdminUserCreateWithoutOtpCodesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutOtpCodesInput = {
@@ -714,6 +767,7 @@ export type AdminUserUncheckedCreateWithoutOtpCodesInput = {
   birthDate?: Date | string | null
   companyName?: string
   companyDescription?: string | null
+  profileImageUrl?: string | null
   gender?: string | null
   region?: string | null
   district?: string | null
@@ -722,6 +776,7 @@ export type AdminUserUncheckedCreateWithoutOtpCodesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutOtpCodesInput = {
@@ -749,6 +804,7 @@ export type AdminUserUpdateWithoutOtpCodesInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -757,6 +813,7 @@ export type AdminUserUpdateWithoutOtpCodesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutOtpCodesInput = {
@@ -768,6 +825,7 @@ export type AdminUserUncheckedUpdateWithoutOtpCodesInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -776,6 +834,7 @@ export type AdminUserUncheckedUpdateWithoutOtpCodesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutMediaAssetsInput = {
@@ -787,6 +846,7 @@ export type AdminUserCreateWithoutMediaAssetsInput = {
   birthDate?: Date | string | null
   companyName?: string
   companyDescription?: string | null
+  profileImageUrl?: string | null
   gender?: string | null
   region?: string | null
   district?: string | null
@@ -795,6 +855,7 @@ export type AdminUserCreateWithoutMediaAssetsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
   otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
+  notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutMediaAssetsInput = {
@@ -806,6 +867,7 @@ export type AdminUserUncheckedCreateWithoutMediaAssetsInput = {
   birthDate?: Date | string | null
   companyName?: string
   companyDescription?: string | null
+  profileImageUrl?: string | null
   gender?: string | null
   region?: string | null
   district?: string | null
@@ -814,6 +876,7 @@ export type AdminUserUncheckedCreateWithoutMediaAssetsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
   otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
+  notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutMediaAssetsInput = {
@@ -841,6 +904,7 @@ export type AdminUserUpdateWithoutMediaAssetsInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -849,6 +913,7 @@ export type AdminUserUpdateWithoutMediaAssetsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
   otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
+  notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutMediaAssetsInput = {
@@ -860,6 +925,7 @@ export type AdminUserUncheckedUpdateWithoutMediaAssetsInput = {
   birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -868,6 +934,107 @@ export type AdminUserUncheckedUpdateWithoutMediaAssetsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
   otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
+  notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
+}
+
+export type AdminUserCreateWithoutNotesInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  profileImageUrl?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
+  otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
+  mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
+}
+
+export type AdminUserUncheckedCreateWithoutNotesInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  profileImageUrl?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
+  otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
+  mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
+}
+
+export type AdminUserCreateOrConnectWithoutNotesInput = {
+  where: Prisma.AdminUserWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutNotesInput, Prisma.AdminUserUncheckedCreateWithoutNotesInput>
+}
+
+export type AdminUserUpsertWithoutNotesInput = {
+  update: Prisma.XOR<Prisma.AdminUserUpdateWithoutNotesInput, Prisma.AdminUserUncheckedUpdateWithoutNotesInput>
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutNotesInput, Prisma.AdminUserUncheckedCreateWithoutNotesInput>
+  where?: Prisma.AdminUserWhereInput
+}
+
+export type AdminUserUpdateToOneWithWhereWithoutNotesInput = {
+  where?: Prisma.AdminUserWhereInput
+  data: Prisma.XOR<Prisma.AdminUserUpdateWithoutNotesInput, Prisma.AdminUserUncheckedUpdateWithoutNotesInput>
+}
+
+export type AdminUserUpdateWithoutNotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
+  otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
+  mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
+}
+
+export type AdminUserUncheckedUpdateWithoutNotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
+  otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
+  mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 
@@ -879,12 +1046,14 @@ export type AdminUserCountOutputType = {
   sessions: number
   otpCodes: number
   mediaAssets: number
+  notes: number
 }
 
 export type AdminUserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | AdminUserCountOutputTypeCountSessionsArgs
   otpCodes?: boolean | AdminUserCountOutputTypeCountOtpCodesArgs
   mediaAssets?: boolean | AdminUserCountOutputTypeCountMediaAssetsArgs
+  notes?: boolean | AdminUserCountOutputTypeCountNotesArgs
 }
 
 /**
@@ -918,6 +1087,13 @@ export type AdminUserCountOutputTypeCountMediaAssetsArgs<ExtArgs extends runtime
   where?: Prisma.MediaAssetWhereInput
 }
 
+/**
+ * AdminUserCountOutputType without action
+ */
+export type AdminUserCountOutputTypeCountNotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AdminNoteWhereInput
+}
+
 
 export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -928,6 +1104,7 @@ export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   birthDate?: boolean
   companyName?: boolean
   companyDescription?: boolean
+  profileImageUrl?: boolean
   gender?: boolean
   region?: boolean
   district?: boolean
@@ -937,6 +1114,7 @@ export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   sessions?: boolean | Prisma.AdminUser$sessionsArgs<ExtArgs>
   otpCodes?: boolean | Prisma.AdminUser$otpCodesArgs<ExtArgs>
   mediaAssets?: boolean | Prisma.AdminUser$mediaAssetsArgs<ExtArgs>
+  notes?: boolean | Prisma.AdminUser$notesArgs<ExtArgs>
   _count?: boolean | Prisma.AdminUserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["adminUser"]>
 
@@ -949,6 +1127,7 @@ export type AdminUserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   birthDate?: boolean
   companyName?: boolean
   companyDescription?: boolean
+  profileImageUrl?: boolean
   gender?: boolean
   region?: boolean
   district?: boolean
@@ -966,6 +1145,7 @@ export type AdminUserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   birthDate?: boolean
   companyName?: boolean
   companyDescription?: boolean
+  profileImageUrl?: boolean
   gender?: boolean
   region?: boolean
   district?: boolean
@@ -983,6 +1163,7 @@ export type AdminUserSelectScalar = {
   birthDate?: boolean
   companyName?: boolean
   companyDescription?: boolean
+  profileImageUrl?: boolean
   gender?: boolean
   region?: boolean
   district?: boolean
@@ -991,11 +1172,12 @@ export type AdminUserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AdminUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "firstName" | "lastName" | "birthDate" | "companyName" | "companyDescription" | "gender" | "region" | "district" | "ward" | "createdAt" | "updatedAt", ExtArgs["result"]["adminUser"]>
+export type AdminUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "firstName" | "lastName" | "birthDate" | "companyName" | "companyDescription" | "profileImageUrl" | "gender" | "region" | "district" | "ward" | "createdAt" | "updatedAt", ExtArgs["result"]["adminUser"]>
 export type AdminUserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.AdminUser$sessionsArgs<ExtArgs>
   otpCodes?: boolean | Prisma.AdminUser$otpCodesArgs<ExtArgs>
   mediaAssets?: boolean | Prisma.AdminUser$mediaAssetsArgs<ExtArgs>
+  notes?: boolean | Prisma.AdminUser$notesArgs<ExtArgs>
   _count?: boolean | Prisma.AdminUserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AdminUserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1007,6 +1189,7 @@ export type $AdminUserPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     sessions: Prisma.$AdminSessionPayload<ExtArgs>[]
     otpCodes: Prisma.$EmailOtpCodePayload<ExtArgs>[]
     mediaAssets: Prisma.$MediaAssetPayload<ExtArgs>[]
+    notes: Prisma.$AdminNotePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1017,6 +1200,7 @@ export type $AdminUserPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     birthDate: Date | null
     companyName: string
     companyDescription: string | null
+    profileImageUrl: string | null
     gender: string | null
     region: string | null
     district: string | null
@@ -1420,6 +1604,7 @@ export interface Prisma__AdminUserClient<T, Null = never, ExtArgs extends runtim
   sessions<T extends Prisma.AdminUser$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   otpCodes<T extends Prisma.AdminUser$otpCodesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$otpCodesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailOtpCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mediaAssets<T extends Prisma.AdminUser$mediaAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$mediaAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notes<T extends Prisma.AdminUser$notesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$notesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1457,6 +1642,7 @@ export interface AdminUserFieldRefs {
   readonly birthDate: Prisma.FieldRef<"AdminUser", 'DateTime'>
   readonly companyName: Prisma.FieldRef<"AdminUser", 'String'>
   readonly companyDescription: Prisma.FieldRef<"AdminUser", 'String'>
+  readonly profileImageUrl: Prisma.FieldRef<"AdminUser", 'String'>
   readonly gender: Prisma.FieldRef<"AdminUser", 'String'>
   readonly region: Prisma.FieldRef<"AdminUser", 'String'>
   readonly district: Prisma.FieldRef<"AdminUser", 'String'>
@@ -1925,6 +2111,30 @@ export type AdminUser$mediaAssetsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.MediaAssetScalarFieldEnum | Prisma.MediaAssetScalarFieldEnum[]
+}
+
+/**
+ * AdminUser.notes
+ */
+export type AdminUser$notesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AdminNote
+   */
+  select?: Prisma.AdminNoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AdminNote
+   */
+  omit?: Prisma.AdminNoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminNoteInclude<ExtArgs> | null
+  where?: Prisma.AdminNoteWhereInput
+  orderBy?: Prisma.AdminNoteOrderByWithRelationInput | Prisma.AdminNoteOrderByWithRelationInput[]
+  cursor?: Prisma.AdminNoteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AdminNoteScalarFieldEnum | Prisma.AdminNoteScalarFieldEnum[]
 }
 
 /**

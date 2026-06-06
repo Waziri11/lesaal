@@ -397,6 +397,7 @@ export const ModelName = {
   AdminNotification: 'AdminNotification',
   EmailOtpCode: 'EmailOtpCode',
   MediaAsset: 'MediaAsset',
+  AdminNote: 'AdminNote',
   RateLimitEntry: 'RateLimitEntry'
 } as const
 
@@ -413,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset" | "rateLimitEntry"
+    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset" | "adminNote" | "rateLimitEntry"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1379,6 +1380,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdminNote: {
+      payload: Prisma.$AdminNotePayload<ExtArgs>
+      fields: Prisma.AdminNoteFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminNoteFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminNoteFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload>
+        }
+        findFirst: {
+          args: Prisma.AdminNoteFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminNoteFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload>
+        }
+        findMany: {
+          args: Prisma.AdminNoteFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload>[]
+        }
+        create: {
+          args: Prisma.AdminNoteCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload>
+        }
+        createMany: {
+          args: Prisma.AdminNoteCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminNoteCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload>[]
+        }
+        delete: {
+          args: Prisma.AdminNoteDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload>
+        }
+        update: {
+          args: Prisma.AdminNoteUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminNoteDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminNoteUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminNoteUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminNoteUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminNotePayload>
+        }
+        aggregate: {
+          args: Prisma.AdminNoteAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminNote>
+        }
+        groupBy: {
+          args: Prisma.AdminNoteGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminNoteGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminNoteCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminNoteCountAggregateOutputType> | number
+        }
+      }
+    }
     RateLimitEntry: {
       payload: Prisma.$RateLimitEntryPayload<ExtArgs>
       fields: Prisma.RateLimitEntryFieldRefs
@@ -1501,6 +1576,7 @@ export const AdminUserScalarFieldEnum = {
   birthDate: 'birthDate',
   companyName: 'companyName',
   companyDescription: 'companyDescription',
+  profileImageUrl: 'profileImageUrl',
   gender: 'gender',
   region: 'region',
   district: 'district',
@@ -1683,6 +1759,18 @@ export const MediaAssetScalarFieldEnum = {
 } as const
 
 export type MediaAssetScalarFieldEnum = (typeof MediaAssetScalarFieldEnum)[keyof typeof MediaAssetScalarFieldEnum]
+
+
+export const AdminNoteScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  title: 'title',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminNoteScalarFieldEnum = (typeof AdminNoteScalarFieldEnum)[keyof typeof AdminNoteScalarFieldEnum]
 
 
 export const RateLimitEntryScalarFieldEnum = {
@@ -2021,6 +2109,7 @@ export type GlobalOmitConfig = {
   adminNotification?: Prisma.AdminNotificationOmit
   emailOtpCode?: Prisma.EmailOtpCodeOmit
   mediaAsset?: Prisma.MediaAssetOmit
+  adminNote?: Prisma.AdminNoteOmit
   rateLimitEntry?: Prisma.RateLimitEntryOmit
 }
 

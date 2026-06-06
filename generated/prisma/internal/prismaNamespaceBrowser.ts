@@ -64,6 +64,7 @@ export const ModelName = {
   AdminNotification: 'AdminNotification',
   EmailOtpCode: 'EmailOtpCode',
   MediaAsset: 'MediaAsset',
+  AdminNote: 'AdminNote',
   RateLimitEntry: 'RateLimitEntry'
 } as const
 
@@ -92,6 +93,7 @@ export const AdminUserScalarFieldEnum = {
   birthDate: 'birthDate',
   companyName: 'companyName',
   companyDescription: 'companyDescription',
+  profileImageUrl: 'profileImageUrl',
   gender: 'gender',
   region: 'region',
   district: 'district',
@@ -274,6 +276,18 @@ export const MediaAssetScalarFieldEnum = {
 } as const
 
 export type MediaAssetScalarFieldEnum = (typeof MediaAssetScalarFieldEnum)[keyof typeof MediaAssetScalarFieldEnum]
+
+
+export const AdminNoteScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  title: 'title',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminNoteScalarFieldEnum = (typeof AdminNoteScalarFieldEnum)[keyof typeof AdminNoteScalarFieldEnum]
 
 
 export const RateLimitEntryScalarFieldEnum = {

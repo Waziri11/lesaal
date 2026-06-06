@@ -71,6 +71,7 @@ model AdminUser {
   birthDate          DateTime?
   companyName        String         @default("Lesaal")
   companyDescription String?
+  profileImageUrl    String?
   gender             String?
   region             String?
   district           String?
@@ -80,6 +81,7 @@ model AdminUser {
   sessions           AdminSession[]
   otpCodes           EmailOtpCode[]
   mediaAssets        MediaAsset[]
+  notes              AdminNote[]
 }
 
 model AdminSession {
@@ -272,6 +274,19 @@ model MediaAsset {
 
   @@index([uploadedById])
   @@index([createdAt])
+}
+
+model AdminNote {
+  id        String    @id @default(cuid())
+  adminId   String
+  title     String
+  content   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([updatedAt])
 }
 
 model RateLimitEntry {

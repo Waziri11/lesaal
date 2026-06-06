@@ -21,8 +21,8 @@ export default async function AdminProtectedLayout({ children }) {
 
   return (
     <AdminThemeProvider>
-      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <AdminSidebar />
+      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <AdminSidebar admin={admin} />
         <div className="px-4 py-4 sm:px-6">
           <Card className="mb-4 border-[color:var(--ui-border)]">
             <header className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">

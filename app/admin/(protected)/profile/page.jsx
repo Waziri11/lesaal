@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageState from "../../../../components/shared/PageState";
 import { Button } from "../../../../components/ui/button";
@@ -24,6 +24,7 @@ const EMPTY_PROFILE_FORM = {
   birthDate: "",
   companyName: "Lesaal",
   companyDescription: "",
+  profileImageUrl: "",
   gender: "",
   region: "",
   district: "",
@@ -62,8 +63,10 @@ export default function ProfilePage() {
   const [profileForm, setProfileForm] = useState(EMPTY_PROFILE_FORM);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [profileImageUploading, setProfileImageUploading] = useState(false);
   const [profileError, setProfileError] = useState("");
   const [profileMessage, setProfileMessage] = useState("");
+  const profileImageInputRef = useRef(null);
   const [locationHierarchy, setLocationHierarchy] = useState([]);
   const [genderOptions, setGenderOptions] = useState(FALLBACK_GENDER_OPTIONS);
 
@@ -115,6 +118,7 @@ export default function ProfilePage() {
           birthDate: payload.profile.birthDate || "",
           companyName: payload.profile.companyName || "Lesaal",
           companyDescription: payload.profile.companyDescription || "",
+          profileImageUrl: payload.profile.profileImageUrl || "",
           gender: payload.profile.gender || "",
           region: payload.profile.region || "",
           district: payload.profile.district || "",
@@ -204,6 +208,7 @@ export default function ProfilePage() {
         birthDate: payload.profile.birthDate || "",
         companyName: payload.profile.companyName || "Lesaal",
         companyDescription: payload.profile.companyDescription || "",
+        profileImageUrl: payload.profile.profileImageUrl || "",
         gender: payload.profile.gender || "",
         region: payload.profile.region || "",
         district: payload.profile.district || "",
@@ -221,6 +226,48 @@ export default function ProfilePage() {
       setProfileError(requestError.message || "Unable to update profile.");
     } finally {
       setProfileSaving(false);
+    }
+  }
+
+  async function handleProfileImageUpload(file) {
+    if (!(file instanceof File)) {
+      return;
+    }
+
+    if (!file.type?.startsWith("image/")) {
+      setProfileError("Only image files can be uploaded.");
+      return;
+    }
+
+    setProfileError("");
+    setProfileMessage("");
+    setProfileImageUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: createCsrfHeaders(),
+        body: formData,
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Image upload failed.");
+      }
+
+      setProfileForm((current) => ({
+        ...current,
+        profileImageUrl: payload.url || "",
+      }));
+      setProfileMessage("Profile photo uploaded. Save profile to confirm.");
+    } catch (error) {
+      setProfileError(error.message || "Image upload failed.");
+    } finally {
+      setProfileImageUploading(false);
     }
   }
 
@@ -363,6 +410,57 @@ export default function ProfilePage() {
 
         <CardContent>
           <form onSubmit={handleSaveProfile} className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2 md:col-span-2">
+              <Label>Profile Picture (Optional)</Label>
+              <input
+                ref={profileImageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  handleProfileImageUpload(file);
+                  event.target.value = "";
+                }}
+              />
+              <div className="flex flex-wrap items-center gap-4 rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
+                {profileForm.profileImageUrl ? (
+                  <img
+                    src={profileForm.profileImageUrl}
+                    alt="Profile"
+                    className="h-16 w-16 rounded-full border border-[color:var(--ui-border)] object-cover"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[color:var(--ui-border)] text-xs text-[color:var(--ui-muted-foreground)]">
+                    No Photo
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => profileImageInputRef.current?.click()}
+                    disabled={profileImageUploading}
+                  >
+                    {profileImageUploading ? "Uploading..." : profileForm.profileImageUrl ? "Replace Photo" : "Upload Photo"}
+                  </Button>
+
+                  {profileForm.profileImageUrl ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
+                      onClick={() => handleProfileChange("profileImageUrl", "")}
+                      disabled={profileImageUploading}
+                    >
+                      Remove
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="first-name">First Name</Label>
               <Input id="first-name" type="text" value={profileForm.firstName} onChange={(event) => handleProfileChange("firstName", event.target.value)} required />

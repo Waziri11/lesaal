@@ -1,3 +1,4 @@
+import "./styles/landing.css";
 import PublicLandingRuntime from "../components/PublicLandingRuntime";
 import { getPublishedCampaigns, isCampaignTableMissingError } from "../lib/campaigns";
 import { getLandingConfig } from "../lib/landing-config";

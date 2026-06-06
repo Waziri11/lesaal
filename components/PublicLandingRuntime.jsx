@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
+import HeroTypewriter from "./HeroTypewriter";
 
 const SECTION_ANCHOR_BASES = {
   HERO: "top",
@@ -78,21 +79,6 @@ function scrollAnimationClass(preset) {
   return "";
 }
 
-function toStringArray(value) {
-  if (Array.isArray(value)) {
-    return value.map((entry) => String(entry || "").trim()).filter(Boolean);
-  }
-
-  if (typeof value === "string") {
-    return value
-      .split(/[\n,]/)
-      .map((entry) => entry.trim())
-      .filter(Boolean);
-  }
-
-  return [];
-}
-
 function formatCampaignDate(value) {
   if (!value) return "";
   const parsed = new Date(value);
@@ -146,20 +132,12 @@ function sortItems(items) {
 
 export default function PublicLandingRuntime({ config, campaigns = [] }) {
   const [activeFaqItemId, setActiveFaqItemId] = useState(null);
-  const [dynamicWordIndex, setDynamicWordIndex] = useState(0);
-  const [typedDynamicWord, setTypedDynamicWord] = useState("");
-  const [isDeletingDynamicWord, setIsDeletingDynamicWord] = useState(false);
 
   const sections = Array.isArray(config?.sections) ? config.sections : [];
 
   const visibleSections = useMemo(
     () => sections.filter((section) => section?.isVisible).sort((a, b) => Number(a.order || 0) - Number(b.order || 0)),
     [sections]
-  );
-
-  const heroSection = useMemo(
-    () => visibleSections.find((section) => section.type === "HERO") || null,
-    [visibleSections]
   );
 
   const statsBandSection = useMemo(
@@ -222,56 +200,6 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
     return links;
   }, [sectionAnchors, visibleSections]);
 
-  const heroDynamicWords = useMemo(
-    () => toStringArray(heroSection?.settings?.dynamicWords),
-    [heroSection]
-  );
-
-  const heroRotationWords = useMemo(() => {
-    const fallbackWords = ["Social media management", "SEO optimization"];
-    return heroDynamicWords.length ? heroDynamicWords : fallbackWords;
-  }, [heroDynamicWords]);
-
-  useEffect(() => {
-    setDynamicWordIndex(0);
-    setTypedDynamicWord("");
-    setIsDeletingDynamicWord(false);
-  }, [heroSection?.id]);
-
-  useEffect(() => {
-    if (!heroRotationWords.length) {
-      setDynamicWordIndex(0);
-      setTypedDynamicWord("");
-      setIsDeletingDynamicWord(false);
-      return undefined;
-    }
-
-    const currentWord = heroRotationWords[dynamicWordIndex % heroRotationWords.length] || "";
-    const baseTypingSpeed = isDeletingDynamicWord ? 45 : 85;
-    let timer;
-
-    if (!isDeletingDynamicWord && typedDynamicWord.length < currentWord.length) {
-      timer = setTimeout(() => {
-        setTypedDynamicWord(currentWord.slice(0, typedDynamicWord.length + 1));
-      }, baseTypingSpeed);
-    } else if (!isDeletingDynamicWord && typedDynamicWord.length === currentWord.length) {
-      timer = setTimeout(() => {
-        setIsDeletingDynamicWord(true);
-      }, 950);
-    } else if (isDeletingDynamicWord && typedDynamicWord.length > 0) {
-      timer = setTimeout(() => {
-        setTypedDynamicWord(currentWord.slice(0, typedDynamicWord.length - 1));
-      }, 35);
-    } else {
-      timer = setTimeout(() => {
-        setIsDeletingDynamicWord(false);
-        setDynamicWordIndex((current) => (current + 1) % heroRotationWords.length);
-      }, 220);
-    }
-
-    return () => clearTimeout(timer);
-  }, [dynamicWordIndex, heroRotationWords, isDeletingDynamicWord, typedDynamicWord]);
-
   useEffect(() => {
     const faqSection = visibleSections.find((section) => section.type === "FAQ");
     const faqItems = sortItems(faqSection?.items);
@@ -324,10 +252,6 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
           const sectionTextVars = textStyleToCssVars(settings.textStyle);
 
           if (section.type === "HERO") {
-            const heroWords = heroRotationWords.length ? heroRotationWords : ["Social media management"];
-            const activeWordIndex = dynamicWordIndex % heroWords.length;
-            const currentWord = heroWords[activeWordIndex] || "";
-            const displayedDynamicWord = typedDynamicWord || currentWord;
             const heroStatsItems = sortItems(statsBandSection?.items).slice(0, 2);
             const statPrimaryItem = heroStatsItems[0] || null;
             const statSecondaryItem = heroStatsItems[1] || null;
@@ -353,7 +277,11 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                     <span className="lp-hero-headline-static">
                       {settings.staticText || "Let us help you grow your reach through"}
                     </span>{" "}
-                    <span className="lp-hero-headline-dynamic is-type-active">{displayedDynamicWord || "Social media management"}</span>
+                    <HeroTypewriter
+                      className="lp-hero-headline-dynamic is-type-active"
+                      words={settings.dynamicWords}
+                      fallback="Social media management"
+                    />
                   </h1>
 
                   <p className={`lp-hero-description ${textClass}`}>

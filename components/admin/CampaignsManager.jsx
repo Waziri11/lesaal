@@ -2,7 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpDown } from "lucide-react";
+import {
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Filter,
+  Plus,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -15,6 +25,7 @@ import PageState from "../shared/PageState";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Spinner } from "../ui/spinner";
@@ -64,6 +75,31 @@ function getStatus(campaign) {
   return { value: "active", label: "Active", variant: "success" };
 }
 
+function getCampaignAvatarStyle(campaign) {
+  const title = String(campaign?.title || "");
+  let seed = 0;
+
+  for (let index = 0; index < title.length; index += 1) {
+    seed = (seed + title.charCodeAt(index) * (index + 3)) % 360;
+  }
+
+  const hue = seed || 210;
+  const secondaryHue = (hue + 38) % 360;
+
+  return {
+    background: `radial-gradient(circle at 30% 30%, hsl(${hue} 90% 86%), hsl(${secondaryHue} 64% 62%))`,
+  };
+}
+
+const SORT_OPTIONS = {
+  updated_desc: [{ id: "updatedAt", desc: true }],
+  updated_asc: [{ id: "updatedAt", desc: false }],
+  title_asc: [{ id: "title", desc: false }],
+  title_desc: [{ id: "title", desc: true }],
+  responses_desc: [{ id: "responseCount", desc: true }],
+  responses_asc: [{ id: "responseCount", desc: false }],
+};
+
 export default function CampaignsManager() {
   const router = useRouter();
   const [campaigns, setCampaigns] = useState([]);
@@ -72,18 +108,12 @@ export default function CampaignsManager() {
   const [statusSuccess, setStatusSuccess] = useState("");
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sorting, setSorting] = useState([]);
+  const [sortOption, setSortOption] = useState("updated_desc");
+  const [sorting, setSorting] = useState(SORT_OPTIONS.updated_desc);
   const [columnFilters, setColumnFilters] = useState([]);
+  const [rowSelection, setRowSelection] = useState({});
   const [updatingCampaignId, setUpdatingCampaignId] = useState(null);
   const [deletingCampaignId, setDeletingCampaignId] = useState(null);
-
-  const campaignsForTable = useMemo(() => {
-    return [...campaigns].sort((a, b) => {
-      const aTime = Number(new Date(a.updatedAt || a.createdAt || 0));
-      const bTime = Number(new Date(b.updatedAt || b.createdAt || 0));
-      return bTime - aTime;
-    });
-  }, [campaigns]);
 
   const campaignStats = useMemo(() => {
     const total = campaigns.length;
@@ -185,7 +215,28 @@ export default function CampaignsManager() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "title",
+        id: "select",
+        enableSorting: false,
+        enableHiding: false,
+        header: ({ table }) => (
+          <Checkbox
+            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all campaigns on page"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label={`Select ${row.original.title}`}
+            onClick={(event) => event.stopPropagation()}
+          />
+        ),
+      },
+      {
+        id: "title",
+        accessorFn: (row) => String(row.title || ""),
         header: ({ column }) => (
           <Button
             type="button"
@@ -193,29 +244,63 @@ export default function CampaignsManager() {
             className="-ml-3 h-8 px-3"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Campaign Title
+            Campaign name
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
         cell: ({ row }) => (
-          <div className="space-y-0.5">
-            <p className="font-semibold">{row.original.title}</p>
-            <p className="text-xs text-[color:var(--ui-muted-foreground)]">/{row.original.slug}</p>
+          <div className="flex items-center gap-3">
+            <span className="h-10 w-10 shrink-0 rounded-full border border-white/30 shadow-sm" style={getCampaignAvatarStyle(row.original)} />
+            <div className="min-w-0">
+              <p className="truncate text-base font-semibold text-[color:var(--ui-foreground)]">{row.original.title}</p>
+              <p className="truncate text-xs text-[color:var(--ui-muted-foreground)]">/{row.original.slug}</p>
+            </div>
           </div>
         ),
       },
       {
-        accessorKey: "targetMarket",
-        header: "Target Market",
+        id: "status",
+        accessorFn: (row) => getStatus(row).value,
+        filterFn: (row, columnId, value) => {
+          const expected = String(value || "").trim().toLowerCase();
+          if (!expected) return true;
+          return String(row.getValue(columnId) || "").toLowerCase() === expected;
+        },
+        header: ({ column }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            className="-ml-3 h-8 px-3"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Status
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const status = getStatus(row.original);
+          return <Badge variant={status.variant}>{status.label}</Badge>;
+        },
+      },
+      {
+        id: "targetMarket",
+        accessorFn: (row) => String(row.targetMarket || ""),
+        header: "Target market",
         cell: ({ row }) => row.original.targetMarket || "-",
       },
       {
         id: "duration",
+        accessorFn: (row) => {
+          const created = Number(new Date(row.createdAt || 0));
+          const deadline = row.deadline ? Number(new Date(row.deadline)) : Number.POSITIVE_INFINITY;
+          return Number.isFinite(deadline) ? deadline - created : created;
+        },
         header: "Duration",
         cell: ({ row }) => getDurationLabel(row.original),
       },
       {
-        accessorKey: "responseCount",
+        id: "responseCount",
+        accessorFn: (row) => Number(row.responseCount || 0),
         header: ({ column }) => (
           <Button
             type="button"
@@ -230,23 +315,15 @@ export default function CampaignsManager() {
         cell: ({ row }) => Number(row.original.responseCount || 0),
       },
       {
-        id: "status",
-        accessorFn: (row) => getStatus(row).value,
-        filterFn: (row, columnId, value) => {
-          const expected = String(value || "").trim().toLowerCase();
-          if (!expected) return true;
-          return String(row.getValue(columnId) || "").toLowerCase() === expected;
-        },
-        header: "Status",
-        cell: ({ row }) => {
-          const status = getStatus(row.original);
-          return <Badge variant={status.variant}>{status.label}</Badge>;
-        },
+        id: "updatedAt",
+        accessorFn: (row) => Number(new Date(row.updatedAt || row.createdAt || 0)),
+        header: () => null,
+        cell: () => null,
       },
       {
         id: "actions",
-        header: () => <div className="text-right">Actions</div>,
         enableSorting: false,
+        header: () => <div className="text-right">Actions</div>,
         cell: ({ row }) => {
           const campaign = row.original;
           const isUpdating = updatingCampaignId === campaign.id;
@@ -302,16 +379,19 @@ export default function CampaignsManager() {
   );
 
   const table = useReactTable({
-    data: campaignsForTable,
+    data: campaigns,
     columns,
     state: {
       sorting,
       columnFilters,
       globalFilter,
+      rowSelection,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
     globalFilterFn: (row, _, filterValue) => {
       const query = String(filterValue || "").trim().toLowerCase();
       if (!query) return true;
@@ -330,13 +410,16 @@ export default function CampaignsManager() {
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 8,
       },
     },
   });
 
-  const hasCampaigns = campaigns.length > 0;
   const filteredRowsCount = table.getFilteredRowModel().rows.length;
+  const pagination = table.getState().pagination;
+  const pageStart = filteredRowsCount ? pagination.pageIndex * pagination.pageSize + 1 : 0;
+  const pageEnd = filteredRowsCount ? Math.min((pagination.pageIndex + 1) * pagination.pageSize, filteredRowsCount) : 0;
+  const hasCampaigns = campaigns.length > 0;
 
   return (
     <div className="space-y-6">
@@ -371,17 +454,11 @@ export default function CampaignsManager() {
       </Card>
 
       <Card>
-        <CardHeader className="space-y-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <CardTitle className="text-xl">Campaign Library</CardTitle>
-              <CardDescription>Sort, filter, and search campaigns, then open details from the table.</CardDescription>
-            </div>
-            <Button size="sm" onClick={() => router.push("/admin/campaigns/new")}>+ New Campaign</Button>
-          </div>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl">Campaign Library</CardTitle>
+          <CardDescription>Manage campaigns with search, filter, and sorting controls.</CardDescription>
         </CardHeader>
-
-        <CardContent className="pt-0">
+        <CardContent className="pt-2">
           <PageState
             status={loadingCampaigns ? "loading" : campaignError ? "error" : !hasCampaigns ? "empty" : "loaded"}
             resourceLabel="campaigns"
@@ -391,16 +468,19 @@ export default function CampaignsManager() {
               <Button type="button" size="sm" onClick={() => router.push("/admin/campaigns/new")}>Add Campaign</Button>
             }
           >
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <Input
-                  value={globalFilter}
-                  onChange={(event) => setGlobalFilter(event.target.value)}
-                  placeholder="Search by title, slug, market, or description"
-                  className="w-full max-w-md"
-                />
+            <div className="overflow-hidden rounded-2xl border border-[color:var(--ui-border)]">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--ui-border)] p-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="relative w-full min-w-[260px] max-w-[560px]">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--ui-muted-foreground)]" />
+                    <Input
+                      value={globalFilter}
+                      onChange={(event) => setGlobalFilter(event.target.value)}
+                      placeholder="Search campaigns..."
+                      className="pl-10"
+                    />
+                  </div>
 
-                <div className="flex items-center gap-2">
                   <Select
                     value={statusFilter}
                     onValueChange={(value) => {
@@ -408,70 +488,158 @@ export default function CampaignsManager() {
                       table.getColumn("status")?.setFilterValue(value === "all" ? undefined : value);
                     }}
                   >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Filter status" />
+                    <SelectTrigger className="w-[140px]">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        <SelectValue placeholder="Filter" />
+                      </div>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All statuses</SelectItem>
+                      <SelectItem value="all">All</SelectItem>
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="disabled">Disabled</SelectItem>
                       <SelectItem value="expired">Expired</SelectItem>
                     </SelectContent>
                   </Select>
 
-                  <Badge variant="secondary">{filteredRowsCount} listed</Badge>
+                  <Select
+                    value={sortOption}
+                    onValueChange={(value) => {
+                      setSortOption(value);
+                      setSorting(SORT_OPTIONS[value] || SORT_OPTIONS.updated_desc);
+                    }}
+                  >
+                    <SelectTrigger className="w-[190px]">
+                      <div className="flex items-center gap-2">
+                        <SlidersHorizontal className="h-4 w-4" />
+                        <SelectValue placeholder="Sort" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="updated_desc">Newest first</SelectItem>
+                      <SelectItem value="updated_asc">Oldest first</SelectItem>
+                      <SelectItem value="title_asc">Name A-Z</SelectItem>
+                      <SelectItem value="title_desc">Name Z-A</SelectItem>
+                      <SelectItem value="responses_desc">Most responses</SelectItem>
+                      <SelectItem value="responses_asc">Least responses</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                <Button
+                  type="button"
+                  className="bg-black text-white hover:bg-black/90 dark:bg-black dark:text-white"
+                  onClick={() => router.push("/admin/campaigns/new")}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  New campaign
+                </Button>
               </div>
 
-              <div className="overflow-hidden rounded-md border border-[color:var(--ui-border)]">
-                <Table>
-                  <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => (
-                          <TableHead key={header.id}>
-                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                          </TableHead>
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        className="cursor-pointer"
+                        onClick={() => router.push(`/admin/campaigns/${row.original.id}`)}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                         ))}
                       </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody>
-                    {table.getRowModel().rows.length ? (
-                      table.getRowModel().rows.map((row) => (
-                        <TableRow
-                          key={row.id}
-                          className="cursor-pointer"
-                          onClick={() => router.push(`/admin/campaigns/${row.original.id}`)}
-                        >
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} className="h-24 text-center text-[color:var(--ui-muted-foreground)]">
-                          No campaigns match your filters.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="h-24 text-center text-[color:var(--ui-muted-foreground)]">
+                        No campaigns match your current search/filter.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
 
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs text-[color:var(--ui-muted-foreground)]">
-                  Page {table.getState().pagination.pageIndex + 1} of {Math.max(1, table.getPageCount())}
-                </p>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--ui-border)] px-4 py-3">
+                <div className="flex flex-wrap items-center gap-6 text-sm text-[color:var(--ui-muted-foreground)]">
+                  <p>Showing {pageStart} to {pageEnd} of {filteredRowsCount} campaigns</p>
+                  <div className="flex items-center gap-2">
+                    <span>Rows per page</span>
+                    <Select value={String(pagination.pageSize)} onValueChange={(value) => table.setPageSize(Number(value))}>
+                      <SelectTrigger className="h-9 w-[90px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="8">8</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {Object.keys(rowSelection || {}).length ? (
+                    <p>{table.getFilteredSelectedRowModel().rows.length} selected</p>
+                  ) : null}
+                </div>
+
                 <div className="flex items-center gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-                    Previous
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => table.setPageIndex(0)}
+                    disabled={!table.getCanPreviousPage()}
+                    aria-label="First page"
+                  >
+                    <ChevronsLeft className="h-4 w-4" />
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-                    Next
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="px-2 text-sm text-[color:var(--ui-muted-foreground)]">
+                    {table.getPageCount() ? table.getState().pagination.pageIndex + 1 : 0} / {Math.max(1, table.getPageCount())}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => table.setPageIndex(Math.max(0, table.getPageCount() - 1))}
+                    disabled={!table.getCanNextPage()}
+                    aria-label="Last page"
+                  >
+                    <ChevronsRight className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

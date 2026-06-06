@@ -3,7 +3,7 @@ import { revalidateTag } from "next/cache";
 import { getAdminFromApiRequest } from "../../../../lib/auth";
 import {
   addTemplateSectionToConfig,
-  getLandingConfig,
+  getLandingConfigForAdmin,
   LANDING_CONFIG_CACHE_TAG,
   updateLandingConfig,
 } from "../../../../lib/landing-config";
@@ -17,7 +17,7 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const config = await getLandingConfig({ bypassCache: true });
+    const config = await getLandingConfigForAdmin();
     return NextResponse.json({ config });
   } catch (error) {
     console.error("Failed to load landing config", error);

@@ -2,11 +2,14 @@ import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import path from "node:path";
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 import { getAdminFromApiRequest } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
 import { validateAdminMutationRequest } from "../../../../lib/request-security";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 1920;
+const WEBP_QUALITY = 78;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const EXTENSION_TO_MIME = {
   ".jpg": "image/jpeg",
@@ -15,12 +18,8 @@ const EXTENSION_TO_MIME = {
   ".webp": "image/webp",
   ".gif": "image/gif",
 };
-const MIME_TO_EXTENSION = {
-  "image/jpeg": ".jpg",
-  "image/png": ".png",
-  "image/webp": ".webp",
-  "image/gif": ".gif",
-};
+const OUTPUT_MIME_TYPE = "image/webp";
+const OUTPUT_EXTENSION = ".webp";
 
 function sanitizeFilename(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -106,14 +105,30 @@ export async function POST(request) {
       return NextResponse.json({ error: "File MIME type mismatch." }, { status: 400 });
     }
 
-    const generatedExtension = MIME_TO_EXTENSION[detectedMimeType];
+    const sourceImage = sharp(buffer, { animated: true, failOn: "none" }).rotate();
+    const sourceMetadata = await sourceImage.metadata();
+
+    const shouldResize =
+      (typeof sourceMetadata.width === "number" && sourceMetadata.width > MAX_IMAGE_DIMENSION) ||
+      (typeof sourceMetadata.height === "number" && sourceMetadata.height > MAX_IMAGE_DIMENSION);
+
+    if (shouldResize) {
+      sourceImage.resize({
+        width: MAX_IMAGE_DIMENSION,
+        height: MAX_IMAGE_DIMENSION,
+        fit: "inside",
+        withoutEnlargement: true,
+      });
+    }
+
+    const optimizedBuffer = await sourceImage.webp({ quality: WEBP_QUALITY, effort: 5 }).toBuffer();
     const randomPart = crypto.randomBytes(16).toString("hex");
-    const filename = `${Date.now()}-${randomPart}${generatedExtension}`;
+    const filename = `${Date.now()}-${randomPart}${OUTPUT_EXTENSION}`;
     const uploadDir = path.join(process.cwd(), "public", "uploads");
     const filePath = path.join(uploadDir, filename);
 
     await fs.mkdir(uploadDir, { recursive: true });
-    await fs.writeFile(filePath, buffer);
+    await fs.writeFile(filePath, optimizedBuffer);
 
     const url = `/uploads/${filename}`;
 
@@ -122,8 +137,8 @@ export async function POST(request) {
         data: {
           filename,
           originalName: file.name,
-          mimeType: file.type,
-          size: file.size,
+          mimeType: OUTPUT_MIME_TYPE,
+          size: optimizedBuffer.byteLength,
           url,
           uploadedById: admin.id,
         },

@@ -117,16 +117,21 @@ export async function POST(request) {
 
     const url = `/uploads/${filename}`;
 
-    await prisma.mediaAsset.create({
-      data: {
-        filename,
-        originalName: file.name,
-        mimeType: file.type,
-        size: file.size,
-        url,
-        uploadedById: admin.id,
-      },
-    });
+    try {
+      await prisma.mediaAsset.create({
+        data: {
+          filename,
+          originalName: file.name,
+          mimeType: file.type,
+          size: file.size,
+          url,
+          uploadedById: admin.id,
+        },
+      });
+    } catch (assetError) {
+      // File is already saved to disk; do not fail upload solely because metadata persistence failed.
+      console.warn("Media asset metadata save failed; returning upload URL anyway.", assetError);
+    }
 
     return NextResponse.json({ success: true, url, filename });
   } catch (error) {

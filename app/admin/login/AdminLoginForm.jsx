@@ -64,6 +64,20 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
     let isCancelled = false;
     let timeoutId = null;
 
+    function cleanupWidget() {
+      if (widgetIdRef.current !== null && window.turnstile?.remove) {
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch (error) {
+          console.warn("Unable to remove Turnstile widget during cleanup.", error);
+        } finally {
+          widgetIdRef.current = null;
+          captchaTokenRef.current = "";
+          setCaptchaToken("");
+        }
+      }
+    }
+
     function markCaptchaLoadError() {
       if (isCancelled) {
         return;
@@ -109,6 +123,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
       renderTurnstile();
       return () => {
         isCancelled = true;
+        cleanupWidget();
       };
     }
 
@@ -137,6 +152,7 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
         if (timeoutId) {
           window.clearTimeout(timeoutId);
         }
+        cleanupWidget();
       };
     }
 
@@ -157,12 +173,24 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
       if (timeoutId) {
         window.clearTimeout(timeoutId);
       }
+      cleanupWidget();
     };
   }, [turnstileSiteKey]);
 
   function resetCaptcha() {
-    if (widgetIdRef.current !== null && window.turnstile?.reset) {
+    if (widgetIdRef.current === null || !window.turnstile?.reset) {
+      return;
+    }
+
+    if (!captchaRef.current || !document.body.contains(captchaRef.current)) {
+      return;
+    }
+
+    try {
       window.turnstile.reset(widgetIdRef.current);
+    } catch (error) {
+      console.warn("Unable to reset Turnstile widget.", error);
+    } finally {
       captchaTokenRef.current = "";
       setCaptchaToken("");
     }

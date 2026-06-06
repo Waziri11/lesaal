@@ -111,6 +111,15 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
       renderTurnstile();
       return () => {
         isCancelled = true;
+        if (widgetIdRef.current !== null && window.turnstile?.remove) {
+          try {
+            window.turnstile.remove(widgetIdRef.current);
+          } catch (error) {
+            console.warn("Unable to remove Turnstile widget during cleanup.", error);
+          } finally {
+            widgetIdRef.current = null;
+          }
+        }
       };
     }
 
@@ -121,6 +130,15 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
       return () => {
         isCancelled = true;
         existingScript.removeEventListener("load", renderTurnstile);
+        if (widgetIdRef.current !== null && window.turnstile?.remove) {
+          try {
+            window.turnstile.remove(widgetIdRef.current);
+          } catch (error) {
+            console.warn("Unable to remove Turnstile widget during cleanup.", error);
+          } finally {
+            widgetIdRef.current = null;
+          }
+        }
       };
     }
 
@@ -135,6 +153,15 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
     return () => {
       isCancelled = true;
       script.removeEventListener("load", renderTurnstile);
+      if (widgetIdRef.current !== null && window.turnstile?.remove) {
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch (error) {
+          console.warn("Unable to remove Turnstile widget during cleanup.", error);
+        } finally {
+          widgetIdRef.current = null;
+        }
+      }
     };
   }, [turnstileSiteKey]);
 
@@ -177,8 +204,12 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
       setFormData({});
       setHoneypotWebsite("");
       setCaptchaToken("");
-      if (widgetIdRef.current !== null && window.turnstile?.reset) {
-        window.turnstile.reset(widgetIdRef.current);
+      if (widgetIdRef.current !== null && window.turnstile?.reset && captchaRef.current && document.body.contains(captchaRef.current)) {
+        try {
+          window.turnstile.reset(widgetIdRef.current);
+        } catch (error) {
+          console.warn("Unable to reset Turnstile widget.", error);
+        }
       }
     } catch (submitError) {
       setError(submitError.message || "Unable to submit response.");

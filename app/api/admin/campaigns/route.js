@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { getAdminFromApiRequest } from "../../../../lib/auth";
-import { createCampaign, getAdminCampaigns, isCampaignTableMissingError } from "../../../../lib/campaigns";
+import {
+  createCampaign,
+  getAdminCampaigns,
+  isCampaignTableMissingError,
+  PUBLIC_CAMPAIGNS_CACHE_TAG,
+} from "../../../../lib/campaigns";
 import { validateAdminMutationRequest } from "../../../../lib/request-security";
 
 export async function GET(request) {
@@ -39,6 +45,7 @@ export async function POST(request) {
 
     const body = await request.json();
     const campaign = await createCampaign(body);
+    revalidateTag(PUBLIC_CAMPAIGNS_CACHE_TAG);
 
     return NextResponse.json({ success: true, campaign });
   } catch (error) {

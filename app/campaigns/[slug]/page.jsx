@@ -7,7 +7,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "../../../component
 import { getCampaignBySlugForPublic, isCampaignTableMissingError } from "../../../lib/campaigns";
 import { getSecurityConfig } from "../../../lib/security-config";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 function formatDate(value) {
   if (!value) return "";

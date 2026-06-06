@@ -4,7 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { getPublishedCampaigns, isCampaignTableMissingError } from "../../lib/campaigns";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata = {
   title: "Lesaal | Campaigns",

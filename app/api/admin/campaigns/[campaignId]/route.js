@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { getAdminFromApiRequest } from "../../../../../lib/auth";
 import {
   deleteCampaign,
   getCampaignByIdForAdmin,
   isCampaignTableMissingError,
+  PUBLIC_CAMPAIGNS_CACHE_TAG,
   setCampaignPublishedState,
   updateCampaign,
 } from "../../../../../lib/campaigns";
@@ -62,6 +64,7 @@ export async function PUT(request, { params }) {
     }
 
     const campaign = await updateCampaign(campaignId, body);
+    revalidateTag(PUBLIC_CAMPAIGNS_CACHE_TAG);
     return NextResponse.json({ success: true, campaign });
   } catch (error) {
     console.error("Failed to update campaign", error);
@@ -100,6 +103,7 @@ export async function DELETE(request, { params }) {
     }
 
     await deleteCampaign(campaignId);
+    revalidateTag(PUBLIC_CAMPAIGNS_CACHE_TAG);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete campaign", error);
@@ -143,6 +147,7 @@ export async function PATCH(request, { params }) {
     }
 
     const campaign = await setCampaignPublishedState(campaignId, isPublished);
+    revalidateTag(PUBLIC_CAMPAIGNS_CACHE_TAG);
     return NextResponse.json({ success: true, campaign });
   } catch (error) {
     console.error("Failed to update campaign publish state", error);

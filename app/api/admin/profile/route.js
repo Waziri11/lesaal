@@ -11,6 +11,38 @@ import {
 } from "../../../../lib/admin-profile";
 import { getTanzaniaLocationHierarchy } from "../../../../lib/tanzania-locations";
 
+const ADMIN_PROFILE_SELECT = {
+  firstName: true,
+  lastName: true,
+  birthDate: true,
+  companyName: true,
+  companyDescription: true,
+  profileImageUrl: true,
+  gender: true,
+  region: true,
+  district: true,
+  ward: true,
+};
+
+const ADMIN_PROFILE_SELECT_LEGACY = {
+  firstName: true,
+  lastName: true,
+  birthDate: true,
+  companyName: true,
+  companyDescription: true,
+  gender: true,
+  region: true,
+  district: true,
+  ward: true,
+};
+
+function isMissingProfileImageColumnError(error) {
+  if (!error) return false;
+
+  const message = String(error?.message || "").toLowerCase();
+  return error?.code === "P2022" && message.includes("profileimageurl");
+}
+
 function toGenderLabel(value) {
   if (value === "prefer_not_to_say") {
     return "Prefer not to say";
@@ -44,21 +76,24 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const currentAdmin = await prisma.adminUser.findUnique({
-      where: { id: admin.id },
-      select: {
-        firstName: true,
-        lastName: true,
-        birthDate: true,
-        companyName: true,
-        companyDescription: true,
-        profileImageUrl: true,
-        gender: true,
-        region: true,
-        district: true,
-        ward: true,
-      },
-    });
+    let currentAdmin;
+
+    try {
+      currentAdmin = await prisma.adminUser.findUnique({
+        where: { id: admin.id },
+        select: ADMIN_PROFILE_SELECT,
+      });
+    } catch (error) {
+      if (!isMissingProfileImageColumnError(error)) {
+        throw error;
+      }
+
+      // Backward-compatibility while pending profile image DB migration.
+      currentAdmin = await prisma.adminUser.findUnique({
+        where: { id: admin.id },
+        select: ADMIN_PROFILE_SELECT_LEGACY,
+      });
+    }
 
     if (!currentAdmin) {
       return NextResponse.json({ error: "Admin account not found." }, { status: 404 });
@@ -100,33 +135,47 @@ export async function PUT(request) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    const updatedAdmin = await prisma.adminUser.update({
-      where: { id: admin.id },
-      data: {
-        firstName: input.firstName,
-        lastName: input.lastName,
-        birthDate: input.birthDate,
-        companyName: input.companyName,
-        companyDescription: input.companyDescription,
-        profileImageUrl: input.profileImageUrl,
-        gender: input.gender,
-        region: input.region,
-        district: input.district,
-        ward: input.ward,
-      },
-      select: {
-        firstName: true,
-        lastName: true,
-        birthDate: true,
-        companyName: true,
-        companyDescription: true,
-        profileImageUrl: true,
-        gender: true,
-        region: true,
-        district: true,
-        ward: true,
-      },
-    });
+    let updatedAdmin;
+
+    try {
+      updatedAdmin = await prisma.adminUser.update({
+        where: { id: admin.id },
+        data: {
+          firstName: input.firstName,
+          lastName: input.lastName,
+          birthDate: input.birthDate,
+          companyName: input.companyName,
+          companyDescription: input.companyDescription,
+          profileImageUrl: input.profileImageUrl,
+          gender: input.gender,
+          region: input.region,
+          district: input.district,
+          ward: input.ward,
+        },
+        select: ADMIN_PROFILE_SELECT,
+      });
+    } catch (error) {
+      if (!isMissingProfileImageColumnError(error)) {
+        throw error;
+      }
+
+      // Backward-compatibility while pending profile image DB migration.
+      updatedAdmin = await prisma.adminUser.update({
+        where: { id: admin.id },
+        data: {
+          firstName: input.firstName,
+          lastName: input.lastName,
+          birthDate: input.birthDate,
+          companyName: input.companyName,
+          companyDescription: input.companyDescription,
+          gender: input.gender,
+          region: input.region,
+          district: input.district,
+          ward: input.ward,
+        },
+        select: ADMIN_PROFILE_SELECT_LEGACY,
+      });
+    }
 
     return NextResponse.json({
       success: true,

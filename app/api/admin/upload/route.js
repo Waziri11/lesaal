@@ -2,7 +2,6 @@ import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import sharp from "sharp";
 import { getAdminFromApiRequest } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
 import { validateAdminMutationRequest } from "../../../../lib/request-security";
@@ -17,6 +16,12 @@ const EXTENSION_TO_MIME = {
   ".png": "image/png",
   ".webp": "image/webp",
   ".gif": "image/gif",
+};
+const MIME_TO_EXTENSION = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
 };
 const OUTPUT_MIME_TYPE = "image/webp";
 const OUTPUT_EXTENSION = ".webp";
@@ -62,6 +67,55 @@ function detectMimeTypeFromMagic(buffer) {
   return "";
 }
 
+function shouldFallbackToInlineDataUrl(error) {
+  if (!error) return false;
+
+  if (error?.code === "EROFS" || error?.code === "EPERM" || error?.code === "EACCES") {
+    return true;
+  }
+
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    message.includes("read-only file system") ||
+    message.includes("operation not permitted") ||
+    message.includes("permission denied")
+  );
+}
+
+async function optimizeImageBuffer(buffer) {
+  try {
+    const sharpModule = await import("sharp");
+    const sharp = sharpModule.default;
+
+    const sourceImage = sharp(buffer, { animated: true, failOn: "none" }).rotate();
+    const sourceMetadata = await sourceImage.metadata();
+
+    const shouldResize =
+      (typeof sourceMetadata.width === "number" && sourceMetadata.width > MAX_IMAGE_DIMENSION) ||
+      (typeof sourceMetadata.height === "number" && sourceMetadata.height > MAX_IMAGE_DIMENSION);
+
+    if (shouldResize) {
+      sourceImage.resize({
+        width: MAX_IMAGE_DIMENSION,
+        height: MAX_IMAGE_DIMENSION,
+        fit: "inside",
+        withoutEnlargement: true,
+      });
+    }
+
+    const optimizedBuffer = await sourceImage.webp({ quality: WEBP_QUALITY, effort: 5 }).toBuffer();
+    return {
+      outputBuffer: optimizedBuffer,
+      outputMimeType: OUTPUT_MIME_TYPE,
+      outputExtension: OUTPUT_EXTENSION,
+    };
+  } catch (error) {
+    // If sharp is unavailable (for example, binary/runtime mismatch), keep the original image.
+    console.warn("Image optimization unavailable, storing original upload bytes.", error);
+    return null;
+  }
+}
+
 export async function POST(request) {
   try {
     const securityError = validateAdminMutationRequest(request);
@@ -105,40 +159,37 @@ export async function POST(request) {
       return NextResponse.json({ error: "File MIME type mismatch." }, { status: 400 });
     }
 
-    const sourceImage = sharp(buffer, { animated: true, failOn: "none" }).rotate();
-    const sourceMetadata = await sourceImage.metadata();
-
-    const shouldResize =
-      (typeof sourceMetadata.width === "number" && sourceMetadata.width > MAX_IMAGE_DIMENSION) ||
-      (typeof sourceMetadata.height === "number" && sourceMetadata.height > MAX_IMAGE_DIMENSION);
-
-    if (shouldResize) {
-      sourceImage.resize({
-        width: MAX_IMAGE_DIMENSION,
-        height: MAX_IMAGE_DIMENSION,
-        fit: "inside",
-        withoutEnlargement: true,
-      });
-    }
-
-    const optimizedBuffer = await sourceImage.webp({ quality: WEBP_QUALITY, effort: 5 }).toBuffer();
+    const optimizationResult = await optimizeImageBuffer(buffer);
+    const outputBuffer = optimizationResult?.outputBuffer || buffer;
+    const outputMimeType = optimizationResult?.outputMimeType || detectedMimeType;
+    const outputExtension = optimizationResult?.outputExtension || MIME_TO_EXTENSION[detectedMimeType] || extension;
     const randomPart = crypto.randomBytes(16).toString("hex");
-    const filename = `${Date.now()}-${randomPart}${OUTPUT_EXTENSION}`;
+    const filename = `${Date.now()}-${randomPart}${outputExtension}`;
     const uploadDir = path.join(process.cwd(), "public", "uploads");
     const filePath = path.join(uploadDir, filename);
+    let url = `/uploads/${filename}`;
 
-    await fs.mkdir(uploadDir, { recursive: true });
-    await fs.writeFile(filePath, optimizedBuffer);
+    try {
+      await fs.mkdir(uploadDir, { recursive: true });
+      await fs.writeFile(filePath, outputBuffer);
+    } catch (storageError) {
+      if (!shouldFallbackToInlineDataUrl(storageError)) {
+        throw storageError;
+      }
 
-    const url = `/uploads/${filename}`;
+      // Some environments disallow writes to app directories (read-only FS).
+      // In that case, return a data URL so profile uploads still work.
+      console.warn("Upload directory is not writable; falling back to inline image URL.", storageError);
+      url = `data:${outputMimeType};base64,${outputBuffer.toString("base64")}`;
+    }
 
     try {
       await prisma.mediaAsset.create({
         data: {
           filename,
           originalName: file.name,
-          mimeType: OUTPUT_MIME_TYPE,
-          size: optimizedBuffer.byteLength,
+          mimeType: outputMimeType,
+          size: outputBuffer.byteLength,
           url,
           uploadedById: admin.id,
         },

@@ -1,4 +1,4 @@
-import PublicLanding from "../components/PublicLanding";
+import PublicLandingRuntime from "../components/PublicLandingRuntime";
 import { getPublishedCampaigns, isCampaignTableMissingError } from "../lib/campaigns";
 import { getLandingConfig } from "../lib/landing-config";
 
@@ -16,5 +16,5 @@ export default async function HomePage() {
     }
   }
 
-  return <PublicLanding config={config} campaigns={campaigns} />;
+  return <PublicLandingRuntime config={config} campaigns={campaigns} />;
 }

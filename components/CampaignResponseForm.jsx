@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import PageState from "./shared/PageState";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -12,6 +13,49 @@ import { Textarea } from "./ui/textarea";
 
 function toOptionsArray(value) {
   return Array.isArray(value) ? value : [];
+}
+
+function formatDeadline(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function buildSections(campaign) {
+  if (Array.isArray(campaign?.sections) && campaign.sections.length) {
+    return campaign.sections
+      .map((section, index) => ({
+        ...section,
+        key: section.key || `section_${index + 1}`,
+        title: section.title || `Section ${index + 1}`,
+        description: section.description || "",
+        order: Number(section.order || index),
+        questions: (Array.isArray(section.questions) ? section.questions : []).filter((question) => question?.isVisible !== false),
+      }))
+      .filter((section) => section.questions.length)
+      .sort((a, b) => a.order - b.order);
+  }
+
+  const visibleQuestions = (Array.isArray(campaign?.questions) ? campaign.questions : []).filter((question) => question?.isVisible !== false);
+
+  if (!visibleQuestions.length) {
+    return [];
+  }
+
+  return [
+    {
+      key: "section_1",
+      title: "Form Questions",
+      description: "",
+      order: 0,
+      questions: visibleQuestions,
+    },
+  ];
 }
 
 export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }) {
@@ -25,10 +69,8 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
   const captchaRef = useRef(null);
   const widgetIdRef = useRef(null);
 
-  const questions = useMemo(
-    () => (Array.isArray(campaign?.questions) ? campaign.questions : []).filter((question) => question?.isVisible !== false),
-    [campaign]
-  );
+  const sections = useMemo(() => buildSections(campaign), [campaign]);
+  const questions = useMemo(() => sections.flatMap((section) => section.questions), [sections]);
 
   function setValue(key, value) {
     setFormData((current) => ({
@@ -145,6 +187,61 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
     }
   }
 
+  function renderQuestion(question) {
+    const value = formData[question.key] || "";
+    const options = toOptionsArray(question.options);
+    const key = question.id || question.key;
+
+    if (question.type === "textarea") {
+      return (
+        <div key={key} className="space-y-2">
+          <Label htmlFor={key}>{question.label}</Label>
+          <Textarea
+            id={key}
+            value={value}
+            required={question.required}
+            placeholder={question.placeholder || ""}
+            onChange={(event) => setValue(question.key, event.target.value)}
+          />
+        </div>
+      );
+    }
+
+    if (question.type === "select") {
+      return (
+        <div key={key} className="space-y-2">
+          <Label>{question.label}</Label>
+          <Select value={value} onValueChange={(nextValue) => setValue(question.key, nextValue)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select an option" />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    }
+
+    return (
+      <div key={key} className="space-y-2">
+        <Label htmlFor={key}>{question.label}</Label>
+        <Input
+          id={key}
+          type={question.type || "text"}
+          value={value}
+          required={question.required}
+          placeholder={question.placeholder || ""}
+          onChange={(event) => setValue(question.key, event.target.value)}
+        />
+      </div>
+    );
+  }
+
   if (!questions.length) {
     return <PageState status="empty" resourceLabel="campaign form fields" />;
   }
@@ -152,6 +249,10 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
   return (
     <Card>
       <CardHeader>
+        <div className="flex flex-wrap items-center gap-2">
+          {campaign?.targetMarket ? <Badge variant="secondary">Target: {campaign.targetMarket}</Badge> : null}
+          {campaign?.deadline ? <Badge variant="secondary">Deadline: {formatDeadline(campaign.deadline)}</Badge> : null}
+        </div>
         <CardTitle>{campaign.title}</CardTitle>
         <CardDescription>{campaign.description}</CardDescription>
       </CardHeader>
@@ -173,60 +274,17 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
             </label>
           </div>
 
-          {questions.map((question) => {
-            const value = formData[question.key] || "";
-            const options = toOptionsArray(question.options);
-            const key = question.id || question.key;
-
-            if (question.type === "textarea") {
-              return (
-                <div key={key} className="space-y-2">
-                  <Label htmlFor={key}>{question.label}</Label>
-                  <Textarea
-                    id={key}
-                    value={value}
-                    required={question.required}
-                    placeholder={question.placeholder || ""}
-                    onChange={(event) => setValue(question.key, event.target.value)}
-                  />
-                </div>
-              );
-            }
-
-            if (question.type === "select") {
-              return (
-                <div key={key} className="space-y-2">
-                  <Label>{question.label}</Label>
-                  <Select value={value} onValueChange={(nextValue) => setValue(question.key, nextValue)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {options.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              );
-            }
-
-            return (
-              <div key={key} className="space-y-2">
-                <Label htmlFor={key}>{question.label}</Label>
-                <Input
-                  id={key}
-                  type={question.type || "text"}
-                  value={value}
-                  required={question.required}
-                  placeholder={question.placeholder || ""}
-                  onChange={(event) => setValue(question.key, event.target.value)}
-                />
+          {sections.map((section, index) => (
+            <section key={section.key || `section_${index + 1}`} className="space-y-3 rounded-lg border border-[color:var(--ui-border)] p-4">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-primary)]">Section {index + 1}</p>
+                <h3 className="text-lg font-semibold text-[color:var(--ui-foreground)]">{section.title}</h3>
+                {section.description ? <p className="text-sm text-[color:var(--ui-muted-foreground)]">{section.description}</p> : null}
               </div>
-            );
-          })}
+
+              <div className="space-y-4">{section.questions.map((question) => renderQuestion(question))}</div>
+            </section>
+          ))}
 
           {turnstileSiteKey ? (
             <div className="space-y-2 rounded-lg border border-[color:var(--ui-border)] p-3">

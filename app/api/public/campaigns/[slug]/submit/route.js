@@ -74,6 +74,7 @@ export async function POST(request, { params }) {
       where: {
         slug,
         isPublished: true,
+        OR: [{ deadline: null }, { deadline: { gte: new Date() } }],
       },
       include: {
         questions: {

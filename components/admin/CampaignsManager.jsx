@@ -8,37 +8,67 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { createCsrfHeaders } from "../../lib/csrf-client";
 
-function formatDateTime(value) {
+function formatDate(value) {
   if (!value) return "-";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "-";
-  return parsed.toLocaleString();
+
+  return parsed.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function formatCount(value) {
   return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(Number(value) || 0);
 }
 
+function getDurationLabel(campaign) {
+  const createdAt = new Date(campaign.createdAt);
+  const deadline = campaign.deadline ? new Date(campaign.deadline) : null;
+
+  if (Number.isNaN(createdAt.getTime()) || !deadline || Number.isNaN(deadline.getTime())) {
+    return "No deadline";
+  }
+
+  const days = Math.max(1, Math.ceil((deadline.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24)));
+  return `${formatDate(createdAt)} to ${formatDate(deadline)} (${days} days)`;
+}
+
+function getStatus(campaign) {
+  const deadline = campaign.deadline ? new Date(campaign.deadline) : null;
+  const isExpired = deadline && !Number.isNaN(deadline.getTime()) && deadline.getTime() < Date.now();
+
+  if (!campaign.isPublished) {
+    return { label: "Disabled", variant: "default" };
+  }
+
+  if (isExpired) {
+    return { label: "Expired", variant: "secondary" };
+  }
+
+  return { label: "Active", variant: "success" };
+}
+
 export default function CampaignsManager() {
   const router = useRouter();
   const [campaigns, setCampaigns] = useState([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
-  const [selectedCampaignId, setSelectedCampaignId] = useState(null);
-  const [responsesLoading, setResponsesLoading] = useState(false);
-  const [responses, setResponses] = useState([]);
-  const [responseQuestions, setResponseQuestions] = useState([]);
   const [campaignError, setCampaignError] = useState("");
-  const [responsesError, setResponsesError] = useState("");
   const [statusSuccess, setStatusSuccess] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [updatingCampaignId, setUpdatingCampaignId] = useState(null);
+  const [deletingCampaignId, setDeletingCampaignId] = useState(null);
 
   const campaignStats = useMemo(() => {
     const total = campaigns.length;
-    const published = campaigns.filter((campaign) => campaign.isPublished).length;
-    const drafts = total - published;
+    const active = campaigns.filter((campaign) => campaign.isPublished).length;
+    const disabled = total - active;
     const responsesCount = campaigns.reduce((sum, campaign) => sum + Number(campaign.responseCount || 0), 0);
-    return { total, published, drafts, responsesCount };
+    return { total, active, disabled, responsesCount };
   }, [campaigns]);
 
   const filteredCampaigns = useMemo(() => {
@@ -52,7 +82,7 @@ export default function CampaignsManager() {
     if (!query) return sorted;
 
     return sorted.filter((campaign) => {
-      const searchable = [campaign.title, campaign.slug, campaign.description]
+      const searchable = [campaign.title, campaign.slug, campaign.description, campaign.targetMarket]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -60,7 +90,7 @@ export default function CampaignsManager() {
     });
   }, [campaigns, searchQuery]);
 
-  async function loadCampaigns(preferredCampaignId = null) {
+  async function loadCampaigns() {
     setLoadingCampaigns(true);
     setCampaignError("");
 
@@ -74,18 +104,6 @@ export default function CampaignsManager() {
 
       const nextCampaigns = Array.isArray(payload.campaigns) ? payload.campaigns : [];
       setCampaigns(nextCampaigns);
-
-      const nextSelectedId =
-        preferredCampaignId && nextCampaigns.some((campaign) => campaign.id === preferredCampaignId)
-          ? preferredCampaignId
-          : nextCampaigns[0]?.id || null;
-
-      setSelectedCampaignId(nextSelectedId);
-
-      if (!nextSelectedId) {
-        setResponses([]);
-        setResponseQuestions([]);
-      }
     } catch (error) {
       setCampaignError(error.message || "Unable to load campaigns.");
     } finally {
@@ -93,47 +111,72 @@ export default function CampaignsManager() {
     }
   }
 
-  async function loadResponses(campaignId) {
-    if (!campaignId) {
-      setResponses([]);
-      setResponseQuestions([]);
-      return;
-    }
-
-    setResponsesLoading(true);
-    setResponsesError("");
-
-    try {
-      const response = await fetch(`/api/admin/campaigns/${campaignId}/responses`, { cache: "no-store" });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error || "Unable to load campaign responses.");
-      }
-
-      setResponses(Array.isArray(payload.responses) ? payload.responses : []);
-      setResponseQuestions(Array.isArray(payload.questions) ? payload.questions : []);
-    } catch (error) {
-      setResponsesError(error.message || "Unable to load campaign responses.");
-      setResponses([]);
-      setResponseQuestions([]);
-    } finally {
-      setResponsesLoading(false);
-    }
-  }
-
   useEffect(() => {
     loadCampaigns();
   }, []);
 
-  useEffect(() => {
-    if (!selectedCampaignId) return;
-    loadResponses(selectedCampaignId);
-  }, [selectedCampaignId]);
+  async function toggleCampaignState(campaign) {
+    if (!campaign?.id || updatingCampaignId) return;
 
-  function openExport() {
-    if (!selectedCampaignId) return;
-    window.open(`/api/admin/campaigns/${selectedCampaignId}/responses?format=csv`, "_blank", "noopener,noreferrer");
+    setUpdatingCampaignId(campaign.id);
+    setCampaignError("");
+    setStatusSuccess("");
+
+    try {
+      const response = await fetch(`/api/admin/campaigns/${campaign.id}`, {
+        method: "PATCH",
+        headers: createCsrfHeaders({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({
+          isPublished: !campaign.isPublished,
+        }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update campaign status.");
+      }
+
+      setStatusSuccess(`Campaign ${payload.campaign.isPublished ? "enabled" : "disabled"} successfully.`);
+      await loadCampaigns();
+    } catch (error) {
+      setCampaignError(error.message || "Unable to update campaign status.");
+    } finally {
+      setUpdatingCampaignId(null);
+    }
+  }
+
+  async function deleteCampaign(campaign) {
+    if (!campaign?.id || deletingCampaignId) return;
+
+    const confirmed = window.confirm(`Delete \"${campaign.title}\" and all responses?`);
+    if (!confirmed) return;
+
+    setDeletingCampaignId(campaign.id);
+    setCampaignError("");
+    setStatusSuccess("");
+
+    try {
+      const response = await fetch(`/api/admin/campaigns/${campaign.id}`, {
+        method: "DELETE",
+        headers: createCsrfHeaders(),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to delete campaign.");
+      }
+
+      setStatusSuccess("Campaign deleted successfully.");
+      await loadCampaigns();
+    } catch (error) {
+      setCampaignError(error.message || "Unable to delete campaign.");
+    } finally {
+      setDeletingCampaignId(null);
+    }
   }
 
   return (
@@ -150,15 +193,15 @@ export default function CampaignsManager() {
               <p className="mt-2 text-2xl font-semibold">{campaignStats.total}</p>
             </div>
             <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
-              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Published</p>
-              <p className="mt-2 text-2xl font-semibold text-[color:var(--ui-success)]">{campaignStats.published}</p>
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Active</p>
+              <p className="mt-2 text-2xl font-semibold text-[color:var(--ui-success)]">{campaignStats.active}</p>
             </div>
             <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
-              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Drafts</p>
-              <p className="mt-2 text-2xl font-semibold">{campaignStats.drafts}</p>
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Disabled</p>
+              <p className="mt-2 text-2xl font-semibold">{campaignStats.disabled}</p>
             </div>
             <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
-              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Total responses</p>
+              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Responses</p>
               <p className="mt-2 text-2xl font-semibold">{formatCount(campaignStats.responsesCount)}</p>
             </div>
           </div>
@@ -173,11 +216,9 @@ export default function CampaignsManager() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <CardTitle className="text-xl">Campaign Library</CardTitle>
-              <CardDescription>Campaign builder is now on its own page.</CardDescription>
+              <CardDescription>Click a row to open campaign details and responses.</CardDescription>
             </div>
-            <Button size="sm" onClick={() => router.push("/admin/campaigns/new")}>
-              + New Campaign
-            </Button>
+            <Button size="sm" onClick={() => router.push("/admin/campaigns/new")}>+ New Campaign</Button>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -185,7 +226,7 @@ export default function CampaignsManager() {
               <Input
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search campaigns by title, slug, or description"
+                placeholder="Search campaigns by title, target market, or description"
               />
             </div>
             <Badge variant="secondary">{filteredCampaigns.length} listed</Badge>
@@ -199,74 +240,85 @@ export default function CampaignsManager() {
             errorMessage={campaignError}
             onRetry={loadCampaigns}
             createAction={
-              <Button type="button" size="sm" onClick={() => router.push("/admin/campaigns/new")}>
-                Add Campaign
-              </Button>
+              <Button type="button" size="sm" onClick={() => router.push("/admin/campaigns/new")}>Add Campaign</Button>
             }
           >
             <>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Campaign</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Questions</TableHead>
+                    <TableHead>Campaign Title</TableHead>
+                    <TableHead>Target Market</TableHead>
+                    <TableHead>Duration</TableHead>
                     <TableHead>Responses</TableHead>
-                    <TableHead>Last Updated</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCampaigns.map((campaign) => (
-                    <TableRow
-                      key={campaign.id}
-                      className={`cursor-pointer ${
-                        selectedCampaignId === campaign.id ? "bg-[color:var(--ui-primary-soft)] hover:bg-[color:var(--ui-primary-soft)]" : ""
-                      }`}
-                      onClick={() => setSelectedCampaignId(campaign.id)}
-                    >
-                      <TableCell>
-                        <div>
-                          <p className="font-semibold">{campaign.title}</p>
-                          <p className="text-xs text-[color:var(--ui-muted-foreground)]">/{campaign.slug}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={campaign.isPublished ? "success" : "default"}>
-                          {campaign.isPublished ? "Published" : "Draft"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{campaign.questionCount || 0}</TableCell>
-                      <TableCell>{campaign.responseCount || 0}</TableCell>
-                      <TableCell>{formatDateTime(campaign.updatedAt || campaign.createdAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex flex-wrap justify-end gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              router.push(`/admin/campaigns/${campaign.id}`);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setSelectedCampaignId(campaign.id);
-                            }}
-                          >
-                            Responses
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {filteredCampaigns.map((campaign) => {
+                    const status = getStatus(campaign);
+                    const isUpdating = updatingCampaignId === campaign.id;
+                    const isDeleting = deletingCampaignId === campaign.id;
+
+                    return (
+                      <TableRow key={campaign.id} className="cursor-pointer" onClick={() => router.push(`/admin/campaigns/${campaign.id}`)}>
+                        <TableCell>
+                          <div>
+                            <p className="font-semibold">{campaign.title}</p>
+                            <p className="text-xs text-[color:var(--ui-muted-foreground)]">/{campaign.slug}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>{campaign.targetMarket || "-"}</TableCell>
+                        <TableCell>{getDurationLabel(campaign)}</TableCell>
+                        <TableCell>{campaign.responseCount || 0}</TableCell>
+                        <TableCell>
+                          <Badge variant={status.variant}>{status.label}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex flex-wrap justify-end gap-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                router.push(`/admin/campaigns/${campaign.id}`);
+                              }}
+                            >
+                              View
+                            </Button>
+
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              disabled={isUpdating || isDeleting}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                toggleCampaignState(campaign);
+                              }}
+                            >
+                              {isUpdating ? "Updating..." : campaign.isPublished ? "Disable" : "Enable"}
+                            </Button>
+
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              disabled={isDeleting || isUpdating}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                deleteCampaign(campaign);
+                              }}
+                            >
+                              {isDeleting ? "Deleting..." : "Delete"}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
 
@@ -274,61 +326,6 @@ export default function CampaignsManager() {
                 <p className="mt-3 text-sm text-[color:var(--ui-muted-foreground)]">No campaigns matched that search.</p>
               ) : null}
             </>
-          </PageState>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Responses</CardTitle>
-            <CardDescription>Review incoming form responses for the selected campaign.</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{responses.length} responses</Badge>
-            <Button type="button" variant="outline" onClick={openExport} disabled={!selectedCampaignId || !responses.length}>
-              Export CSV
-            </Button>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          <PageState
-            status={
-              responsesLoading
-                ? "loading"
-                : responsesError
-                  ? "error"
-                : !selectedCampaignId
-                  ? "empty"
-                  : responses.length
-                    ? "loaded"
-                    : "empty"
-            }
-            resourceLabel={selectedCampaignId ? "responses" : "selected campaign responses"}
-            errorMessage={responsesError}
-            onRetry={() => loadResponses(selectedCampaignId)}
-          >
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Submitted At</TableHead>
-                  {responseQuestions.map((question) => (
-                    <TableHead key={question.id || question.key}>{question.label}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {responses.map((response) => (
-                  <TableRow key={response.id}>
-                    <TableCell>{formatDateTime(response.submittedAt)}</TableCell>
-                    {responseQuestions.map((question) => (
-                      <TableCell key={`${response.id}_${question.key}`}>{String(response.data?.[question.key] || "-")}</TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
           </PageState>
         </CardContent>
       </Card>

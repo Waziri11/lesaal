@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../../lib/auth";
-import { deleteCampaign, getCampaignByIdForAdmin, isCampaignTableMissingError, updateCampaign } from "../../../../../lib/campaigns";
+import {
+  deleteCampaign,
+  getCampaignByIdForAdmin,
+  isCampaignTableMissingError,
+  setCampaignPublishedState,
+  updateCampaign,
+} from "../../../../../lib/campaigns";
 import { validateAdminMutationRequest } from "../../../../../lib/request-security";
 
 export async function GET(request, { params }) {
@@ -106,5 +112,50 @@ export async function DELETE(request, { params }) {
     }
 
     return NextResponse.json({ error: "Unable to delete campaign." }, { status: 500 });
+  }
+}
+
+export async function PATCH(request, { params }) {
+  try {
+    const securityError = validateAdminMutationRequest(request);
+    if (securityError) {
+      return securityError;
+    }
+
+    const admin = await getAdminFromApiRequest(request);
+
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const campaignId = String(params?.campaignId || "");
+    const body = await request.json();
+    const isPublished = body?.isPublished;
+
+    if (typeof isPublished !== "boolean") {
+      return NextResponse.json({ error: "isPublished must be a boolean value." }, { status: 400 });
+    }
+
+    const existing = await getCampaignByIdForAdmin(campaignId);
+
+    if (!existing) {
+      return NextResponse.json({ error: "Campaign not found." }, { status: 404 });
+    }
+
+    const campaign = await setCampaignPublishedState(campaignId, isPublished);
+    return NextResponse.json({ success: true, campaign });
+  } catch (error) {
+    console.error("Failed to update campaign publish state", error);
+
+    if (isCampaignTableMissingError(error)) {
+      return NextResponse.json(
+        { error: "Campaign tables are not initialized. Run database migrations and retry." },
+        { status: 500 }
+      );
+    }
+
+    const message = error?.message || "Unable to update campaign publish state.";
+    const status = /required|invalid|not found/i.test(message) ? 400 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

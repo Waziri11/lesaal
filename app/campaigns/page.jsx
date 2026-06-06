@@ -11,6 +11,17 @@ export const metadata = {
   description: "Explore active outreach campaigns and submit your response.",
 };
 
+function formatDate(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export default async function CampaignsPage() {
   let campaigns = [];
   let errorMessage = "";
@@ -56,23 +67,29 @@ export default async function CampaignsPage() {
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {campaigns.map((campaign) => (
             <Card key={campaign.id}>
-              <CardContent className="space-y-4 p-5">
-                <div className="overflow-hidden rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)]">
+              <CardContent className="space-y-4 p-0">
+                <Link href={`/campaigns/${campaign.slug}`} className="block overflow-hidden rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)]">
                   {campaign.imageUrl ? (
-                    <img src={campaign.imageUrl} alt={campaign.title} className="h-40 w-full object-cover" />
+                    <img src={campaign.imageUrl} alt={campaign.title} className="h-44 w-full object-cover transition hover:scale-[1.02]" />
                   ) : (
-                    <div className="flex h-40 items-center justify-center text-sm text-[color:var(--ui-muted-foreground)]">Campaign image</div>
+                    <div className="flex h-44 items-center justify-center text-sm text-[color:var(--ui-muted-foreground)]">Campaign image</div>
                   )}
-                </div>
+                </Link>
 
-                <div className="space-y-2">
+                <div className="space-y-2 px-5 pb-5">
                   <h3 className="text-lg font-semibold">{campaign.title}</h3>
                   <p className="text-sm text-[color:var(--ui-muted-foreground)]">{campaign.description}</p>
+                  <p className="text-xs text-[color:var(--ui-muted-foreground)]">Target Market: {campaign.targetMarket || "General audience"}</p>
+                  {campaign.deadline ? (
+                    <p className="text-xs text-[color:var(--ui-muted-foreground)]">Active until {formatDate(campaign.deadline)}</p>
+                  ) : null}
                 </div>
 
-                <Button asChild>
-                  <Link href={`/campaigns/${campaign.slug}`}>Join Campaign</Link>
-                </Button>
+                <div className="px-5 pb-5">
+                  <Button asChild>
+                    <Link href={`/campaigns/${campaign.slug}`}>Open Campaign Form</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}

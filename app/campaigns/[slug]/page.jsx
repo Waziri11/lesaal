@@ -1,12 +1,24 @@
 import Link from "next/link";
 import CampaignResponseForm from "../../../components/CampaignResponseForm";
 import PageState from "../../../components/shared/PageState";
+import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
 import { getCampaignBySlugForPublic, isCampaignTableMissingError } from "../../../lib/campaigns";
 import { getSecurityConfig } from "../../../lib/security-config";
 
 export const dynamic = "force-dynamic";
+
+function formatDate(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
 
 async function loadCampaign(slug) {
   try {
@@ -79,6 +91,10 @@ export default async function CampaignDetailPage({ params }) {
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
       <Card>
         <CardHeader className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {campaign.targetMarket ? <Badge variant="secondary">Target: {campaign.targetMarket}</Badge> : null}
+            {campaign.deadline ? <Badge variant="secondary">Deadline: {formatDate(campaign.deadline)}</Badge> : null}
+          </div>
           <div>
             <CardTitle>{campaign.title}</CardTitle>
             <CardDescription>{campaign.description}</CardDescription>

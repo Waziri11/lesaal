@@ -103,6 +103,7 @@ export async function POST(request) {
       const matchingCampaign = await prisma.campaign.findFirst({
         where: {
           isPublished: true,
+          OR: [{ deadline: null }, { deadline: { gte: new Date() } }],
         },
         orderBy: [{ order: "asc" }, { createdAt: "desc" }],
         select: {

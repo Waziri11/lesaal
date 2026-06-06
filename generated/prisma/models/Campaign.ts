@@ -38,6 +38,8 @@ export type CampaignMinAggregateOutputType = {
   id: string | null
   title: string | null
   slug: string | null
+  targetMarket: string | null
+  deadline: Date | null
   description: string | null
   imageUrl: string | null
   isPublished: boolean | null
@@ -50,6 +52,8 @@ export type CampaignMaxAggregateOutputType = {
   id: string | null
   title: string | null
   slug: string | null
+  targetMarket: string | null
+  deadline: Date | null
   description: string | null
   imageUrl: string | null
   isPublished: boolean | null
@@ -62,6 +66,8 @@ export type CampaignCountAggregateOutputType = {
   id: number
   title: number
   slug: number
+  targetMarket: number
+  deadline: number
   description: number
   imageUrl: number
   isPublished: number
@@ -84,6 +90,8 @@ export type CampaignMinAggregateInputType = {
   id?: true
   title?: true
   slug?: true
+  targetMarket?: true
+  deadline?: true
   description?: true
   imageUrl?: true
   isPublished?: true
@@ -96,6 +104,8 @@ export type CampaignMaxAggregateInputType = {
   id?: true
   title?: true
   slug?: true
+  targetMarket?: true
+  deadline?: true
   description?: true
   imageUrl?: true
   isPublished?: true
@@ -108,6 +118,8 @@ export type CampaignCountAggregateInputType = {
   id?: true
   title?: true
   slug?: true
+  targetMarket?: true
+  deadline?: true
   description?: true
   imageUrl?: true
   isPublished?: true
@@ -207,6 +219,8 @@ export type CampaignGroupByOutputType = {
   id: string
   title: string
   slug: string
+  targetMarket: string
+  deadline: Date | null
   description: string
   imageUrl: string | null
   isPublished: boolean
@@ -242,6 +256,8 @@ export type CampaignWhereInput = {
   id?: Prisma.StringFilter<"Campaign"> | string
   title?: Prisma.StringFilter<"Campaign"> | string
   slug?: Prisma.StringFilter<"Campaign"> | string
+  targetMarket?: Prisma.StringFilter<"Campaign"> | string
+  deadline?: Prisma.DateTimeNullableFilter<"Campaign"> | Date | string | null
   description?: Prisma.StringFilter<"Campaign"> | string
   imageUrl?: Prisma.StringNullableFilter<"Campaign"> | string | null
   isPublished?: Prisma.BoolFilter<"Campaign"> | boolean
@@ -257,6 +273,8 @@ export type CampaignOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  targetMarket?: Prisma.SortOrder
+  deadline?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -275,6 +293,8 @@ export type CampaignWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.CampaignWhereInput[]
   NOT?: Prisma.CampaignWhereInput | Prisma.CampaignWhereInput[]
   title?: Prisma.StringFilter<"Campaign"> | string
+  targetMarket?: Prisma.StringFilter<"Campaign"> | string
+  deadline?: Prisma.DateTimeNullableFilter<"Campaign"> | Date | string | null
   description?: Prisma.StringFilter<"Campaign"> | string
   imageUrl?: Prisma.StringNullableFilter<"Campaign"> | string | null
   isPublished?: Prisma.BoolFilter<"Campaign"> | boolean
@@ -290,6 +310,8 @@ export type CampaignOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  targetMarket?: Prisma.SortOrder
+  deadline?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -310,6 +332,8 @@ export type CampaignScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Campaign"> | string
   title?: Prisma.StringWithAggregatesFilter<"Campaign"> | string
   slug?: Prisma.StringWithAggregatesFilter<"Campaign"> | string
+  targetMarket?: Prisma.StringWithAggregatesFilter<"Campaign"> | string
+  deadline?: Prisma.DateTimeNullableWithAggregatesFilter<"Campaign"> | Date | string | null
   description?: Prisma.StringWithAggregatesFilter<"Campaign"> | string
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Campaign"> | string | null
   isPublished?: Prisma.BoolWithAggregatesFilter<"Campaign"> | boolean
@@ -322,6 +346,8 @@ export type CampaignCreateInput = {
   id?: string
   title: string
   slug: string
+  targetMarket: string
+  deadline?: Date | string | null
   description: string
   imageUrl?: string | null
   isPublished?: boolean
@@ -337,6 +363,8 @@ export type CampaignUncheckedCreateInput = {
   id?: string
   title: string
   slug: string
+  targetMarket: string
+  deadline?: Date | string | null
   description: string
   imageUrl?: string | null
   isPublished?: boolean
@@ -352,6 +380,8 @@ export type CampaignUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -367,6 +397,8 @@ export type CampaignUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -382,6 +414,8 @@ export type CampaignCreateManyInput = {
   id?: string
   title: string
   slug: string
+  targetMarket: string
+  deadline?: Date | string | null
   description: string
   imageUrl?: string | null
   isPublished?: boolean
@@ -394,6 +428,8 @@ export type CampaignUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -406,6 +442,8 @@ export type CampaignUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -418,6 +456,8 @@ export type CampaignCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  targetMarket?: Prisma.SortOrder
+  deadline?: Prisma.SortOrder
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -434,6 +474,8 @@ export type CampaignMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  targetMarket?: Prisma.SortOrder
+  deadline?: Prisma.SortOrder
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -446,6 +488,8 @@ export type CampaignMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  targetMarket?: Prisma.SortOrder
+  deadline?: Prisma.SortOrder
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -516,6 +560,8 @@ export type CampaignCreateWithoutQuestionsInput = {
   id?: string
   title: string
   slug: string
+  targetMarket: string
+  deadline?: Date | string | null
   description: string
   imageUrl?: string | null
   isPublished?: boolean
@@ -530,6 +576,8 @@ export type CampaignUncheckedCreateWithoutQuestionsInput = {
   id?: string
   title: string
   slug: string
+  targetMarket: string
+  deadline?: Date | string | null
   description: string
   imageUrl?: string | null
   isPublished?: boolean
@@ -560,6 +608,8 @@ export type CampaignUpdateWithoutQuestionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -574,6 +624,8 @@ export type CampaignUncheckedUpdateWithoutQuestionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -588,6 +640,8 @@ export type CampaignCreateWithoutResponsesInput = {
   id?: string
   title: string
   slug: string
+  targetMarket: string
+  deadline?: Date | string | null
   description: string
   imageUrl?: string | null
   isPublished?: boolean
@@ -602,6 +656,8 @@ export type CampaignUncheckedCreateWithoutResponsesInput = {
   id?: string
   title: string
   slug: string
+  targetMarket: string
+  deadline?: Date | string | null
   description: string
   imageUrl?: string | null
   isPublished?: boolean
@@ -632,6 +688,8 @@ export type CampaignUpdateWithoutResponsesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -646,6 +704,8 @@ export type CampaignUncheckedUpdateWithoutResponsesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -660,6 +720,8 @@ export type CampaignCreateWithoutNotificationsInput = {
   id?: string
   title: string
   slug: string
+  targetMarket: string
+  deadline?: Date | string | null
   description: string
   imageUrl?: string | null
   isPublished?: boolean
@@ -674,6 +736,8 @@ export type CampaignUncheckedCreateWithoutNotificationsInput = {
   id?: string
   title: string
   slug: string
+  targetMarket: string
+  deadline?: Date | string | null
   description: string
   imageUrl?: string | null
   isPublished?: boolean
@@ -704,6 +768,8 @@ export type CampaignUpdateWithoutNotificationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -718,6 +784,8 @@ export type CampaignUncheckedUpdateWithoutNotificationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  targetMarket?: Prisma.StringFieldUpdateOperationsInput | string
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -781,6 +849,8 @@ export type CampaignSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id?: boolean
   title?: boolean
   slug?: boolean
+  targetMarket?: boolean
+  deadline?: boolean
   description?: boolean
   imageUrl?: boolean
   isPublished?: boolean
@@ -797,6 +867,8 @@ export type CampaignSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   id?: boolean
   title?: boolean
   slug?: boolean
+  targetMarket?: boolean
+  deadline?: boolean
   description?: boolean
   imageUrl?: boolean
   isPublished?: boolean
@@ -809,6 +881,8 @@ export type CampaignSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   id?: boolean
   title?: boolean
   slug?: boolean
+  targetMarket?: boolean
+  deadline?: boolean
   description?: boolean
   imageUrl?: boolean
   isPublished?: boolean
@@ -821,6 +895,8 @@ export type CampaignSelectScalar = {
   id?: boolean
   title?: boolean
   slug?: boolean
+  targetMarket?: boolean
+  deadline?: boolean
   description?: boolean
   imageUrl?: boolean
   isPublished?: boolean
@@ -829,7 +905,7 @@ export type CampaignSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CampaignOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "imageUrl" | "isPublished" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["campaign"]>
+export type CampaignOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "targetMarket" | "deadline" | "description" | "imageUrl" | "isPublished" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["campaign"]>
 export type CampaignInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   questions?: boolean | Prisma.Campaign$questionsArgs<ExtArgs>
   responses?: boolean | Prisma.Campaign$responsesArgs<ExtArgs>
@@ -850,6 +926,8 @@ export type $CampaignPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     id: string
     title: string
     slug: string
+    targetMarket: string
+    deadline: Date | null
     description: string
     imageUrl: string | null
     isPublished: boolean
@@ -1285,6 +1363,8 @@ export interface CampaignFieldRefs {
   readonly id: Prisma.FieldRef<"Campaign", 'String'>
   readonly title: Prisma.FieldRef<"Campaign", 'String'>
   readonly slug: Prisma.FieldRef<"Campaign", 'String'>
+  readonly targetMarket: Prisma.FieldRef<"Campaign", 'String'>
+  readonly deadline: Prisma.FieldRef<"Campaign", 'DateTime'>
   readonly description: Prisma.FieldRef<"Campaign", 'String'>
   readonly imageUrl: Prisma.FieldRef<"Campaign", 'String'>
   readonly isPublished: Prisma.FieldRef<"Campaign", 'Boolean'>

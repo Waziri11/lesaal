@@ -173,6 +173,8 @@ model Campaign {
   id          String             @id @default(cuid())
   title       String
   slug        String             @unique
+  targetMarket String
+  deadline    DateTime?
   description String
   imageUrl    String?
   isPublished Boolean            @default(true)
@@ -190,6 +192,10 @@ model Campaign {
 model CampaignQuestion {
   id          String   @id @default(cuid())
   campaignId  String
+  sectionKey  String?
+  sectionTitle String?
+  sectionDescription String?
+  sectionOrder Int      @default(0)
   key         String
   label       String
   type        String

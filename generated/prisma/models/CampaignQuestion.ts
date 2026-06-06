@@ -27,16 +27,22 @@ export type AggregateCampaignQuestion = {
 }
 
 export type CampaignQuestionAvgAggregateOutputType = {
+  sectionOrder: number | null
   order: number | null
 }
 
 export type CampaignQuestionSumAggregateOutputType = {
+  sectionOrder: number | null
   order: number | null
 }
 
 export type CampaignQuestionMinAggregateOutputType = {
   id: string | null
   campaignId: string | null
+  sectionKey: string | null
+  sectionTitle: string | null
+  sectionDescription: string | null
+  sectionOrder: number | null
   key: string | null
   label: string | null
   type: string | null
@@ -49,6 +55,10 @@ export type CampaignQuestionMinAggregateOutputType = {
 export type CampaignQuestionMaxAggregateOutputType = {
   id: string | null
   campaignId: string | null
+  sectionKey: string | null
+  sectionTitle: string | null
+  sectionDescription: string | null
+  sectionOrder: number | null
   key: string | null
   label: string | null
   type: string | null
@@ -61,6 +71,10 @@ export type CampaignQuestionMaxAggregateOutputType = {
 export type CampaignQuestionCountAggregateOutputType = {
   id: number
   campaignId: number
+  sectionKey: number
+  sectionTitle: number
+  sectionDescription: number
+  sectionOrder: number
   key: number
   label: number
   type: number
@@ -74,16 +88,22 @@ export type CampaignQuestionCountAggregateOutputType = {
 
 
 export type CampaignQuestionAvgAggregateInputType = {
+  sectionOrder?: true
   order?: true
 }
 
 export type CampaignQuestionSumAggregateInputType = {
+  sectionOrder?: true
   order?: true
 }
 
 export type CampaignQuestionMinAggregateInputType = {
   id?: true
   campaignId?: true
+  sectionKey?: true
+  sectionTitle?: true
+  sectionDescription?: true
+  sectionOrder?: true
   key?: true
   label?: true
   type?: true
@@ -96,6 +116,10 @@ export type CampaignQuestionMinAggregateInputType = {
 export type CampaignQuestionMaxAggregateInputType = {
   id?: true
   campaignId?: true
+  sectionKey?: true
+  sectionTitle?: true
+  sectionDescription?: true
+  sectionOrder?: true
   key?: true
   label?: true
   type?: true
@@ -108,6 +132,10 @@ export type CampaignQuestionMaxAggregateInputType = {
 export type CampaignQuestionCountAggregateInputType = {
   id?: true
   campaignId?: true
+  sectionKey?: true
+  sectionTitle?: true
+  sectionDescription?: true
+  sectionOrder?: true
   key?: true
   label?: true
   type?: true
@@ -208,6 +236,10 @@ export type CampaignQuestionGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type CampaignQuestionGroupByOutputType = {
   id: string
   campaignId: string
+  sectionKey: string | null
+  sectionTitle: string | null
+  sectionDescription: string | null
+  sectionOrder: number
   key: string
   label: string
   type: string
@@ -244,6 +276,10 @@ export type CampaignQuestionWhereInput = {
   NOT?: Prisma.CampaignQuestionWhereInput | Prisma.CampaignQuestionWhereInput[]
   id?: Prisma.StringFilter<"CampaignQuestion"> | string
   campaignId?: Prisma.StringFilter<"CampaignQuestion"> | string
+  sectionKey?: Prisma.StringNullableFilter<"CampaignQuestion"> | string | null
+  sectionTitle?: Prisma.StringNullableFilter<"CampaignQuestion"> | string | null
+  sectionDescription?: Prisma.StringNullableFilter<"CampaignQuestion"> | string | null
+  sectionOrder?: Prisma.IntFilter<"CampaignQuestion"> | number
   key?: Prisma.StringFilter<"CampaignQuestion"> | string
   label?: Prisma.StringFilter<"CampaignQuestion"> | string
   type?: Prisma.StringFilter<"CampaignQuestion"> | string
@@ -258,6 +294,10 @@ export type CampaignQuestionWhereInput = {
 export type CampaignQuestionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   campaignId?: Prisma.SortOrder
+  sectionKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionOrder?: Prisma.SortOrder
   key?: Prisma.SortOrder
   label?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -275,6 +315,10 @@ export type CampaignQuestionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.CampaignQuestionWhereInput[]
   NOT?: Prisma.CampaignQuestionWhereInput | Prisma.CampaignQuestionWhereInput[]
   campaignId?: Prisma.StringFilter<"CampaignQuestion"> | string
+  sectionKey?: Prisma.StringNullableFilter<"CampaignQuestion"> | string | null
+  sectionTitle?: Prisma.StringNullableFilter<"CampaignQuestion"> | string | null
+  sectionDescription?: Prisma.StringNullableFilter<"CampaignQuestion"> | string | null
+  sectionOrder?: Prisma.IntFilter<"CampaignQuestion"> | number
   key?: Prisma.StringFilter<"CampaignQuestion"> | string
   label?: Prisma.StringFilter<"CampaignQuestion"> | string
   type?: Prisma.StringFilter<"CampaignQuestion"> | string
@@ -289,6 +333,10 @@ export type CampaignQuestionWhereUniqueInput = Prisma.AtLeast<{
 export type CampaignQuestionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   campaignId?: Prisma.SortOrder
+  sectionKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionOrder?: Prisma.SortOrder
   key?: Prisma.SortOrder
   label?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -310,6 +358,10 @@ export type CampaignQuestionScalarWhereWithAggregatesInput = {
   NOT?: Prisma.CampaignQuestionScalarWhereWithAggregatesInput | Prisma.CampaignQuestionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"CampaignQuestion"> | string
   campaignId?: Prisma.StringWithAggregatesFilter<"CampaignQuestion"> | string
+  sectionKey?: Prisma.StringNullableWithAggregatesFilter<"CampaignQuestion"> | string | null
+  sectionTitle?: Prisma.StringNullableWithAggregatesFilter<"CampaignQuestion"> | string | null
+  sectionDescription?: Prisma.StringNullableWithAggregatesFilter<"CampaignQuestion"> | string | null
+  sectionOrder?: Prisma.IntWithAggregatesFilter<"CampaignQuestion"> | number
   key?: Prisma.StringWithAggregatesFilter<"CampaignQuestion"> | string
   label?: Prisma.StringWithAggregatesFilter<"CampaignQuestion"> | string
   type?: Prisma.StringWithAggregatesFilter<"CampaignQuestion"> | string
@@ -322,6 +374,10 @@ export type CampaignQuestionScalarWhereWithAggregatesInput = {
 
 export type CampaignQuestionCreateInput = {
   id?: string
+  sectionKey?: string | null
+  sectionTitle?: string | null
+  sectionDescription?: string | null
+  sectionOrder?: number
   key: string
   label: string
   type: string
@@ -336,6 +392,10 @@ export type CampaignQuestionCreateInput = {
 export type CampaignQuestionUncheckedCreateInput = {
   id?: string
   campaignId: string
+  sectionKey?: string | null
+  sectionTitle?: string | null
+  sectionDescription?: string | null
+  sectionOrder?: number
   key: string
   label: string
   type: string
@@ -348,6 +408,10 @@ export type CampaignQuestionUncheckedCreateInput = {
 
 export type CampaignQuestionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sectionKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionOrder?: Prisma.IntFieldUpdateOperationsInput | number
   key?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -362,6 +426,10 @@ export type CampaignQuestionUpdateInput = {
 export type CampaignQuestionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   campaignId?: Prisma.StringFieldUpdateOperationsInput | string
+  sectionKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionOrder?: Prisma.IntFieldUpdateOperationsInput | number
   key?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -375,6 +443,10 @@ export type CampaignQuestionUncheckedUpdateInput = {
 export type CampaignQuestionCreateManyInput = {
   id?: string
   campaignId: string
+  sectionKey?: string | null
+  sectionTitle?: string | null
+  sectionDescription?: string | null
+  sectionOrder?: number
   key: string
   label: string
   type: string
@@ -387,6 +459,10 @@ export type CampaignQuestionCreateManyInput = {
 
 export type CampaignQuestionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sectionKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionOrder?: Prisma.IntFieldUpdateOperationsInput | number
   key?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -400,6 +476,10 @@ export type CampaignQuestionUpdateManyMutationInput = {
 export type CampaignQuestionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   campaignId?: Prisma.StringFieldUpdateOperationsInput | string
+  sectionKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionOrder?: Prisma.IntFieldUpdateOperationsInput | number
   key?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -423,6 +503,10 @@ export type CampaignQuestionOrderByRelationAggregateInput = {
 export type CampaignQuestionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   campaignId?: Prisma.SortOrder
+  sectionKey?: Prisma.SortOrder
+  sectionTitle?: Prisma.SortOrder
+  sectionDescription?: Prisma.SortOrder
+  sectionOrder?: Prisma.SortOrder
   key?: Prisma.SortOrder
   label?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -434,12 +518,17 @@ export type CampaignQuestionCountOrderByAggregateInput = {
 }
 
 export type CampaignQuestionAvgOrderByAggregateInput = {
+  sectionOrder?: Prisma.SortOrder
   order?: Prisma.SortOrder
 }
 
 export type CampaignQuestionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   campaignId?: Prisma.SortOrder
+  sectionKey?: Prisma.SortOrder
+  sectionTitle?: Prisma.SortOrder
+  sectionDescription?: Prisma.SortOrder
+  sectionOrder?: Prisma.SortOrder
   key?: Prisma.SortOrder
   label?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -452,6 +541,10 @@ export type CampaignQuestionMaxOrderByAggregateInput = {
 export type CampaignQuestionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   campaignId?: Prisma.SortOrder
+  sectionKey?: Prisma.SortOrder
+  sectionTitle?: Prisma.SortOrder
+  sectionDescription?: Prisma.SortOrder
+  sectionOrder?: Prisma.SortOrder
   key?: Prisma.SortOrder
   label?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -462,6 +555,7 @@ export type CampaignQuestionMinOrderByAggregateInput = {
 }
 
 export type CampaignQuestionSumOrderByAggregateInput = {
+  sectionOrder?: Prisma.SortOrder
   order?: Prisma.SortOrder
 }
 
@@ -509,6 +603,10 @@ export type CampaignQuestionUncheckedUpdateManyWithoutCampaignNestedInput = {
 
 export type CampaignQuestionCreateWithoutCampaignInput = {
   id?: string
+  sectionKey?: string | null
+  sectionTitle?: string | null
+  sectionDescription?: string | null
+  sectionOrder?: number
   key: string
   label: string
   type: string
@@ -521,6 +619,10 @@ export type CampaignQuestionCreateWithoutCampaignInput = {
 
 export type CampaignQuestionUncheckedCreateWithoutCampaignInput = {
   id?: string
+  sectionKey?: string | null
+  sectionTitle?: string | null
+  sectionDescription?: string | null
+  sectionOrder?: number
   key: string
   label: string
   type: string
@@ -563,6 +665,10 @@ export type CampaignQuestionScalarWhereInput = {
   NOT?: Prisma.CampaignQuestionScalarWhereInput | Prisma.CampaignQuestionScalarWhereInput[]
   id?: Prisma.StringFilter<"CampaignQuestion"> | string
   campaignId?: Prisma.StringFilter<"CampaignQuestion"> | string
+  sectionKey?: Prisma.StringNullableFilter<"CampaignQuestion"> | string | null
+  sectionTitle?: Prisma.StringNullableFilter<"CampaignQuestion"> | string | null
+  sectionDescription?: Prisma.StringNullableFilter<"CampaignQuestion"> | string | null
+  sectionOrder?: Prisma.IntFilter<"CampaignQuestion"> | number
   key?: Prisma.StringFilter<"CampaignQuestion"> | string
   label?: Prisma.StringFilter<"CampaignQuestion"> | string
   type?: Prisma.StringFilter<"CampaignQuestion"> | string
@@ -575,6 +681,10 @@ export type CampaignQuestionScalarWhereInput = {
 
 export type CampaignQuestionCreateManyCampaignInput = {
   id?: string
+  sectionKey?: string | null
+  sectionTitle?: string | null
+  sectionDescription?: string | null
+  sectionOrder?: number
   key: string
   label: string
   type: string
@@ -587,6 +697,10 @@ export type CampaignQuestionCreateManyCampaignInput = {
 
 export type CampaignQuestionUpdateWithoutCampaignInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sectionKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionOrder?: Prisma.IntFieldUpdateOperationsInput | number
   key?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -599,6 +713,10 @@ export type CampaignQuestionUpdateWithoutCampaignInput = {
 
 export type CampaignQuestionUncheckedUpdateWithoutCampaignInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sectionKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionOrder?: Prisma.IntFieldUpdateOperationsInput | number
   key?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -611,6 +729,10 @@ export type CampaignQuestionUncheckedUpdateWithoutCampaignInput = {
 
 export type CampaignQuestionUncheckedUpdateManyWithoutCampaignInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sectionKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionOrder?: Prisma.IntFieldUpdateOperationsInput | number
   key?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -626,6 +748,10 @@ export type CampaignQuestionUncheckedUpdateManyWithoutCampaignInput = {
 export type CampaignQuestionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   campaignId?: boolean
+  sectionKey?: boolean
+  sectionTitle?: boolean
+  sectionDescription?: boolean
+  sectionOrder?: boolean
   key?: boolean
   label?: boolean
   type?: boolean
@@ -640,6 +766,10 @@ export type CampaignQuestionSelect<ExtArgs extends runtime.Types.Extensions.Inte
 export type CampaignQuestionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   campaignId?: boolean
+  sectionKey?: boolean
+  sectionTitle?: boolean
+  sectionDescription?: boolean
+  sectionOrder?: boolean
   key?: boolean
   label?: boolean
   type?: boolean
@@ -654,6 +784,10 @@ export type CampaignQuestionSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
 export type CampaignQuestionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   campaignId?: boolean
+  sectionKey?: boolean
+  sectionTitle?: boolean
+  sectionDescription?: boolean
+  sectionOrder?: boolean
   key?: boolean
   label?: boolean
   type?: boolean
@@ -668,6 +802,10 @@ export type CampaignQuestionSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
 export type CampaignQuestionSelectScalar = {
   id?: boolean
   campaignId?: boolean
+  sectionKey?: boolean
+  sectionTitle?: boolean
+  sectionDescription?: boolean
+  sectionOrder?: boolean
   key?: boolean
   label?: boolean
   type?: boolean
@@ -678,7 +816,7 @@ export type CampaignQuestionSelectScalar = {
   isVisible?: boolean
 }
 
-export type CampaignQuestionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "campaignId" | "key" | "label" | "type" | "required" | "placeholder" | "options" | "order" | "isVisible", ExtArgs["result"]["campaignQuestion"]>
+export type CampaignQuestionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "campaignId" | "sectionKey" | "sectionTitle" | "sectionDescription" | "sectionOrder" | "key" | "label" | "type" | "required" | "placeholder" | "options" | "order" | "isVisible", ExtArgs["result"]["campaignQuestion"]>
 export type CampaignQuestionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   campaign?: boolean | Prisma.CampaignDefaultArgs<ExtArgs>
 }
@@ -697,6 +835,10 @@ export type $CampaignQuestionPayload<ExtArgs extends runtime.Types.Extensions.In
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     campaignId: string
+    sectionKey: string | null
+    sectionTitle: string | null
+    sectionDescription: string | null
+    sectionOrder: number
     key: string
     label: string
     type: string
@@ -1131,6 +1273,10 @@ export interface Prisma__CampaignQuestionClient<T, Null = never, ExtArgs extends
 export interface CampaignQuestionFieldRefs {
   readonly id: Prisma.FieldRef<"CampaignQuestion", 'String'>
   readonly campaignId: Prisma.FieldRef<"CampaignQuestion", 'String'>
+  readonly sectionKey: Prisma.FieldRef<"CampaignQuestion", 'String'>
+  readonly sectionTitle: Prisma.FieldRef<"CampaignQuestion", 'String'>
+  readonly sectionDescription: Prisma.FieldRef<"CampaignQuestion", 'String'>
+  readonly sectionOrder: Prisma.FieldRef<"CampaignQuestion", 'Int'>
   readonly key: Prisma.FieldRef<"CampaignQuestion", 'String'>
   readonly label: Prisma.FieldRef<"CampaignQuestion", 'String'>
   readonly type: Prisma.FieldRef<"CampaignQuestion", 'String'>

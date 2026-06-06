@@ -93,6 +93,17 @@ function toStringArray(value) {
   return [];
 }
 
+function formatCampaignDate(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 function normalizeHexColor(value) {
   const trimmed = String(value || "").trim();
   if (!trimmed) return "";
@@ -1364,16 +1375,20 @@ export default function PublicLanding({
                     campaignHighlights.map((campaign) => (
                       <article key={campaign.id || campaign.slug} className="lp-campaign-slide">
                         <div className="lp-campaign-slide-media">
-                          {campaign.imageUrl ? (
-                            <img src={campaign.imageUrl} alt={campaign.title || "Campaign"} />
-                          ) : (
-                            <div className="lp-image-placeholder">Campaign image</div>
-                          )}
+                          <a href={`/campaigns/${campaign.slug}`} onClick={(event) => handlePreviewLinkClick(event, section.id)}>
+                            {campaign.imageUrl ? (
+                              <img src={campaign.imageUrl} alt={campaign.title || "Campaign"} />
+                            ) : (
+                              <div className="lp-image-placeholder">Campaign image</div>
+                            )}
+                          </a>
                         </div>
 
                         <div className="lp-campaign-slide-content">
                           <h3>{campaign.title || "Campaign"}</h3>
                           <p>{campaign.description || "Campaign details coming soon."}</p>
+                          {campaign.targetMarket ? <p>Target market: {campaign.targetMarket}</p> : null}
+                          {campaign.deadline ? <p>Active until: {formatCampaignDate(campaign.deadline)}</p> : null}
                           <a
                             href={`/campaigns/${campaign.slug}`}
                             className="lp-btn lp-btn-primary"

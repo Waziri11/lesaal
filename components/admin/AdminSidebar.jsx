@@ -88,7 +88,7 @@ export default function AdminSidebar({ admin = null }) {
   }
 
   return (
-    <aside className="flex min-h-screen flex-col border-r border-[color:var(--ui-border)] bg-[color:var(--ui-card)]/70 px-3 py-4 lg:sticky lg:top-0">
+    <aside className="flex min-h-screen flex-col border-r border-[color:var(--ui-border)] bg-[color:var(--ui-card)]/70 px-3 py-4 lg:h-screen lg:min-h-0 lg:overflow-hidden">
       <div className="mb-2 flex items-center gap-3 rounded-xl px-2 py-2">
         {admin?.profileImageUrl ? (
           <img

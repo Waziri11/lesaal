@@ -10,6 +10,44 @@ import { createRateLimitResponse, validateAdminMutationRequest } from "../../../
 import { getSecurityConfig } from "../../../../lib/security-config";
 import { isAdminProfileComplete } from "../../../../lib/admin-profile";
 
+const ADMIN_LOGIN_SELECT = {
+  id: true,
+  email: true,
+  passwordHash: true,
+  firstName: true,
+  lastName: true,
+  birthDate: true,
+  companyName: true,
+  companyDescription: true,
+  profileImageUrl: true,
+  gender: true,
+  region: true,
+  district: true,
+  ward: true,
+};
+
+const ADMIN_LOGIN_SELECT_LEGACY = {
+  id: true,
+  email: true,
+  passwordHash: true,
+  firstName: true,
+  lastName: true,
+  birthDate: true,
+  companyName: true,
+  companyDescription: true,
+  gender: true,
+  region: true,
+  district: true,
+  ward: true,
+};
+
+function isMissingProfileImageColumnError(error) {
+  if (!error) return false;
+
+  const message = String(error?.message || "").toLowerCase();
+  return error?.code === "P2022" && message.includes("profileimageurl");
+}
+
 export async function POST(request) {
   try {
     const securityError = validateAdminMutationRequest(request);
@@ -65,7 +103,24 @@ export async function POST(request) {
       return NextResponse.json({ error: "Captcha validation failed." }, { status: 400 });
     }
 
-    const admin = await prisma.adminUser.findUnique({ where: { email } });
+    let admin;
+
+    try {
+      admin = await prisma.adminUser.findUnique({
+        where: { email },
+        select: ADMIN_LOGIN_SELECT,
+      });
+    } catch (error) {
+      if (!isMissingProfileImageColumnError(error)) {
+        throw error;
+      }
+
+      // Backward-compatibility while pending profile image DB migration.
+      admin = await prisma.adminUser.findUnique({
+        where: { email },
+        select: ADMIN_LOGIN_SELECT_LEGACY,
+      });
+    }
 
     if (!admin) {
       return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });

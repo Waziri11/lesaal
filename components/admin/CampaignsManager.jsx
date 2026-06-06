@@ -10,7 +10,6 @@ import {
   ChevronsRight,
   Filter,
   MoreHorizontal,
-  Pencil,
   Plus,
   Search,
   SlidersHorizontal,
@@ -414,13 +413,6 @@ export default function CampaignsManager() {
                     onClick={() => openCampaignViewer(campaign)}
                   >
                     View campaign
-                  </button>
-                  <button
-                    type="button"
-                    className={MENU_ITEM_CLASS}
-                    onClick={() => router.push(`/admin/campaigns/${campaign.id}`)}
-                  >
-                    Edit campaign
                   </button>
                   <button
                     type="button"
@@ -851,10 +843,6 @@ export default function CampaignsManager() {
             <div className="flex items-center justify-end gap-2 border-t border-[color:var(--ui-border)] p-4">
               <Button type="button" variant="outline" onClick={closeCampaignViewer}>
                 Close
-              </Button>
-              <Button type="button" onClick={() => router.push(`/admin/campaigns/${viewerCampaign.id}`)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit campaign
               </Button>
             </div>
           </div>

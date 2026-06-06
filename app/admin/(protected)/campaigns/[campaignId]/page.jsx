@@ -1,8 +1,6 @@
-import CampaignBuilderPage from "../../../../../components/admin/CampaignBuilderPage";
+import { redirect } from "next/navigation";
 
 export default async function EditCampaignPage({ params }) {
-  const resolvedParams = await params;
-  const campaignId = String(resolvedParams?.campaignId || "");
-
-  return <CampaignBuilderPage campaignId={campaignId} />;
+  await params;
+  redirect("/admin/campaigns");
 }

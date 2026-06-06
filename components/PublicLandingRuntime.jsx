@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import HeroTypewriter from "./HeroTypewriter";
 
@@ -130,6 +131,34 @@ function sortItems(items) {
   return (Array.isArray(items) ? items : []).slice().sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
 }
 
+function shouldUnoptimizeImage(src) {
+  if (typeof src !== "string" || !src) {
+    return true;
+  }
+
+  if (!src.startsWith("/")) {
+    return true;
+  }
+
+  const normalizedPath = src.split("?")[0].toLowerCase();
+  return normalizedPath.endsWith(".svg");
+}
+
+function LandingImage({ src, alt, className, sizes, width = 1200, height = 800, priority = false }) {
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      sizes={sizes}
+      priority={priority}
+      unoptimized={shouldUnoptimizeImage(src)}
+      className={className}
+    />
+  );
+}
+
 export default function PublicLandingRuntime({ config, campaigns = [] }) {
   const [activeFaqItemId, setActiveFaqItemId] = useState(null);
 
@@ -220,7 +249,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
     <div className="lp-shell">
       <header className="lp-header">
         <a href="#top" className="lp-brand">
-          <img src="/images/logo/LESAAL.png" alt="Lesaal logo" />
+          <LandingImage src="/images/logo/LESAAL.png" alt="Lesaal logo" width={96} height={96} sizes="96px" priority />
           <span>Lesaal</span>
         </a>
 
@@ -266,7 +295,14 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
               >
                 <div className="lp-hero-background">
                   {settings.imageUrl ? (
-                    <img src={settings.imageUrl} alt="Marketing growth visual" />
+                    <LandingImage
+                      src={settings.imageUrl}
+                      alt="Marketing growth visual"
+                      width={1600}
+                      height={1000}
+                      sizes="100vw"
+                      priority
+                    />
                   ) : (
                     <div className="lp-image-placeholder">No image selected</div>
                   )}
@@ -369,7 +405,13 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                     <article key={item.id} className="lp-client-card">
                       <div className="lp-client-logo-wrap">
                         {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={`${item.title || "Client"} logo`} />
+                          <LandingImage
+                            src={item.imageUrl}
+                            alt={`${item.title || "Client"} logo`}
+                            width={320}
+                            height={160}
+                            sizes="(min-width: 1024px) 12vw, (min-width: 768px) 18vw, 28vw"
+                          />
                         ) : (
                           <div className="lp-image-placeholder">No logo</div>
                         )}
@@ -406,7 +448,13 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                       <article key={item.id} className="lp-service-card">
                         <div className="lp-service-image-wrap">
                           {item.imageUrl ? (
-                            <img src={item.imageUrl} alt={item.title || "Service image"} />
+                            <LandingImage
+                              src={item.imageUrl}
+                              alt={item.title || "Service image"}
+                              width={960}
+                              height={640}
+                              sizes="(min-width: 1280px) 24vw, (min-width: 768px) 42vw, 100vw"
+                            />
                           ) : (
                             <div className="lp-image-placeholder">No image</div>
                           )}
@@ -456,7 +504,13 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                 <div className="lp-commentary-stage">
                   <div className="lp-commentary-background">
                     {commentaryItem?.imageUrl ? (
-                      <img src={commentaryItem.imageUrl} alt={commentaryItem.title || "Client commentary"} />
+                      <LandingImage
+                        src={commentaryItem.imageUrl}
+                        alt={commentaryItem.title || "Client commentary"}
+                        width={1200}
+                        height={800}
+                        sizes="(min-width: 1024px) 55vw, 100vw"
+                      />
                     ) : (
                       <div className="lp-image-placeholder">No image</div>
                     )}
@@ -518,7 +572,13 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                         {isRecommended ? <span className="lp-plan-badge">Recommended</span> : null}
                         {item.imageUrl ? (
                           <div className="lp-plan-media">
-                            <img src={item.imageUrl} alt={item.title || "Pricing plan"} />
+                            <LandingImage
+                              src={item.imageUrl}
+                              alt={item.title || "Pricing plan"}
+                              width={900}
+                              height={600}
+                              sizes="(min-width: 1280px) 24vw, (min-width: 768px) 42vw, 100vw"
+                            />
                           </div>
                         ) : null}
                         <h3>{item.title || "Plan"}</h3>
@@ -581,7 +641,13 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                             <p>{item.description || "Answer"}</p>
                             {item.imageUrl ? (
                               <div className="lp-faq-image-wrap">
-                                <img src={item.imageUrl} alt={item.title || "FAQ visual"} />
+                                <LandingImage
+                                  src={item.imageUrl}
+                                  alt={item.title || "FAQ visual"}
+                                  width={960}
+                                  height={640}
+                                  sizes="(min-width: 1024px) 40vw, 100vw"
+                                />
                               </div>
                             ) : null}
                           </div>
@@ -615,7 +681,13 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                         <div className="lp-campaign-slide-media">
                           <a href={`/campaigns/${campaign.slug}`}>
                             {campaign.imageUrl ? (
-                              <img src={campaign.imageUrl} alt={campaign.title || "Campaign"} />
+                              <LandingImage
+                                src={campaign.imageUrl}
+                                alt={campaign.title || "Campaign"}
+                                width={1200}
+                                height={800}
+                                sizes="(min-width: 1024px) 42vw, 100vw"
+                              />
                             ) : (
                               <div className="lp-image-placeholder">Campaign image</div>
                             )}
@@ -677,7 +749,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                 <div className="lp-footer-main">
                   <div className="lp-footer-brand">
                     <a href="#top">
-                      <img src="/images/logo/LESAAL.png" alt="Lesaal logo" />
+                      <LandingImage src="/images/logo/LESAAL.png" alt="Lesaal logo" width={84} height={84} sizes="84px" />
                       <span>Lesaal</span>
                     </a>
                     <p>Boost sales with customer care, ads, and social media packages.</p>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import PageState from "../../components/shared/PageState";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
@@ -10,6 +11,10 @@ export const metadata = {
   title: "Lesaal | Services",
   description: "Explore Lesaal's full service catalog.",
 };
+
+function isLocalImageSrc(src) {
+  return typeof src === "string" && src.startsWith("/");
+}
 
 export default async function ServicesPage() {
   let services = [];
@@ -56,12 +61,21 @@ export default async function ServicesPage() {
 
       <PageState status={services.length ? "loaded" : "empty"} resourceLabel="services">
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {services.map((service) => (
+          {services.map((service, serviceIndex) => (
             <Card key={service.id}>
               <CardContent className="space-y-3 p-5">
                 <div className="overflow-hidden rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)]">
                   {service.imageUrl ? (
-                    <img src={service.imageUrl} alt={service.title || "Service"} className="h-40 w-full object-cover" />
+                    <Image
+                      src={service.imageUrl}
+                      alt={service.title || "Service"}
+                      width={960}
+                      height={640}
+                      sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+                      priority={serviceIndex < 3}
+                      unoptimized={!isLocalImageSrc(service.imageUrl)}
+                      className="h-40 w-full object-cover"
+                    />
                   ) : (
                     <div className="flex h-40 items-center justify-center text-sm text-[color:var(--ui-muted-foreground)]">No image</div>
                   )}

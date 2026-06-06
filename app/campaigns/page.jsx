@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import PageState from "../../components/shared/PageState";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
@@ -20,6 +21,10 @@ function formatDate(value) {
     month: "short",
     day: "numeric",
   });
+}
+
+function isLocalImageSrc(src) {
+  return typeof src === "string" && src.startsWith("/");
 }
 
 export default async function CampaignsPage() {
@@ -65,12 +70,21 @@ export default async function CampaignsPage() {
 
       <PageState status={campaigns.length ? "loaded" : "empty"} resourceLabel="campaigns">
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {campaigns.map((campaign) => (
+          {campaigns.map((campaign, campaignIndex) => (
             <Card key={campaign.id}>
               <CardContent className="space-y-4 p-0">
                 <Link href={`/campaigns/${campaign.slug}`} className="block overflow-hidden rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)]">
                   {campaign.imageUrl ? (
-                    <img src={campaign.imageUrl} alt={campaign.title} className="h-44 w-full object-cover transition hover:scale-[1.02]" />
+                    <Image
+                      src={campaign.imageUrl}
+                      alt={campaign.title}
+                      width={960}
+                      height={540}
+                      sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+                      priority={campaignIndex < 2}
+                      unoptimized={!isLocalImageSrc(campaign.imageUrl)}
+                      className="h-44 w-full object-cover transition hover:scale-[1.02]"
+                    />
                   ) : (
                     <div className="flex h-44 items-center justify-center text-sm text-[color:var(--ui-muted-foreground)]">Campaign image</div>
                   )}

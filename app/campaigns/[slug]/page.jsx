@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import CampaignResponseForm from "../../../components/CampaignResponseForm";
 import PageState from "../../../components/shared/PageState";
 import { Badge } from "../../../components/ui/badge";
@@ -18,6 +19,10 @@ function formatDate(value) {
     month: "short",
     day: "numeric",
   });
+}
+
+function isLocalImageSrc(src) {
+  return typeof src === "string" && src.startsWith("/");
 }
 
 async function loadCampaign(slug) {
@@ -114,7 +119,16 @@ export default async function CampaignDetailPage({ params }) {
         <Card>
           <div className="overflow-hidden rounded-xl">
             {campaign.imageUrl ? (
-              <img src={campaign.imageUrl} alt={campaign.title} className="h-full min-h-[280px] w-full object-cover" />
+              <Image
+                src={campaign.imageUrl}
+                alt={campaign.title}
+                width={1280}
+                height={720}
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                priority
+                unoptimized={!isLocalImageSrc(campaign.imageUrl)}
+                className="h-full min-h-[280px] w-full object-cover"
+              />
             ) : (
               <div className="flex min-h-[280px] items-center justify-center text-sm text-[color:var(--ui-muted-foreground)]">Campaign image</div>
             )}

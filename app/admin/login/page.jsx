@@ -8,13 +8,13 @@ import { isAdminProfileComplete } from "../../../lib/admin-profile";
 export const dynamic = "force-dynamic";
 
 export default async function AdminLoginPage() {
+  const admin = await getAuthenticatedAdminFromCookies();
+
+  if (admin) {
+    redirect(isAdminProfileComplete(admin) ? "/admin/dashboard" : "/admin/profile?setup=1");
+  }
+
   try {
-    const admin = await getAuthenticatedAdminFromCookies();
-
-    if (admin) {
-      redirect(isAdminProfileComplete(admin) ? "/admin/dashboard" : "/admin/profile?setup=1");
-    }
-
     const { turnstileSiteKey } = getSecurityConfig();
 
     return <AdminLoginForm turnstileSiteKey={turnstileSiteKey} />;

@@ -189,6 +189,7 @@ model Campaign {
 
   @@index([order])
   @@index([isPublished])
+  @@index([isPublished, deadline, order, createdAt])
 }
 
 model CampaignQuestion {
@@ -222,6 +223,7 @@ model CampaignResponse {
 
   @@index([campaignId])
   @@index([submittedAt])
+  @@index([campaignId, submittedAt, id])
 }
 
 model AdminNotification {
@@ -242,6 +244,7 @@ model AdminNotification {
   @@index([createdAt])
   @@index([campaignId])
   @@index([campaignResponseId])
+  @@index([isRead, createdAt, id])
 }
 
 model EmailOtpCode {
@@ -287,6 +290,7 @@ model AdminNote {
 
   @@index([adminId])
   @@index([updatedAt])
+  @@index([adminId, updatedAt, id])
 }
 
 model RateLimitEntry {

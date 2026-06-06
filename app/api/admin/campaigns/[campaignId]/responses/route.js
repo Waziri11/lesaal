@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../../../lib/auth";
 import { getCampaignResponsesForAdmin, isCampaignTableMissingError, toCsvString } from "../../../../../../lib/campaigns";
 
+const DEFAULT_PAGE_LIMIT = 50;
+const MAX_PAGE_LIMIT = 100;
+
 function toExportRows(questions, responses) {
   const columns = [
     { key: "submittedAt", label: "Submitted At" },
@@ -26,6 +29,15 @@ function toExportRows(questions, responses) {
   return { columns, rows };
 }
 
+function parsePaginationParams(searchParams) {
+  const parsedLimit = Number.parseInt(String(searchParams.get("limit") || DEFAULT_PAGE_LIMIT), 10);
+  const limit = Number.isFinite(parsedLimit)
+    ? Math.min(Math.max(parsedLimit, 1), MAX_PAGE_LIMIT)
+    : DEFAULT_PAGE_LIMIT;
+  const cursor = String(searchParams.get("cursor") || "").trim() || null;
+  return { limit, cursor };
+}
+
 export async function GET(request, { params }) {
   try {
     const admin = await getAdminFromApiRequest(request);
@@ -35,15 +47,15 @@ export async function GET(request, { params }) {
     }
 
     const campaignId = String(params?.campaignId || "");
-    const data = await getCampaignResponsesForAdmin(campaignId);
-
-    if (!data) {
-      return NextResponse.json({ error: "Campaign not found." }, { status: 404 });
-    }
-
     const format = request.nextUrl.searchParams.get("format");
 
     if (format === "csv") {
+      const data = await getCampaignResponsesForAdmin(campaignId, { includeAllResponses: true });
+
+      if (!data) {
+        return NextResponse.json({ error: "Campaign not found." }, { status: 404 });
+      }
+
       const { columns, rows } = toExportRows(data.questions, data.responses);
       const csv = toCsvString(columns, rows);
 
@@ -56,10 +68,19 @@ export async function GET(request, { params }) {
       });
     }
 
+    const pagination = parsePaginationParams(request.nextUrl.searchParams);
+    const data = await getCampaignResponsesForAdmin(campaignId, pagination);
+
+    if (!data) {
+      return NextResponse.json({ error: "Campaign not found." }, { status: 404 });
+    }
+
     return NextResponse.json({
       campaign: data.campaign,
       questions: data.questions,
       responses: data.responses,
+      nextCursor: data.nextCursor,
+      hasMore: data.hasMore,
     });
   } catch (error) {
     console.error("Failed to load campaign responses", error);

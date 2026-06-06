@@ -3,6 +3,9 @@ import { getAdminFromApiRequest } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
 import { validateAdminMutationRequest } from "../../../../lib/request-security";
 
+const DEFAULT_PAGE_LIMIT = 30;
+const MAX_PAGE_LIMIT = 100;
+
 function isMissingAdminNoteTableError(error) {
   if (!error) return false;
 
@@ -35,6 +38,15 @@ function normalizeNoteInput(body) {
   };
 }
 
+function parsePaginationParams(searchParams) {
+  const parsedLimit = Number.parseInt(String(searchParams.get("limit") || DEFAULT_PAGE_LIMIT), 10);
+  const limit = Number.isFinite(parsedLimit)
+    ? Math.min(Math.max(parsedLimit, 1), MAX_PAGE_LIMIT)
+    : DEFAULT_PAGE_LIMIT;
+  const cursor = String(searchParams.get("cursor") || "").trim() || null;
+  return { limit, cursor };
+}
+
 export async function GET(request) {
   try {
     const admin = await getAdminFromApiRequest(request);
@@ -43,13 +55,23 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let notes;
+    let notes = [];
+    let nextCursor = null;
+    let hasMore = false;
+    const pagination = parsePaginationParams(request.nextUrl.searchParams);
 
     try {
-      notes = await prisma.adminNote.findMany({
+      const pageRows = await prisma.adminNote.findMany({
         where: { adminId: admin.id },
-        orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+        take: pagination.limit + 1,
+        cursor: pagination.cursor ? { id: pagination.cursor } : undefined,
+        skip: pagination.cursor ? 1 : 0,
       });
+
+      hasMore = pageRows.length > pagination.limit;
+      notes = hasMore ? pageRows.slice(0, pagination.limit) : pageRows;
+      nextCursor = hasMore ? notes[notes.length - 1]?.id || null : null;
     } catch (error) {
       if (!isMissingAdminNoteTableError(error)) {
         throw error;
@@ -57,9 +79,11 @@ export async function GET(request) {
 
       warnIfMissingAdminNoteTable();
       notes = [];
+      nextCursor = null;
+      hasMore = false;
     }
 
-    return NextResponse.json({ success: true, notes });
+    return NextResponse.json({ success: true, notes, nextCursor, hasMore });
   } catch (error) {
     console.error("Failed to fetch notes", error);
     return NextResponse.json({ error: "Unable to load notes." }, { status: 500 });

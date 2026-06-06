@@ -9,6 +9,8 @@ import { Input } from "../../../../components/ui/input";
 import { Textarea } from "../../../../components/ui/textarea";
 import { createCsrfHeaders } from "../../../../lib/csrf-client";
 
+const PAGE_LIMIT = 30;
+
 function formatDateTime(value) {
   if (!value) return "";
   const parsed = new Date(value);
@@ -16,11 +18,20 @@ function formatDateTime(value) {
   return parsed.toLocaleString();
 }
 
+function sortNotesByRecentUpdate(notes) {
+  return notes
+    .slice()
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime());
+}
+
 export default function AdminNotesPage() {
   const [notes, setNotes] = useState([]);
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingNotes, setLoadingNotes] = useState(true);
+  const [loadingMoreNotes, setLoadingMoreNotes] = useState(false);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
   const [creatingNote, setCreatingNote] = useState(false);
   const [deletingNote, setDeletingNote] = useState(false);
@@ -58,12 +69,22 @@ export default function AdminNotesPage() {
     });
   }, [selectedNote]);
 
-  async function loadNotes(preferredNoteId = null) {
-    setLoadingNotes(true);
+  async function loadNotes({ cursor = null, append = false, preferredNoteId = null } = {}) {
+    if (append) {
+      setLoadingMoreNotes(true);
+    } else {
+      setLoadingNotes(true);
+    }
+
     setStatusError("");
 
     try {
-      const response = await fetch("/api/admin/notes", { cache: "no-store" });
+      const query = new URLSearchParams({ limit: String(PAGE_LIMIT) });
+      if (cursor) {
+        query.set("cursor", cursor);
+      }
+
+      const response = await fetch(`/api/admin/notes?${query.toString()}`, { cache: "no-store" });
       const payload = await response.json();
 
       if (!response.ok) {
@@ -71,25 +92,36 @@ export default function AdminNotesPage() {
       }
 
       const nextNotes = Array.isArray(payload.notes) ? payload.notes : [];
-      setNotes(nextNotes);
+      setNextCursor(payload.nextCursor || null);
+      setHasMore(Boolean(payload.hasMore));
 
-      if (nextNotes.length === 0) {
-        setSelectedNoteId(null);
+      if (append) {
+        setNotes((current) => [...current, ...nextNotes]);
         return;
       }
 
-      const resolvedSelection =
-        preferredNoteId && nextNotes.some((note) => note.id === preferredNoteId)
-          ? preferredNoteId
-          : selectedNoteId && nextNotes.some((note) => note.id === selectedNoteId)
-            ? selectedNoteId
-            : nextNotes[0].id;
+      setNotes(nextNotes);
 
-      setSelectedNoteId(resolvedSelection);
+      if (!nextNotes.length) {
+        setSelectedNoteId(null);
+      } else {
+        const resolvedSelection =
+          preferredNoteId && nextNotes.some((note) => note.id === preferredNoteId)
+            ? preferredNoteId
+            : selectedNoteId && nextNotes.some((note) => note.id === selectedNoteId)
+              ? selectedNoteId
+              : nextNotes[0].id;
+
+        setSelectedNoteId(resolvedSelection);
+      }
     } catch (error) {
       setStatusError(error.message || "Unable to load notes.");
     } finally {
-      setLoadingNotes(false);
+      if (append) {
+        setLoadingMoreNotes(false);
+      } else {
+        setLoadingNotes(false);
+      }
     }
   }
 
@@ -117,7 +149,10 @@ export default function AdminNotesPage() {
         throw new Error(payload.error || "Unable to create note.");
       }
 
-      await loadNotes(payload.note?.id);
+      if (payload.note) {
+        setNotes((current) => [payload.note, ...current.filter((note) => note.id !== payload.note.id)]);
+        setSelectedNoteId(payload.note.id);
+      }
       setStatusMessage("New note created.");
     } catch (error) {
       setStatusError(error.message || "Unable to create note.");
@@ -150,7 +185,13 @@ export default function AdminNotesPage() {
         throw new Error(payload.error || "Unable to update note.");
       }
 
-      await loadNotes(payload.note?.id || selectedNote.id);
+      if (payload.note) {
+        setNotes((current) => {
+          const updated = current.map((note) => (note.id === payload.note.id ? payload.note : note));
+          return sortNotesByRecentUpdate(updated);
+        });
+        setSelectedNoteId(payload.note.id);
+      }
       setStatusMessage("Note saved.");
     } catch (error) {
       setStatusError(error.message || "Unable to update note.");
@@ -180,7 +221,11 @@ export default function AdminNotesPage() {
         throw new Error(payload.error || "Unable to delete note.");
       }
 
-      await loadNotes();
+      setNotes((current) => {
+        const remaining = current.filter((note) => note.id !== selectedNote.id);
+        setSelectedNoteId(remaining[0]?.id || null);
+        return remaining;
+      });
       setStatusMessage("Note deleted.");
     } catch (error) {
       setStatusError(error.message || "Unable to delete note.");
@@ -248,6 +293,20 @@ export default function AdminNotesPage() {
                     </button>
                   );
                 })}
+
+                {hasMore ? (
+                  <div className="pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => loadNotes({ cursor: nextCursor, append: true })}
+                      disabled={loadingMoreNotes || !nextCursor}
+                    >
+                      {loadingMoreNotes ? "Loading..." : "Load More"}
+                    </Button>
+                  </div>
+                ) : null}
               </div>
             </PageState>
           </CardContent>

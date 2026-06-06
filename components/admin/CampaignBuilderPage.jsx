@@ -21,6 +21,7 @@ const LIGHT_TEXTAREA_CLASS =
   "border-[color:var(--ui-border)] bg-[color:var(--ui-input)] text-[color:var(--ui-foreground)] placeholder:text-[color:var(--ui-muted-foreground)] focus-visible:ring-[color:var(--ui-ring)] focus-visible:ring-offset-[color:var(--ui-background)]";
 const LIGHT_SELECT_TRIGGER_CLASS =
   "border-[color:var(--ui-border)] bg-[color:var(--ui-input)] text-[color:var(--ui-foreground)] focus:ring-[color:var(--ui-ring)] focus:ring-offset-[color:var(--ui-background)] ring-offset-[color:var(--ui-background)]";
+const RESPONSE_PAGE_LIMIT = 50;
 
 function slugify(value) {
   return String(value || "")
@@ -272,17 +273,36 @@ export default function CampaignBuilderPage({ campaignId = null }) {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [loadingCampaign, setLoadingCampaign] = useState(isEditing);
   const [loadingResponses, setLoadingResponses] = useState(isEditing);
+  const [loadingMoreResponses, setLoadingMoreResponses] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [statusError, setStatusError] = useState("");
   const [statusSuccess, setStatusSuccess] = useState("");
   const [responsesError, setResponsesError] = useState("");
   const [responses, setResponses] = useState([]);
   const [responseQuestions, setResponseQuestions] = useState([]);
+  const [responsesNextCursor, setResponsesNextCursor] = useState(null);
+  const [responsesHasMore, setResponsesHasMore] = useState(false);
 
   const flatQuestionCount = useMemo(
     () => draft.sections.reduce((total, section) => total + (Array.isArray(section.questions) ? section.questions.length : 0), 0),
     [draft.sections]
   );
+
+  async function fetchResponsePage(cursor = null) {
+    const query = new URLSearchParams({ limit: String(RESPONSE_PAGE_LIMIT) });
+    if (cursor) {
+      query.set("cursor", cursor);
+    }
+
+    const response = await fetch(`/api/admin/campaigns/${campaignId}/responses?${query.toString()}`, { cache: "no-store" });
+    const payload = await response.json();
+
+    if (!response.ok) {
+      throw new Error(payload.error || "Unable to load campaign responses.");
+    }
+
+    return payload;
+  }
 
   useEffect(() => {
     if (!isEditing) return;
@@ -333,6 +353,9 @@ export default function CampaignBuilderPage({ campaignId = null }) {
   useEffect(() => {
     if (!isEditing || loadingCampaign || notFound) {
       setLoadingResponses(false);
+      setLoadingMoreResponses(false);
+      setResponsesHasMore(false);
+      setResponsesNextCursor(null);
       return;
     }
 
@@ -343,22 +366,21 @@ export default function CampaignBuilderPage({ campaignId = null }) {
       setResponsesError("");
 
       try {
-        const response = await fetch(`/api/admin/campaigns/${campaignId}/responses`, { cache: "no-store" });
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload.error || "Unable to load campaign responses.");
-        }
+        const payload = await fetchResponsePage();
 
         if (!isCancelled) {
           setResponses(Array.isArray(payload.responses) ? payload.responses : []);
           setResponseQuestions(Array.isArray(payload.questions) ? payload.questions : []);
+          setResponsesNextCursor(payload.nextCursor || null);
+          setResponsesHasMore(Boolean(payload.hasMore));
         }
       } catch (error) {
         if (!isCancelled) {
           setResponsesError(error.message || "Unable to load campaign responses.");
           setResponses([]);
           setResponseQuestions([]);
+          setResponsesNextCursor(null);
+          setResponsesHasMore(false);
         }
       } finally {
         if (!isCancelled) {
@@ -373,6 +395,26 @@ export default function CampaignBuilderPage({ campaignId = null }) {
       isCancelled = true;
     };
   }, [campaignId, isEditing, loadingCampaign, notFound]);
+
+  async function handleLoadMoreResponses() {
+    if (!responsesNextCursor || !responsesHasMore || loadingMoreResponses || loadingResponses) {
+      return;
+    }
+
+    setLoadingMoreResponses(true);
+    setResponsesError("");
+
+    try {
+      const payload = await fetchResponsePage(responsesNextCursor);
+      setResponses((current) => [...current, ...(Array.isArray(payload.responses) ? payload.responses : [])]);
+      setResponsesNextCursor(payload.nextCursor || null);
+      setResponsesHasMore(Boolean(payload.hasMore));
+    } catch (error) {
+      setResponsesError(error.message || "Unable to load campaign responses.");
+    } finally {
+      setLoadingMoreResponses(false);
+    }
+  }
 
   function goToQuestionsStep() {
     const nextSlug = draft.slug || slugify(draft.title);
@@ -1337,7 +1379,7 @@ export default function CampaignBuilderPage({ campaignId = null }) {
               <CardDescription>View all submissions for this campaign, similar to Google Forms responses.</CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">{responses.length} responses</Badge>
+              <Badge variant="secondary">{responses.length} loaded</Badge>
               <Button type="button" variant="outline" onClick={openResponseExport} disabled={!responses.length}>
                 Export CSV
               </Button>
@@ -1370,6 +1412,14 @@ export default function CampaignBuilderPage({ campaignId = null }) {
                   ))}
                 </TableBody>
               </Table>
+
+              {responsesHasMore ? (
+                <div className="mt-4 flex justify-center">
+                  <Button type="button" variant="outline" onClick={handleLoadMoreResponses} disabled={loadingMoreResponses}>
+                    {loadingMoreResponses ? "Loading..." : "Load More Responses"}
+                  </Button>
+                </div>
+              ) : null}
             </PageState>
           </CardContent>
         </Card>

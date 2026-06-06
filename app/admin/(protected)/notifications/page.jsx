@@ -7,6 +7,8 @@ import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { createCsrfHeaders } from "../../../../lib/csrf-client";
 
+const PAGE_LIMIT = 40;
+
 function formatDateTime(value) {
   if (!value) return "-";
   const parsed = new Date(value);
@@ -18,27 +20,47 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState("");
 
-  async function loadNotifications() {
-    setLoading(true);
+  async function loadNotifications({ cursor = null, append = false } = {}) {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
     setError("");
 
     try {
-      const response = await fetch("/api/admin/notifications", { cache: "no-store" });
+      const query = new URLSearchParams({ limit: String(PAGE_LIMIT) });
+      if (cursor) {
+        query.set("cursor", cursor);
+      }
+
+      const response = await fetch(`/api/admin/notifications?${query.toString()}`, { cache: "no-store" });
       const payload = await response.json();
 
       if (!response.ok) {
         throw new Error(payload.error || "Unable to load notifications.");
       }
 
-      setNotifications(Array.isArray(payload.notifications) ? payload.notifications : []);
+      const nextPage = Array.isArray(payload.notifications) ? payload.notifications : [];
+      setNotifications((current) => (append ? [...current, ...nextPage] : nextPage));
       setUnreadCount(Number(payload.unreadCount || 0));
+      setNextCursor(payload.nextCursor || null);
+      setHasMore(Boolean(payload.hasMore));
     } catch (requestError) {
       setError(requestError.message || "Unable to load notifications.");
     } finally {
-      setLoading(false);
+      if (append) {
+        setLoadingMore(false);
+      } else {
+        setLoading(false);
+      }
     }
   }
 
@@ -62,8 +84,26 @@ export default function NotificationsPage() {
         throw new Error(payload.error || "Unable to update notifications.");
       }
 
-      setNotifications(Array.isArray(payload.notifications) ? payload.notifications : []);
       setUnreadCount(Number(payload.unreadCount || 0));
+      const readAt = new Date().toISOString();
+
+      setNotifications((current) =>
+        current.map((notification) => {
+          if (notificationId && notification.id !== notificationId) {
+            return notification;
+          }
+
+          if (!notificationId && notification.isRead) {
+            return notification;
+          }
+
+          return {
+            ...notification,
+            isRead: true,
+            readAt: notification.readAt || readAt,
+          };
+        })
+      );
     } catch (requestError) {
       setError(requestError.message || "Unable to update notifications.");
     } finally {
@@ -97,7 +137,7 @@ export default function NotificationsPage() {
         status={loading ? "loading" : error ? "error" : !notifications.length ? "empty" : "loaded"}
         resourceLabel="notifications"
         errorMessage={error}
-        onRetry={loadNotifications}
+        onRetry={() => loadNotifications()}
       >
         <div className="space-y-3">
           {notifications.map((notification) => (
@@ -129,6 +169,19 @@ export default function NotificationsPage() {
               </CardContent>
             </Card>
           ))}
+
+          {hasMore ? (
+            <div className="flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => loadNotifications({ cursor: nextCursor, append: true })}
+                disabled={loadingMore || !nextCursor}
+              >
+                {loadingMore ? "Loading..." : "Load more"}
+              </Button>
+            </div>
+          ) : null}
         </div>
       </PageState>
     </div>

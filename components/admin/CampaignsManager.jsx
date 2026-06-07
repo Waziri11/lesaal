@@ -74,6 +74,65 @@ function formatPercent(value) {
   return `${Math.max(0, Math.round(Number(value) || 0))}%`;
 }
 
+function formatAxisCount(value) {
+  const numeric = Number(value) || 0;
+
+  if (numeric >= 1000) {
+    return `${Math.round(numeric / 100) / 10}k`;
+  }
+
+  return String(Math.round(numeric));
+}
+
+function formatShortDate(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function getNiceStep(maxValue) {
+  const safe = Math.max(1, Number(maxValue) || 0);
+  const roughStep = safe / 3;
+  const power = 10 ** Math.floor(Math.log10(Math.max(1, roughStep)));
+  const normalized = roughStep / power;
+
+  if (normalized <= 1) return power;
+  if (normalized <= 2) return 2 * power;
+  if (normalized <= 5) return 5 * power;
+  return 10 * power;
+}
+
+function toPathNumber(value) {
+  return Number(value).toFixed(2);
+}
+
+function buildSmoothLinePath(points) {
+  if (!Array.isArray(points) || points.length < 2) {
+    return "";
+  }
+
+  let path = `M ${toPathNumber(points[0].x)} ${toPathNumber(points[0].y)}`;
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const previous = points[index - 1] || points[index];
+    const current = points[index];
+    const next = points[index + 1];
+    const following = points[index + 2] || next;
+
+    const controlPoint1X = current.x + (next.x - previous.x) / 6;
+    const controlPoint1Y = current.y + (next.y - previous.y) / 6;
+    const controlPoint2X = next.x - (following.x - current.x) / 6;
+    const controlPoint2Y = next.y - (following.y - current.y) / 6;
+
+    path += ` C ${toPathNumber(controlPoint1X)} ${toPathNumber(controlPoint1Y)},`;
+    path += ` ${toPathNumber(controlPoint2X)} ${toPathNumber(controlPoint2Y)},`;
+    path += ` ${toPathNumber(next.x)} ${toPathNumber(next.y)}`;
+  }
+
+  return path;
+}
+
 function getDurationLabel(campaign) {
   const createdAt = new Date(campaign.createdAt);
   const deadline = campaign.deadline ? new Date(campaign.deadline) : null;
@@ -118,9 +177,14 @@ function getCampaignAvatarStyle(campaign) {
 }
 
 export default function CampaignsManager() {
+  const trendDays = 30;
   const router = useRouter();
   const [campaigns, setCampaigns] = useState([]);
+  const [responseTrendSeries, setResponseTrendSeries] = useState([]);
+  const [responseTrendRange, setResponseTrendRange] = useState({ start: "", end: "" });
+  const [trendError, setTrendError] = useState("");
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
+  const [loadingTrend, setLoadingTrend] = useState(true);
   const [campaignError, setCampaignError] = useState("");
   const [statusSuccess, setStatusSuccess] = useState("");
   const [globalFilter, setGlobalFilter] = useState("");
@@ -200,23 +264,109 @@ export default function CampaignsManager() {
     ];
   }, [campaignStats]);
 
+  const responseTrendChart = useMemo(() => {
+    const series = Array.isArray(responseTrendSeries) ? responseTrendSeries : [];
+
+    if (!series.length) {
+      return null;
+    }
+
+    const chartWidth = 1200;
+    const chartHeight = 320;
+    const padding = { top: 20, right: 24, bottom: 42, left: 54 };
+    const innerWidth = chartWidth - padding.left - padding.right;
+    const innerHeight = chartHeight - padding.top - padding.bottom;
+    const counts = series.map((point) => Number(point.count) || 0);
+    const maxCount = Math.max(0, ...counts);
+    const step = getNiceStep(maxCount || 1);
+    let yMax = step * 3;
+
+    while (yMax < maxCount) {
+      yMax += step;
+    }
+
+    const xDenominator = Math.max(1, series.length - 1);
+    const points = series.map((point, index) => {
+      const x = padding.left + (index / xDenominator) * innerWidth;
+      const y = padding.top + innerHeight - (Math.min(yMax, Number(point.count) || 0) / yMax) * innerHeight;
+
+      return { x, y };
+    });
+
+    const linePath = buildSmoothLinePath(points);
+    const baselineY = padding.top + innerHeight;
+    const areaPath =
+      linePath && points.length
+        ? `${linePath} L ${toPathNumber(points[points.length - 1].x)} ${toPathNumber(baselineY)} L ${toPathNumber(points[0].x)} ${toPathNumber(
+            baselineY
+          )} Z`
+        : "";
+
+    const firstLabel = series[0]?.label || "";
+    const midLabel = series[Math.floor(series.length / 2)]?.label || "";
+    const lastLabel = series[series.length - 1]?.label || "";
+    const totalResponses = counts.reduce((sum, value) => sum + value, 0);
+    const tickValues = [0, step, step * 2, yMax];
+    const tickLines = tickValues.map((value) => ({
+      value,
+      y: padding.top + innerHeight - (value / yMax) * innerHeight,
+    }));
+
+    return {
+      chartWidth,
+      chartHeight,
+      padding,
+      baselineY,
+      linePath,
+      areaPath,
+      firstLabel,
+      midLabel,
+      lastLabel,
+      totalResponses,
+      tickLines,
+    };
+  }, [responseTrendSeries]);
+
   async function loadCampaigns() {
     setLoadingCampaigns(true);
+    setLoadingTrend(true);
     setCampaignError("");
+    setTrendError("");
 
     try {
-      const response = await fetch("/api/admin/campaigns", { cache: "no-store" });
-      const payload = await response.json();
+      const [campaignsResponse, trendResponse] = await Promise.all([
+        fetch("/api/admin/campaigns", { cache: "no-store" }),
+        fetch(`/api/admin/campaigns/responses-trend?days=${trendDays}`, { cache: "no-store" }),
+      ]);
 
-      if (!response.ok) {
-        throw new Error(payload.error || "Unable to load campaigns.");
+      const campaignsPayload = await campaignsResponse.json();
+
+      if (!campaignsResponse.ok) {
+        throw new Error(campaignsPayload.error || "Unable to load campaigns.");
       }
 
-      setCampaigns(Array.isArray(payload.campaigns) ? payload.campaigns : []);
+      setCampaigns(Array.isArray(campaignsPayload.campaigns) ? campaignsPayload.campaigns : []);
+
+      const trendPayload = await trendResponse.json().catch(() => ({}));
+
+      if (trendResponse.ok) {
+        setResponseTrendSeries(Array.isArray(trendPayload?.series) ? trendPayload.series : []);
+        setResponseTrendRange({
+          start: String(trendPayload?.range?.start || ""),
+          end: String(trendPayload?.range?.end || ""),
+        });
+      } else if (trendResponse.status === 401) {
+        throw new Error(trendPayload?.error || "Unauthorized");
+      } else {
+        setTrendError(trendPayload?.error || "Unable to load response trend.");
+        setResponseTrendSeries([]);
+        setResponseTrendRange({ start: "", end: "" });
+      }
     } catch (error) {
       setCampaignError(error.message || "Unable to load campaigns.");
     } finally {
       setLoadingCampaigns(false);
+      setLoadingTrend(false);
     }
   }
 
@@ -554,6 +704,120 @@ export default function CampaignsManager() {
 
         {campaignError ? <p className="text-sm text-[color:var(--ui-destructive)]">{campaignError}</p> : null}
         {statusSuccess ? <p className="text-sm text-[color:var(--ui-success)]">{statusSuccess}</p> : null}
+      </div>
+
+      <div className="w-full rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-4 sm:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-xl font-semibold text-[color:var(--ui-foreground)]">Responses over time</h3>
+            <p className="text-sm text-[color:var(--ui-muted-foreground)]">
+              {responseTrendRange.start && responseTrendRange.end
+                ? `${formatShortDate(responseTrendRange.start)} - ${formatShortDate(responseTrendRange.end)}`
+                : `Last ${trendDays} days`}
+            </p>
+          </div>
+
+          <div className="text-left sm:text-right">
+            <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Total responses</p>
+            <p className="text-2xl font-semibold text-[color:var(--ui-foreground)]">{formatInteger(responseTrendChart?.totalResponses || 0)}</p>
+          </div>
+        </div>
+
+        {loadingTrend ? (
+          <div className="mt-6 flex h-[300px] items-center justify-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
+            <Spinner className="h-4 w-4" />
+            <span>Loading response trend...</span>
+          </div>
+        ) : trendError ? (
+          <div className="mt-6 flex h-[300px] items-center justify-center">
+            <p className="text-sm text-[color:var(--ui-destructive)]">{trendError}</p>
+          </div>
+        ) : responseTrendChart ? (
+          <div className="mt-4">
+            <svg
+              viewBox={`0 0 ${responseTrendChart.chartWidth} ${responseTrendChart.chartHeight}`}
+              className="h-[320px] w-full"
+              role="img"
+              aria-label={`Responses over the last ${trendDays} days`}
+            >
+              <defs>
+                <linearGradient id="campaign-responses-area-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(16, 185, 129, 0.35)" />
+                  <stop offset="100%" stopColor="rgba(16, 185, 129, 0.02)" />
+                </linearGradient>
+              </defs>
+
+              {responseTrendChart.tickLines.map((tick) => (
+                <g key={tick.value}>
+                  <line
+                    x1={responseTrendChart.padding.left}
+                    y1={tick.y}
+                    x2={responseTrendChart.chartWidth - responseTrendChart.padding.right}
+                    y2={tick.y}
+                    stroke="rgba(148, 163, 184, 0.28)"
+                    strokeDasharray="4 6"
+                  />
+                  <text
+                    x={responseTrendChart.padding.left - 12}
+                    y={tick.y + 5}
+                    textAnchor="end"
+                    fontSize="12"
+                    fill="rgba(148, 163, 184, 0.92)"
+                  >
+                    {formatAxisCount(tick.value)}
+                  </text>
+                </g>
+              ))}
+
+              {responseTrendChart.areaPath ? (
+                <path d={responseTrendChart.areaPath} fill="url(#campaign-responses-area-fill)" />
+              ) : null}
+
+              {responseTrendChart.linePath ? (
+                <path
+                  d={responseTrendChart.linePath}
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              ) : null}
+
+              <text
+                x={responseTrendChart.padding.left}
+                y={responseTrendChart.chartHeight - 10}
+                textAnchor="start"
+                fontSize="12"
+                fill="rgba(148, 163, 184, 0.95)"
+              >
+                {responseTrendChart.firstLabel}
+              </text>
+              <text
+                x={responseTrendChart.chartWidth / 2}
+                y={responseTrendChart.chartHeight - 10}
+                textAnchor="middle"
+                fontSize="12"
+                fill="rgba(148, 163, 184, 0.95)"
+              >
+                {responseTrendChart.midLabel}
+              </text>
+              <text
+                x={responseTrendChart.chartWidth - responseTrendChart.padding.right}
+                y={responseTrendChart.chartHeight - 10}
+                textAnchor="end"
+                fontSize="12"
+                fill="rgba(148, 163, 184, 0.95)"
+              >
+                {responseTrendChart.lastLabel}
+              </text>
+            </svg>
+          </div>
+        ) : (
+          <div className="mt-6 flex h-[300px] items-center justify-center">
+            <p className="text-sm text-[color:var(--ui-muted-foreground)]">No responses yet to visualize.</p>
+          </div>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]">

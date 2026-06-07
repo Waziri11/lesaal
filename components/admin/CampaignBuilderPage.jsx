@@ -878,9 +878,6 @@ export default function CampaignBuilderPage() {
                   <h3 className="text-lg font-semibold text-[color:var(--ui-foreground)]">Campaign Form Builder</h3>
                   <p className="text-sm text-[color:var(--ui-muted-foreground)]">Add sections and questions in a clean form layout.</p>
                 </div>
-                <Button type="button" size="sm" onClick={addSection}>
-                  + Add Section
-                </Button>
               </div>
 
               {draft.sections.map((section, sectionIndex) => (
@@ -930,18 +927,6 @@ export default function CampaignBuilderPage() {
                         Remove Section
                       </Button>
                     </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 border-t border-[color:var(--ui-border)] pt-3">
-                    <Button type="button" size="sm" variant="outline" onClick={() => addQuestion(sectionIndex, "text")}>
-                      + Short answer
-                    </Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => addQuestion(sectionIndex, "textarea")}>
-                      + Paragraph
-                    </Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => addQuestion(sectionIndex, "select")}>
-                      + Multiple choice
-                    </Button>
                   </div>
 
                   {section.questions.map((question, questionIndex) => (
@@ -1082,8 +1067,31 @@ export default function CampaignBuilderPage() {
                       </div>
                     </div>
                   ))}
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--ui-border)] pt-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">
+                      Add field to this section
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button type="button" size="sm" onClick={() => addQuestion(sectionIndex, "text")}>
+                        + Add Field
+                      </Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => addQuestion(sectionIndex, "textarea")}>
+                        + Paragraph
+                      </Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => addQuestion(sectionIndex, "select")}>
+                        + Multiple choice
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               ))}
+
+              <div className="flex justify-end border-t border-[color:var(--ui-border)] pt-3">
+                <Button type="button" size="sm" onClick={addSection}>
+                  + Add Section
+                </Button>
+              </div>
             </div>
           )}
 

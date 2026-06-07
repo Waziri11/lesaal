@@ -71,7 +71,8 @@ function getSections(campaign) {
 }
 
 export default async function CampaignViewerPage({ params }) {
-  const campaignId = String(params?.campaignId || "");
+  const resolvedParams = await params;
+  const campaignId = String(resolvedParams?.campaignId || "");
 
   if (!campaignId) {
     notFound();

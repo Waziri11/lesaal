@@ -1055,6 +1055,29 @@
   font-weight: 800;
 }
 
+.lp-campaign-featured .lp-campaign-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.lp-campaign-featured .lp-campaign-time-remaining {
+  margin: 0;
+  color: #e3edff;
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+  font-weight: 700;
+}
+
+.lp-campaign-featured .lp-campaign-time-remaining strong {
+  font-weight: 800;
+}
+
+.lp-campaign-featured .lp-campaign-slide-cta {
+  margin-left: auto;
+  min-width: clamp(132px, 16vw, 196px);
+}
+
 .lp-campaign-featured .lp-campaign-controls {
   position: absolute;
   z-index: 3;
@@ -1739,6 +1762,15 @@
     box-shadow: none;
     backdrop-filter: none;
     background: transparent;
+  }
+
+  .lp-campaign-featured .lp-campaign-meta-row {
+    gap: 0.6rem;
+  }
+
+  .lp-campaign-featured .lp-campaign-slide-cta {
+    min-width: 126px;
+    padding-inline: 0.9rem;
   }
 
   .lp-campaign-featured .lp-campaign-controls {

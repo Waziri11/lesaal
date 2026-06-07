@@ -783,13 +783,15 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                                     <strong>Target market:</strong> {campaign.targetMarket}
                                   </p>
                                 ) : null}
-                                <p>
+                              </div>
+                              <div className="lp-campaign-meta-row">
+                                <p className="lp-campaign-time-remaining">
                                   <strong>Time remaining:</strong> {formatCampaignTimeRemaining(campaign.deadline, nowTimestamp)}
                                 </p>
+                                <a href={`/campaigns/${campaign.slug}`} className="lp-btn lp-btn-primary lp-campaign-slide-cta">
+                                  Apply Now
+                                </a>
                               </div>
-                              <a href={`/campaigns/${campaign.slug}`} className="lp-btn lp-btn-primary">
-                                Apply Now
-                              </a>
                             </div>
                           </article>
                         ))}

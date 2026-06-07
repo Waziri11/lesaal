@@ -134,18 +134,6 @@ function getQuestionTypeLabel(type) {
   }
 }
 
-function getImageName(imageUrl) {
-  if (!imageUrl) return "";
-
-  try {
-    const normalized = imageUrl.split("?")[0];
-    const parts = normalized.split("/");
-    return parts[parts.length - 1] || "campaign-image";
-  } catch {
-    return "campaign-image";
-  }
-}
-
 function uploadImageFileWithProgress(file, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -804,7 +792,7 @@ export default function CampaignBuilderPage() {
                   role="button"
                   tabIndex={0}
                   aria-disabled={isUploadingImage}
-                  className={`rounded-xl border-2 border-dashed p-10 text-center transition ${
+                  className={`relative flex min-h-[360px] items-center justify-center overflow-hidden rounded-xl border-2 border-dashed p-6 text-center transition ${
                     isDraggingImage
                       ? "border-[color:var(--ui-primary)] bg-[color:var(--ui-primary-soft)]"
                       : "border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] hover:border-[color:var(--ui-primary)] hover:bg-[color:var(--ui-primary-soft)]"
@@ -837,13 +825,54 @@ export default function CampaignBuilderPage() {
                   }}
                   onDrop={handleImageDrop}
                 >
-                  <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">
-                    {isUploadingImage ? "Uploading cover image..." : "Drag and drop cover image here"}
-                  </p>
-                  <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">or click to browse files</p>
-                  <p className="mt-2 text-xs text-[color:var(--ui-muted-foreground)]">PNG, JPG, WEBP supported</p>
+                  {draft.imageUrl ? (
+                    <>
+                      <img
+                        src={draft.imageUrl}
+                        alt="Campaign cover preview"
+                        className="absolute inset-0 h-full w-full object-contain"
+                      />
+                      <div className="absolute inset-0 bg-black/35" />
+                      <div className="relative z-10 flex flex-wrap items-center justify-center gap-3">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="min-w-[112px]"
+                          disabled={isUploadingImage}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            imageInputRef.current?.click();
+                          }}
+                        >
+                          Replace
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="min-w-[112px] border-[color:var(--ui-destructive)] bg-[color:var(--ui-card)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            clearImage();
+                          }}
+                          disabled={isUploadingImage}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">
+                        {isUploadingImage ? "Uploading cover image..." : "Drag and drop cover image here"}
+                      </p>
+                      <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">or click to browse files</p>
+                      <p className="mt-2 text-xs text-[color:var(--ui-muted-foreground)]">PNG, JPG, WEBP supported</p>
+                    </div>
+                  )}
                   {isUploadingImage ? (
-                    <div className="mx-auto mt-4 w-full max-w-sm space-y-2">
+                    <div className="absolute inset-x-6 bottom-6 z-20 mx-auto w-full max-w-sm space-y-2 rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]/90 p-3 backdrop-blur">
                       <div className="flex items-center justify-between text-xs text-[color:var(--ui-muted-foreground)]">
                         <span>Upload progress</span>
                         <span>{imageUploadProgress}%</span>
@@ -857,40 +886,6 @@ export default function CampaignBuilderPage() {
                     </div>
                   ) : null}
                 </div>
-
-                {draft.imageUrl ? (
-                  <div className="rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-3">
-                    <p className="text-xs text-[color:var(--ui-muted-foreground)]">Uploaded cover</p>
-                    <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-[color:var(--ui-foreground)]">{getImageName(draft.imageUrl)}</p>
-                        <p className="truncate text-xs text-[color:var(--ui-muted-foreground)]">{draft.imageUrl}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={isUploadingImage}
-                          onClick={() => imageInputRef.current?.click()}
-                        >
-                          Replace
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          className="border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
-                          onClick={clearImage}
-                          disabled={isUploadingImage}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                    <img src={draft.imageUrl} alt="Campaign" className="mt-3 h-32 w-full rounded-md border border-[color:var(--ui-border)] object-cover" />
-                  </div>
-                ) : null}
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">

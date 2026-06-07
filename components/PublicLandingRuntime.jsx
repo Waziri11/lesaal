@@ -25,6 +25,52 @@ const LANDING_NAV_ITEMS = [
   { key: "faq", label: "FAQ", preferredTypes: ["FAQ"] },
 ];
 
+const CAMPAIGN_SECTION_DEFAULT_HEADING = "Ready to join our campaigns";
+const CAMPAIGN_SECTION_DEFAULT_SUBHEADING = "Be a part of our large community";
+const LEGACY_CAMPAIGN_SECTION_HEADINGS = new Set(["Join our latest campaigns", "Ready to launch your next campaign?"]);
+const LEGACY_CAMPAIGN_SECTION_SUBHEADINGS = new Set([
+  "Browse active outreach programs, open details, and submit your response in minutes.",
+  "Share your goals and our team will reach out with a recommended growth plan.",
+  "Tap to edit this section intro.",
+]);
+
+function placeCampaignSectionAfterStats(sections) {
+  const ordered = [...sections];
+  const statsIndex = ordered.findIndex((section) => section?.type === "STATS_BAND");
+  const campaignIndex = ordered.findIndex((section) => section?.type === "CAMPAIGN_FORM");
+
+  if (statsIndex < 0 || campaignIndex < 0 || campaignIndex === statsIndex + 1) {
+    return ordered;
+  }
+
+  const [campaignSection] = ordered.splice(campaignIndex, 1);
+  const targetIndex = campaignIndex < statsIndex ? statsIndex : statsIndex + 1;
+  ordered.splice(targetIndex, 0, campaignSection);
+
+  return ordered;
+}
+
+function resolveCampaignSectionHeading(rawHeading, sectionTitle) {
+  const heading = String(rawHeading || "").trim();
+  const fallbackTitle = String(sectionTitle || "").trim();
+
+  if (!heading || LEGACY_CAMPAIGN_SECTION_HEADINGS.has(heading) || heading === fallbackTitle) {
+    return CAMPAIGN_SECTION_DEFAULT_HEADING;
+  }
+
+  return heading;
+}
+
+function resolveCampaignSectionSubheading(rawSubheading) {
+  const subheading = String(rawSubheading || "").trim();
+
+  if (!subheading || LEGACY_CAMPAIGN_SECTION_SUBHEADINGS.has(subheading)) {
+    return CAMPAIGN_SECTION_DEFAULT_SUBHEADING;
+  }
+
+  return subheading;
+}
+
 function getSectionMotion(preset) {
   if (preset === "NONE") {
     return {
@@ -217,7 +263,10 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
   const sections = Array.isArray(config?.sections) ? config.sections : [];
 
   const visibleSections = useMemo(
-    () => sections.filter((section) => section?.isVisible).sort((a, b) => Number(a.order || 0) - Number(b.order || 0)),
+    () =>
+      placeCampaignSectionAfterStats(
+        sections.filter((section) => section?.isVisible).sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+      ),
     [sections]
   );
 
@@ -822,6 +871,9 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
           }
 
           if (section.type === "CAMPAIGN_FORM") {
+            const campaignHeading = resolveCampaignSectionHeading(settings.heading, section.title);
+            const campaignSubheading = resolveCampaignSectionSubheading(settings.subheading);
+
             return (
               <motion.section
                 id={anchorId}
@@ -831,8 +883,8 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                 style={sectionTextVars}
               >
                 <div className="lp-section-heading">
-                  <h2 className={textClass}>{settings.heading || section.title}</h2>
-                  <p className={`lp-section-copy ${textClass}`}>{settings.subheading || "Tap to edit this section intro."}</p>
+                  <h2 className={textClass}>{campaignHeading}</h2>
+                  <p className={`lp-section-copy ${textClass}`}>{campaignSubheading}</p>
                 </div>
 
                 <div className="lp-campaign-carousel" aria-label="Campaign highlights">

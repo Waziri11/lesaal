@@ -1017,7 +1017,7 @@
   left: clamp(1rem, 5vw, 3rem);
   right: clamp(1rem, 5vw, 3rem);
   bottom: clamp(1rem, 4vw, 2.6rem);
-  width: min(640px, 100%);
+  width: auto;
   display: grid;
   gap: 0.62rem;
   padding: 0;
@@ -1200,11 +1200,35 @@
 
 .lp-footer-contact h4 {
   margin: 0 0 0.35rem;
+  color: var(--ink-100);
 }
 
 .lp-footer-contact a {
+  display: block;
   color: var(--gold-400);
   text-decoration: none;
+}
+
+.lp-footer-contact p {
+  margin: 0;
+  color: var(--ink-200);
+}
+
+.lp-footer-bottom {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(168, 192, 232, 0.2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem 1rem;
+}
+
+.lp-footer-bottom p {
+  margin: 0;
+  color: rgba(210, 224, 248, 0.8);
+  font-size: 0.83rem;
 }
 
 .is-editor-preview .lp-section,
@@ -1623,12 +1647,17 @@
     left: 1rem;
     right: 1rem;
     bottom: 1rem;
-    width: min(560px, calc(100% - 2rem));
+    width: auto;
   }
 
   .lp-footer-main,
   .campaign-detail-grid {
     grid-template-columns: 1fr;
+  }
+
+  .lp-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .campaign-admin-layout {
@@ -1786,5 +1815,9 @@
   .lp-campaign-featured .lp-campaign-dots {
     left: 0.8rem;
     bottom: 0.8rem;
+  }
+
+  .lp-footer-bottom {
+    gap: 0.3rem;
   }
 }

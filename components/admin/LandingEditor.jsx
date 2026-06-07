@@ -1386,12 +1386,87 @@ export default function LandingEditor() {
                     <h4 className="section-context-group-title">Footer Settings</h4>
                     <div className="section-context-grid">
                   <label className="field-full">
+                    Brand Description
+                    <Textarea
+                      value={menuSection.settings?.brandDescription || ""}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "brandDescription", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    Contact Heading
+                    <Input
+                      type="text"
+                      value={menuSection.settings?.contactHeading || ""}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "contactHeading", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <label className="field-full">
                     Contact Email
                     <Input
                       type="email"
                       value={menuSection.settings?.contactEmail || ""}
                       onChange={(event) =>
                         updateSectionSettingFromPreview(menuSection.id, "contactEmail", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    Contact Phone
+                    <Input
+                      type="text"
+                      value={menuSection.settings?.contactPhone || ""}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "contactPhone", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <label className="field-full">
+                    Contact Address
+                    <Textarea
+                      value={menuSection.settings?.contactAddress || ""}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "contactAddress", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <label className="field-full">
+                    Support Hours
+                    <Input
+                      type="text"
+                      value={menuSection.settings?.supportHours || ""}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "supportHours", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    Copyright Text
+                    <Input
+                      type="text"
+                      value={menuSection.settings?.copyrightText || ""}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "copyrightText", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    Rights Text
+                    <Input
+                      type="text"
+                      value={menuSection.settings?.rightsText || ""}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "rightsText", event.target.value)
                       }
                     />
                   </label>

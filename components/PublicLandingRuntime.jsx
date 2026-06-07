@@ -115,6 +115,14 @@ function formatCampaignTimeRemaining(value, nowTimestamp = Date.now()) {
   return `${totalYears} year${totalYears === 1 ? "" : "s"}`;
 }
 
+function toPhoneHref(value) {
+  const normalized = String(value || "")
+    .trim()
+    .replace(/[^\d+]/g, "");
+
+  return normalized ? `tel:${normalized}` : "";
+}
+
 function normalizeHexColor(value) {
   const trimmed = String(value || "").trim();
   if (!trimmed) return "";
@@ -838,7 +846,15 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
           }
 
           if (section.type === "FOOTER") {
+            const brandDescription = settings.brandDescription || "Boost sales with customer care, ads, and social media packages.";
+            const contactHeading = settings.contactHeading || "Contact";
             const contactEmail = settings.contactEmail || "leilawaziri@lesaal.com";
+            const contactPhone = String(settings.contactPhone || "").trim();
+            const contactAddress = String(settings.contactAddress || "").trim();
+            const supportHours = String(settings.supportHours || "").trim();
+            const copyrightText = settings.copyrightText || "Lesaal cc 2023";
+            const rightsText = settings.rightsText || "All rights reserved.";
+            const contactPhoneHref = toPhoneHref(contactPhone);
             const linkItems = sortItems(section.items);
 
             return (
@@ -865,7 +881,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                       <LandingImage src="/images/logo/LESAAL.png" alt="Lesaal logo" width={84} height={84} sizes="84px" />
                       <span>Lesaal</span>
                     </a>
-                    <p>Boost sales with customer care, ads, and social media packages.</p>
+                    <p>{brandDescription}</p>
                   </div>
 
                   <div className="lp-footer-links">
@@ -877,9 +893,17 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                   </div>
 
                   <div className="lp-footer-contact">
-                    <h4>Contact</h4>
+                    <h4>{contactHeading}</h4>
                     <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+                    {contactPhone && contactPhoneHref ? <a href={contactPhoneHref}>{contactPhone}</a> : null}
+                    {contactAddress ? <p>{contactAddress}</p> : null}
+                    {supportHours ? <p>{supportHours}</p> : null}
                   </div>
+                </div>
+
+                <div className="lp-footer-bottom">
+                  <p>{copyrightText}</p>
+                  <p>{rightsText}</p>
                 </div>
               </motion.section>
             );

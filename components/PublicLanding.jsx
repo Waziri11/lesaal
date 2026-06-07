@@ -104,6 +104,14 @@ function formatCampaignDate(value) {
   });
 }
 
+function toPhoneHref(value) {
+  const normalized = String(value || "")
+    .trim()
+    .replace(/[^\d+]/g, "");
+
+  return normalized ? `tel:${normalized}` : "";
+}
+
 function normalizeHexColor(value) {
   const trimmed = String(value || "").trim();
   if (!trimmed) return "";
@@ -1419,7 +1427,15 @@ export default function PublicLanding({
           }
 
           if (section.type === "FOOTER") {
+            const brandDescription = settings.brandDescription || "Boost sales with customer care, ads, and social media packages.";
+            const contactHeading = settings.contactHeading || "Contact";
             const contactEmail = settings.contactEmail || "leilawaziri@lesaal.com";
+            const contactPhone = String(settings.contactPhone || "").trim();
+            const contactPhoneHref = toPhoneHref(contactPhone) || "#";
+            const contactAddress = String(settings.contactAddress || "").trim();
+            const supportHours = String(settings.supportHours || "").trim();
+            const copyrightText = settings.copyrightText || "Lesaal cc 2023";
+            const rightsText = settings.rightsText || "All rights reserved.";
             const linkItems = section.items.slice().sort((a, b) => a.order - b.order);
 
             return (
@@ -1482,7 +1498,15 @@ export default function PublicLanding({
                       <img src="/images/logo/LESAAL.png" alt="Lesaal logo" />
                       <span>Lesaal</span>
                     </a>
-                    <p>Boost sales with customer care, ads, and social media packages.</p>
+                    <EditableText
+                      editorMode={editorMode}
+                      as="p"
+                      value={brandDescription}
+                      fallback="Boost sales with customer care, ads, and social media packages."
+                      multiline
+                      onActivate={() => onSelectSection?.(section.id)}
+                      onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "brandDescription", nextValue)}
+                    />
                   </div>
 
                   <div className="lp-footer-links">
@@ -1511,7 +1535,14 @@ export default function PublicLanding({
                   </div>
 
                   <div className="lp-footer-contact">
-                    <h4>Contact</h4>
+                    <EditableText
+                      editorMode={editorMode}
+                      as="h4"
+                      value={contactHeading}
+                      fallback="Contact"
+                      onActivate={() => onSelectSection?.(section.id)}
+                      onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "contactHeading", nextValue)}
+                    />
                     <a href={`mailto:${contactEmail}`} onClick={(event) => handlePreviewLinkClick(event, section.id)}>
                       <EditableText
                         editorMode={editorMode}
@@ -1521,7 +1552,52 @@ export default function PublicLanding({
                         onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "contactEmail", nextValue)}
                       />
                     </a>
+                    <a href={contactPhoneHref} onClick={(event) => handlePreviewLinkClick(event, section.id)}>
+                      <EditableText
+                        editorMode={editorMode}
+                        value={contactPhone}
+                        fallback="+255 700 000 000"
+                        onActivate={() => onSelectSection?.(section.id)}
+                        onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "contactPhone", nextValue)}
+                      />
+                    </a>
+                    <EditableText
+                      editorMode={editorMode}
+                      as="p"
+                      value={contactAddress}
+                      fallback="Dar es Salaam, Tanzania"
+                      multiline
+                      onActivate={() => onSelectSection?.(section.id)}
+                      onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "contactAddress", nextValue)}
+                    />
+                    <EditableText
+                      editorMode={editorMode}
+                      as="p"
+                      value={supportHours}
+                      fallback="Mon - Fri, 9:00 AM - 6:00 PM"
+                      onActivate={() => onSelectSection?.(section.id)}
+                      onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "supportHours", nextValue)}
+                    />
                   </div>
+                </div>
+
+                <div className="lp-footer-bottom">
+                  <EditableText
+                    editorMode={editorMode}
+                    as="p"
+                    value={copyrightText}
+                    fallback="Lesaal cc 2023"
+                    onActivate={() => onSelectSection?.(section.id)}
+                    onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "copyrightText", nextValue)}
+                  />
+                  <EditableText
+                    editorMode={editorMode}
+                    as="p"
+                    value={rightsText}
+                    fallback="All rights reserved."
+                    onActivate={() => onSelectSection?.(section.id)}
+                    onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "rightsText", nextValue)}
+                  />
                 </div>
               </motion.section>
             );

@@ -116,12 +116,13 @@ export default async function CampaignDetailPage({ params }) {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
-      <div className="flex justify-start">
+      <div className="flex items-center gap-3">
         <Button asChild variant="outline" size="icon">
           <Link href="/" aria-label="Back to homepage">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
+        <h1 className="text-2xl font-semibold text-[color:var(--ui-foreground)] md:text-3xl">{campaign.title}</h1>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]">
@@ -144,7 +145,6 @@ export default async function CampaignDetailPage({ params }) {
       </div>
 
       <section className="space-y-3 rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-5 md:p-6">
-        <h1 className="text-2xl font-semibold text-[color:var(--ui-foreground)] md:text-3xl">{campaign.title}</h1>
         <p className="text-base leading-relaxed text-[color:var(--ui-muted-foreground)]">
           {campaign.description || "Campaign details coming soon."}
         </p>

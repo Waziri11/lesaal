@@ -958,28 +958,39 @@ export default function CampaignBuilderPage() {
                       />
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      <Button type="button" size="sm" variant="outline" onClick={() => moveSection(sectionIndex, "up")} disabled={sectionIndex === 0}>
-                        Move Up
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8"
+                        onClick={() => moveSection(sectionIndex, "up")}
+                        disabled={sectionIndex === 0}
+                        aria-label="Move section up"
+                      >
+                        <ArrowUp className="h-4 w-4" />
                       </Button>
                       <Button
                         type="button"
-                        size="sm"
+                        size="icon"
                         variant="outline"
+                        className="h-8 w-8"
                         onClick={() => moveSection(sectionIndex, "down")}
                         disabled={sectionIndex === draft.sections.length - 1}
+                        aria-label="Move section down"
                       >
-                        Move Down
+                        <ArrowDown className="h-4 w-4" />
                       </Button>
                       <Button
                         type="button"
-                        size="sm"
+                        size="icon"
                         variant="outline"
-                        className="border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
+                        className="h-8 w-8 border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
                         onClick={() => removeSection(sectionIndex)}
                         disabled={draft.sections.length === 1}
+                        aria-label="Remove section"
                       >
-                        Remove Section
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>

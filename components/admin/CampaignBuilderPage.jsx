@@ -1116,13 +1116,16 @@ export default function CampaignBuilderPage() {
                           </div>
                         </div>
 
-                        <Input
-                          value={question.label}
-                          className={LIGHT_INPUT_CLASS}
-                          onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "label", event.target.value)}
-                          placeholder="Untitled Question"
-                          required
-                        />
+                        <div className="space-y-2">
+                          <Label className="text-[color:var(--ui-foreground)]">Question</Label>
+                          <Input
+                            value={question.label}
+                            className={LIGHT_INPUT_CLASS}
+                            onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "label", event.target.value)}
+                            placeholder="Untitled Question"
+                            required
+                          />
+                        </div>
 
                         <div className="space-y-2">
                           <Label className="text-[color:var(--ui-foreground)]">Response Type</Label>

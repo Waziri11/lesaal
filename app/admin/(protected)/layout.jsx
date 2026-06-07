@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { AdminThemeProvider } from "../../../components/admin/AdminThemeProvider";
+import AdminSessionExpiryGuard from "../../../components/admin/AdminSessionExpiryGuard";
 import { getAuthenticatedAdminFromCookies } from "../../../lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ export default async function AdminProtectedLayout({ children }) {
   const admin = await getAuthenticatedAdminFromCookies();
 
   if (!admin) {
-    redirect("/");
+    redirect("/admin/login");
   }
 
   return (
@@ -20,6 +21,7 @@ export default async function AdminProtectedLayout({ children }) {
           <main>{children}</main>
         </div>
       </div>
+      <AdminSessionExpiryGuard />
     </AdminThemeProvider>
   );
 }

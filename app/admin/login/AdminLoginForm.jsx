@@ -13,6 +13,20 @@ import { createCsrfHeaders } from "../../../lib/csrf-client";
 const MIN_PASSWORD_LENGTH = 8;
 const CAPTCHA_LOAD_ERROR_MESSAGE = "Captcha failed to load. Please disable blockers and refresh the page.";
 
+function sanitizeNextPath(value) {
+  const candidate = String(value || "").trim();
+
+  if (!candidate || !candidate.startsWith("/") || candidate.startsWith("//")) {
+    return "";
+  }
+
+  if (!candidate.startsWith("/admin")) {
+    return "";
+  }
+
+  return candidate;
+}
+
 function getCaptchaErrorMessage(errorCode) {
   const code = String(errorCode || "").trim();
 
@@ -31,7 +45,7 @@ function getCaptchaErrorMessage(errorCode) {
   return `Captcha failed to load (Turnstile error ${code}).`;
 }
 
-export default function AdminLoginForm({ turnstileSiteKey }) {
+export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessionExpired = false }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,6 +65,13 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
   const captchaRef = useRef(null);
   const widgetIdRef = useRef(null);
   const captchaTokenRef = useRef("");
+  const safeNextPath = sanitizeNextPath(nextPath);
+
+  useEffect(() => {
+    if (sessionExpired) {
+      setNotice("Session expired. Please sign in again.");
+    }
+  }, [sessionExpired]);
 
   useEffect(() => {
     captchaTokenRef.current = captchaToken;
@@ -299,7 +320,8 @@ export default function AdminLoginForm({ turnstileSiteKey }) {
         return;
       }
 
-      router.push(payload.requiresProfileSetup ? "/admin/profile?setup=1" : "/admin/dashboard");
+      const destination = payload.requiresProfileSetup ? "/admin/profile?setup=1" : safeNextPath || "/admin/dashboard";
+      router.push(destination);
       router.refresh();
     } catch (submitError) {
       setError("Unable to connect right now.");

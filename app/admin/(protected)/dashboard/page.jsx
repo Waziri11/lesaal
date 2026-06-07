@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   const admin = await getAuthenticatedAdminFromCookies();
 
   if (!admin) {
-    redirect("/");
+    redirect("/admin/login");
   }
 
   if (!isAdminProfileComplete(admin)) {

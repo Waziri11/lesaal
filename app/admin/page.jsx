@@ -11,5 +11,5 @@ export default async function AdminRootPage() {
     redirect(isAdminProfileComplete(admin) ? "/admin/dashboard" : "/admin/profile?setup=1");
   }
 
-  redirect("/");
+  redirect("/admin/login");
 }

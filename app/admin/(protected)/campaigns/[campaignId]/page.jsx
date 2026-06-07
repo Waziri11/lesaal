@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import CampaignViewerPanel from "../../../../../components/admin/CampaignViewerPanel";
 import PageState from "../../../../../components/shared/PageState";
 import { Badge } from "../../../../../components/ui/badge";
 import { Button } from "../../../../../components/ui/button";
-import { Card, CardContent } from "../../../../../components/ui/card";
-import { getCampaignByIdForAdmin, isCampaignTableMissingError } from "../../../../../lib/campaigns";
+import { getCampaignByIdForAdmin, getCampaignResponsesForAdmin, isCampaignTableMissingError } from "../../../../../lib/campaigns";
 
 function formatCount(value) {
   return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(Number(value) || 0);
@@ -88,7 +88,10 @@ export default async function CampaignViewerPage({ params }) {
   }
 
   try {
-    const campaign = await getCampaignByIdForAdmin(campaignId);
+    const [campaign, responseData] = await Promise.all([
+      getCampaignByIdForAdmin(campaignId),
+      getCampaignResponsesForAdmin(campaignId, { includeAllResponses: true }),
+    ]);
 
     if (!campaign) {
       notFound();
@@ -97,6 +100,14 @@ export default async function CampaignViewerPage({ params }) {
     const status = getStatus(campaign);
     const timeRemainingLabel = getTimeRemainingLabel(campaign.deadline);
     const sections = getSections(campaign);
+    const responseQuestions = Array.isArray(responseData?.questions) ? responseData.questions : [];
+    const responses = Array.isArray(responseData?.responses)
+      ? responseData.responses.map((response) => ({
+          id: response.id,
+          submittedAt: response.submittedAt ? new Date(response.submittedAt).toISOString() : null,
+          data: response.data && typeof response.data === "object" ? response.data : {},
+        }))
+      : [];
 
     return (
       <section className="space-y-6">
@@ -151,57 +162,7 @@ export default async function CampaignViewerPage({ params }) {
           </div>
         </div>
 
-        <Card>
-          <CardContent className="space-y-3 p-5 md:p-6">
-            <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">Form sections</p>
-            {sections.length ? (
-              sections.map((section, index) => (
-                <div
-                  key={section?.id || section?.key || `${index}-${section?.title || "section"}`}
-                  className="rounded-xl border border-[color:var(--ui-border)] p-3"
-                >
-                  <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">
-                    {section?.title || `Section ${index + 1}`}
-                  </p>
-                  {section?.description ? (
-                    <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">{section.description}</p>
-                  ) : null}
-
-                  <div className="mt-3 space-y-2">
-                    {(section?.questions || []).map((question, questionIndex) => (
-                      <div
-                        key={question?.id || question?.key || `${index}-${questionIndex}`}
-                        className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-2.5"
-                      >
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-medium text-[color:var(--ui-foreground)]">
-                            {question?.label || question?.key || `Question ${questionIndex + 1}`}
-                          </span>
-                          <Badge variant="default" className="text-xs">
-                            {question?.type || "text"}
-                          </Badge>
-                          {question?.required ? (
-                            <Badge variant="secondary" className="text-xs">
-                              Required
-                            </Badge>
-                          ) : null}
-                        </div>
-                        {question?.placeholder ? (
-                          <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">Placeholder: {question.placeholder}</p>
-                        ) : null}
-                        {question?.type === "select" && Array.isArray(question?.options) && question.options.length ? (
-                          <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">Options: {question.options.join(", ")}</p>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-[color:var(--ui-muted-foreground)]">No form sections configured.</p>
-            )}
-          </CardContent>
-        </Card>
+        <CampaignViewerPanel sections={sections} questions={responseQuestions} responses={responses} />
       </section>
     );
   } catch (error) {

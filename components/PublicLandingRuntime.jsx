@@ -80,15 +80,39 @@ function scrollAnimationClass(preset) {
   return "";
 }
 
-function formatCampaignDate(value) {
-  if (!value) return "";
+function formatCampaignTimeRemaining(value, nowTimestamp = Date.now()) {
+  if (!value) return "No deadline";
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "";
-  return parsed.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  if (Number.isNaN(parsed.getTime())) return "No deadline";
+
+  const diffMs = parsed.getTime() - nowTimestamp;
+
+  if (diffMs <= 0) {
+    return "Expired";
+  }
+
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  if (totalMinutes < 60) {
+    return `${Math.max(1, totalMinutes)} minute${totalMinutes === 1 ? "" : "s"}`;
+  }
+
+  const totalHours = Math.floor(totalMinutes / 60);
+  if (totalHours < 24) {
+    return `${totalHours} hour${totalHours === 1 ? "" : "s"}`;
+  }
+
+  const totalDays = Math.floor(totalHours / 24);
+  if (totalDays < 30) {
+    return `${totalDays} day${totalDays === 1 ? "" : "s"}`;
+  }
+
+  const totalMonths = Math.floor(totalDays / 30);
+  if (totalMonths < 12) {
+    return `${totalMonths} month${totalMonths === 1 ? "" : "s"}`;
+  }
+
+  const totalYears = Math.floor(totalDays / 365);
+  return `${totalYears} year${totalYears === 1 ? "" : "s"}`;
 }
 
 function normalizeHexColor(value) {
@@ -162,6 +186,7 @@ function LandingImage({ src, alt, className, sizes, width = 1200, height = 800, 
 export default function PublicLandingRuntime({ config, campaigns = [] }) {
   const [activeFaqItemId, setActiveFaqItemId] = useState(null);
   const [activeCampaignIndex, setActiveCampaignIndex] = useState(0);
+  const [nowTimestamp, setNowTimestamp] = useState(() => Date.now());
 
   const sections = Array.isArray(config?.sections) ? config.sections : [];
 
@@ -254,6 +279,30 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
 
     setActiveCampaignIndex((current) => Math.min(current, campaignHighlights.length - 1));
   }, [campaignHighlights.length]);
+
+  useEffect(() => {
+    if (campaignHighlights.length <= 1) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setActiveCampaignIndex((current) => (current >= campaignHighlights.length - 1 ? 0 : current + 1));
+    }, 5500);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [campaignHighlights.length]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNowTimestamp(Date.now());
+    }, 60 * 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   function goToCampaign(index) {
     if (!campaignHighlights.length) return;
@@ -729,8 +778,14 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                               <h3>{campaign.title || "Campaign"}</h3>
                               <p>{campaign.description || "Campaign details coming soon."}</p>
                               <div className="lp-campaign-meta">
-                                {campaign.targetMarket ? <span>Target market: {campaign.targetMarket}</span> : null}
-                                {campaign.deadline ? <span>Active until: {formatCampaignDate(campaign.deadline)}</span> : null}
+                                {campaign.targetMarket ? (
+                                  <p>
+                                    <strong>Target market:</strong> {campaign.targetMarket}
+                                  </p>
+                                ) : null}
+                                <p>
+                                  <strong>Time remaining:</strong> {formatCampaignTimeRemaining(campaign.deadline, nowTimestamp)}
+                                </p>
                               </div>
                               <a href={`/campaigns/${campaign.slug}`} className="lp-btn lp-btn-primary">
                                 Apply Now

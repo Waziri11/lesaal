@@ -272,8 +272,8 @@ export default function CampaignsManager() {
     }
 
     const chartWidth = 1200;
-    const chartHeight = 320;
-    const padding = { top: 20, right: 24, bottom: 42, left: 54 };
+    const chartHeight = 260;
+    const padding = { top: 14, right: 20, bottom: 34, left: 48 };
     const innerWidth = chartWidth - padding.left - padding.right;
     const innerHeight = chartHeight - padding.top - padding.bottom;
     const counts = series.map((point) => Number(point.count) || 0);
@@ -677,20 +677,20 @@ export default function CampaignsManager() {
             return (
               <article
                 key={stat.key}
-                className="rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4"
+                className="rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-lg font-medium text-[color:var(--ui-muted-foreground)]">{stat.label}</p>
-                  <span className="inline-flex h-7 w-7 items-center justify-center text-[color:var(--ui-muted-foreground)]">
-                    <stat.Icon className="h-5 w-5" />
+                  <p className="text-sm font-medium text-[color:var(--ui-muted-foreground)]">{stat.label}</p>
+                  <span className="inline-flex h-6 w-6 items-center justify-center text-[color:var(--ui-muted-foreground)]">
+                    <stat.Icon className="h-4 w-4" />
                   </span>
                 </div>
 
-                <div className="mt-4 rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] px-4 py-3">
+                <div className="mt-2.5 rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] px-3 py-2">
                   <div className="flex items-end justify-between gap-3">
-                    <p className="text-4xl font-semibold tracking-tight text-[color:var(--ui-foreground)]">{stat.value}</p>
-                    <p className={`inline-flex shrink-0 items-center gap-1 text-lg font-semibold ${stat.trendTone}`}>
-                      {stat.trendDirection === "neutral" ? null : <TrendIcon className="h-4 w-4" />}
+                    <p className="text-2xl font-semibold tracking-tight text-[color:var(--ui-foreground)]">{stat.value}</p>
+                    <p className={`inline-flex shrink-0 items-center gap-1 text-sm font-semibold ${stat.trendTone}`}>
+                      {stat.trendDirection === "neutral" ? null : <TrendIcon className="h-3.5 w-3.5" />}
                       {stat.trend}
                     </p>
                   </div>
@@ -704,10 +704,10 @@ export default function CampaignsManager() {
         {statusSuccess ? <p className="text-sm text-[color:var(--ui-success)]">{statusSuccess}</p> : null}
       </div>
 
-      <div className="w-full rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-4 sm:p-5">
+      <div className="w-full rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-3.5 sm:p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-xl font-semibold text-[color:var(--ui-foreground)]">Responses over time</h3>
+            <h3 className="text-lg font-semibold text-[color:var(--ui-foreground)]">Responses over time</h3>
             <p className="text-sm text-[color:var(--ui-muted-foreground)]">
               {responseTrendRange.start && responseTrendRange.end
                 ? `${formatShortDate(responseTrendRange.start)} - ${formatShortDate(responseTrendRange.end)}`
@@ -717,24 +717,24 @@ export default function CampaignsManager() {
 
           <div className="text-left sm:text-right">
             <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Total responses</p>
-            <p className="text-2xl font-semibold text-[color:var(--ui-foreground)]">{formatInteger(responseTrendChart?.totalResponses || 0)}</p>
+            <p className="text-xl font-semibold text-[color:var(--ui-foreground)]">{formatInteger(responseTrendChart?.totalResponses || 0)}</p>
           </div>
         </div>
 
         {loadingTrend ? (
-          <div className="mt-6 flex h-[300px] items-center justify-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
+          <div className="mt-6 flex items-center justify-center gap-2 py-12 text-sm text-[color:var(--ui-muted-foreground)]">
             <Spinner className="h-4 w-4" />
             <span>Loading response trend...</span>
           </div>
         ) : trendError ? (
-          <div className="mt-6 flex h-[300px] items-center justify-center">
+          <div className="mt-6 flex items-center justify-center py-12">
             <p className="text-sm text-[color:var(--ui-destructive)]">{trendError}</p>
           </div>
         ) : responseTrendChart ? (
           <div className="mt-4">
             <svg
               viewBox={`0 0 ${responseTrendChart.chartWidth} ${responseTrendChart.chartHeight}`}
-              className="h-[320px] w-full"
+              className="h-auto w-full"
               role="img"
               aria-label={`Responses over the last ${trendDays} days`}
             >
@@ -812,7 +812,7 @@ export default function CampaignsManager() {
             </svg>
           </div>
         ) : (
-          <div className="mt-6 flex h-[300px] items-center justify-center">
+          <div className="mt-6 flex items-center justify-center py-12">
             <p className="text-sm text-[color:var(--ui-muted-foreground)]">No responses yet to visualize.</p>
           </div>
         )}

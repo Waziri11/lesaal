@@ -161,6 +161,7 @@ function LandingImage({ src, alt, className, sizes, width = 1200, height = 800, 
 
 export default function PublicLandingRuntime({ config, campaigns = [] }) {
   const [activeFaqItemId, setActiveFaqItemId] = useState(null);
+  const [activeCampaignIndex, setActiveCampaignIndex] = useState(0);
 
   const sections = Array.isArray(config?.sections) ? config.sections : [];
 
@@ -229,6 +230,8 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
     return links;
   }, [sectionAnchors, visibleSections]);
 
+  const campaignHighlights = useMemo(() => (Array.isArray(campaigns) ? campaigns : []), [campaigns]);
+
   useEffect(() => {
     const faqSection = visibleSections.find((section) => section.type === "FAQ");
     const faqItems = sortItems(faqSection?.items);
@@ -243,7 +246,33 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
     }
   }, [visibleSections, activeFaqItemId]);
 
-  const campaignHighlights = Array.isArray(campaigns) ? campaigns : [];
+  useEffect(() => {
+    if (!campaignHighlights.length) {
+      setActiveCampaignIndex(0);
+      return;
+    }
+
+    setActiveCampaignIndex((current) => Math.min(current, campaignHighlights.length - 1));
+  }, [campaignHighlights.length]);
+
+  function goToCampaign(index) {
+    if (!campaignHighlights.length) return;
+    const lastIndex = campaignHighlights.length - 1;
+    const nextIndex = Math.min(lastIndex, Math.max(0, Number(index) || 0));
+    setActiveCampaignIndex(nextIndex);
+  }
+
+  function goToPrevCampaign() {
+    if (!campaignHighlights.length) return;
+    const lastIndex = campaignHighlights.length - 1;
+    setActiveCampaignIndex((current) => (current <= 0 ? lastIndex : current - 1));
+  }
+
+  function goToNextCampaign() {
+    if (!campaignHighlights.length) return;
+    const lastIndex = campaignHighlights.length - 1;
+    setActiveCampaignIndex((current) => (current >= lastIndex ? 0 : current + 1));
+  }
 
   return (
     <div className="lp-shell">
@@ -665,7 +694,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
               <motion.section
                 id={anchorId}
                 key={section.id}
-                className={`lp-section lp-campaign ${scrollClass}`}
+                className={`lp-section lp-campaign lp-campaign-featured ${scrollClass}`}
                 {...sectionMotion}
                 style={sectionTextVars}
               >
@@ -674,37 +703,70 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                   <p className={`lp-section-copy ${textClass}`}>{settings.subheading || "Tap to edit this section intro."}</p>
                 </div>
 
-                <div className="lp-campaign-carousel">
+                <div className="lp-campaign-carousel" aria-label="Campaign highlights">
                   {campaignHighlights.length ? (
-                    campaignHighlights.map((campaign) => (
-                      <article key={campaign.id || campaign.slug} className="lp-campaign-slide">
-                        <div className="lp-campaign-slide-media">
-                          <a href={`/campaigns/${campaign.slug}`}>
-                            {campaign.imageUrl ? (
-                              <LandingImage
-                                src={campaign.imageUrl}
-                                alt={campaign.title || "Campaign"}
-                                width={1200}
-                                height={800}
-                                sizes="(min-width: 1024px) 42vw, 100vw"
-                              />
-                            ) : (
-                              <div className="lp-image-placeholder">Campaign image</div>
-                            )}
-                          </a>
-                        </div>
+                    <>
+                      <div className="lp-campaign-track" style={{ transform: `translateX(-${activeCampaignIndex * 100}%)` }}>
+                        {campaignHighlights.map((campaign, index) => (
+                          <article key={campaign.id || campaign.slug} className="lp-campaign-slide" aria-hidden={index !== activeCampaignIndex}>
+                            <div className="lp-campaign-slide-media">
+                              <a href={`/campaigns/${campaign.slug}`} aria-label={`Open ${campaign.title || "campaign"} form`}>
+                                {campaign.imageUrl ? (
+                                  <LandingImage
+                                    src={campaign.imageUrl}
+                                    alt={campaign.title || "Campaign"}
+                                    width={1920}
+                                    height={1080}
+                                    sizes="100vw"
+                                  />
+                                ) : (
+                                  <div className="lp-image-placeholder">Campaign image</div>
+                                )}
+                              </a>
+                            </div>
 
-                        <div className="lp-campaign-slide-content">
-                          <h3>{campaign.title || "Campaign"}</h3>
-                          <p>{campaign.description || "Campaign details coming soon."}</p>
-                          {campaign.targetMarket ? <p>Target market: {campaign.targetMarket}</p> : null}
-                          {campaign.deadline ? <p>Active until: {formatCampaignDate(campaign.deadline)}</p> : null}
-                          <a href={`/campaigns/${campaign.slug}`} className="lp-btn lp-btn-primary">
-                            Join Campaign
-                          </a>
-                        </div>
-                      </article>
-                    ))
+                            <div className="lp-campaign-slide-content">
+                              <h3>{campaign.title || "Campaign"}</h3>
+                              <p>{campaign.description || "Campaign details coming soon."}</p>
+                              <div className="lp-campaign-meta">
+                                {campaign.targetMarket ? <span>Target market: {campaign.targetMarket}</span> : null}
+                                {campaign.deadline ? <span>Active until: {formatCampaignDate(campaign.deadline)}</span> : null}
+                              </div>
+                              <a href={`/campaigns/${campaign.slug}`} className="lp-btn lp-btn-primary">
+                                Apply Now
+                              </a>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+
+                      {campaignHighlights.length > 1 ? (
+                        <>
+                          <div className="lp-campaign-controls">
+                            <button type="button" onClick={goToPrevCampaign} aria-label="Previous campaign">
+                              ‹
+                            </button>
+                            <button type="button" onClick={goToNextCampaign} aria-label="Next campaign">
+                              ›
+                            </button>
+                          </div>
+
+                          <div className="lp-campaign-dots" role="tablist" aria-label="Choose campaign slide">
+                            {campaignHighlights.map((campaign, index) => (
+                              <button
+                                key={campaign.id || campaign.slug || index}
+                                type="button"
+                                role="tab"
+                                aria-selected={index === activeCampaignIndex}
+                                aria-label={`View ${campaign.title || `campaign ${index + 1}`}`}
+                                className={index === activeCampaignIndex ? "is-active" : ""}
+                                onClick={() => goToCampaign(index)}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      ) : null}
+                    </>
                   ) : (
                     <article className="lp-campaign-slide lp-campaign-slide-empty">
                       <div className="lp-campaign-slide-content">
@@ -713,12 +775,6 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                       </div>
                     </article>
                   )}
-                </div>
-
-                <div className="lp-campaign-cta-row">
-                  <a href="/campaigns" className="lp-btn lp-btn-ghost">
-                    {settings.submitText || "See all campaigns"}
-                  </a>
                 </div>
               </motion.section>
             );

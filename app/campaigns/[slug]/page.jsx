@@ -38,7 +38,8 @@ async function loadCampaign(slug) {
 }
 
 export async function generateMetadata({ params }) {
-  const slug = String(params?.slug || "");
+  const resolvedParams = await params;
+  const slug = String(resolvedParams?.slug || "");
   const campaign = await loadCampaign(slug);
 
   if (!campaign) {
@@ -55,7 +56,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function CampaignDetailPage({ params }) {
-  const slug = String(params?.slug || "");
+  const resolvedParams = await params;
+  const slug = String(resolvedParams?.slug || "");
 
   let campaign = null;
   let turnstileSiteKey = "";

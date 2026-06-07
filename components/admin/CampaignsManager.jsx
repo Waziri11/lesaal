@@ -8,11 +8,17 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  CircleCheck,
+  CircleOff,
   Filter,
+  ListChecks,
+  MessageSquare,
   MoreHorizontal,
   Plus,
   Search,
   SlidersHorizontal,
+  TrendingDown,
+  TrendingUp,
 } from "lucide-react";
 import {
   flexRender,
@@ -58,6 +64,14 @@ function formatDate(value) {
 
 function formatCount(value) {
   return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(Number(value) || 0);
+}
+
+function formatInteger(value) {
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(Number(value) || 0);
+}
+
+function formatPercent(value) {
+  return `${Math.max(0, Math.round(Number(value) || 0))}%`;
 }
 
 function getDurationLabel(campaign) {
@@ -127,8 +141,68 @@ export default function CampaignsManager() {
     const active = campaigns.filter((campaign) => campaign.isPublished).length;
     const disabled = total - active;
     const responsesCount = campaigns.reduce((sum, campaign) => sum + Number(campaign.responseCount || 0), 0);
-    return { total, active, disabled, responsesCount };
+    const campaignsWithResponses = campaigns.filter((campaign) => Number(campaign.responseCount || 0) > 0).length;
+    const activeRate = total ? (active / total) * 100 : 0;
+    const disabledRate = total ? (disabled / total) * 100 : 0;
+    const responseCoverageRate = total ? (campaignsWithResponses / total) * 100 : 0;
+
+    return { total, active, disabled, responsesCount, activeRate, disabledRate, responseCoverageRate };
   }, [campaigns]);
+
+  const campaignStatCards = useMemo(() => {
+    const hasCampaigns = campaignStats.total > 0;
+    const showNeutralRate = !hasCampaigns;
+
+    return [
+      {
+        key: "listed",
+        label: "Campaigns listed",
+        value: formatInteger(campaignStats.total),
+        Icon: ListChecks,
+        trend: formatPercent(campaignStats.activeRate),
+        trendTone: showNeutralRate
+          ? "text-[color:var(--ui-muted-foreground)]"
+          : campaignStats.activeRate >= 50
+            ? "text-[color:var(--ui-success)]"
+            : "text-[color:var(--ui-destructive)]",
+        trendDirection: showNeutralRate ? "neutral" : campaignStats.activeRate >= 50 ? "up" : "down",
+      },
+      {
+        key: "active",
+        label: "Active campaigns",
+        value: formatInteger(campaignStats.active),
+        Icon: CircleCheck,
+        trend: formatPercent(campaignStats.activeRate),
+        trendTone: showNeutralRate
+          ? "text-[color:var(--ui-muted-foreground)]"
+          : "text-[color:var(--ui-success)]",
+        trendDirection: showNeutralRate ? "neutral" : "up",
+      },
+      {
+        key: "disabled",
+        label: "Disabled campaigns",
+        value: formatInteger(campaignStats.disabled),
+        Icon: CircleOff,
+        trend: formatPercent(campaignStats.disabledRate),
+        trendTone: showNeutralRate
+          ? "text-[color:var(--ui-muted-foreground)]"
+          : campaignStats.disabled > 0
+            ? "text-[color:var(--ui-destructive)]"
+            : "text-[color:var(--ui-success)]",
+        trendDirection: showNeutralRate ? "neutral" : campaignStats.disabled > 0 ? "down" : "up",
+      },
+      {
+        key: "responses",
+        label: "Responses logged",
+        value: formatCount(campaignStats.responsesCount),
+        Icon: MessageSquare,
+        trend: formatPercent(campaignStats.responseCoverageRate),
+        trendTone:
+          campaignStats.responseCoverageRate > 0 ? "text-[color:var(--ui-success)]" : "text-[color:var(--ui-muted-foreground)]",
+        trendDirection: campaignStats.responseCoverageRate > 0 ? "up" : "neutral",
+      },
+    ];
+  }, [campaignStats]);
 
   async function loadCampaigns() {
     setLoadingCampaigns(true);
@@ -530,11 +604,34 @@ export default function CampaignsManager() {
         <h2 className="text-2xl font-semibold text-[color:var(--ui-foreground)]">Campaign Library</h2>
         <p className="text-sm text-[color:var(--ui-muted-foreground)]">Search, filter, and manage campaigns from one clean table.</p>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">{campaignStats.total} listed</Badge>
-          <Badge variant="success">{campaignStats.active} active</Badge>
-          <Badge variant="default">{campaignStats.disabled} disabled</Badge>
-          <Badge variant="outline">{formatCount(campaignStats.responsesCount)} responses</Badge>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {campaignStatCards.map((stat) => {
+            const TrendIcon = stat.trendDirection === "down" ? TrendingDown : TrendingUp;
+
+            return (
+              <article
+                key={stat.key}
+                className="rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-lg font-medium text-[color:var(--ui-muted-foreground)]">{stat.label}</p>
+                  <span className="inline-flex h-7 w-7 items-center justify-center text-[color:var(--ui-muted-foreground)]">
+                    <stat.Icon className="h-5 w-5" />
+                  </span>
+                </div>
+
+                <div className="mt-4 rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] px-4 py-3">
+                  <div className="flex items-end justify-between gap-3">
+                    <p className="text-4xl font-semibold tracking-tight text-[color:var(--ui-foreground)]">{stat.value}</p>
+                    <p className={`inline-flex shrink-0 items-center gap-1 text-lg font-semibold ${stat.trendTone}`}>
+                      {stat.trendDirection === "neutral" ? null : <TrendIcon className="h-4 w-4" />}
+                      {stat.trend}
+                    </p>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
 
         {campaignError ? <p className="text-sm text-[color:var(--ui-destructive)]">{campaignError}</p> : null}

@@ -12,7 +12,8 @@ export async function POST(request, { params }) {
   try {
     await ensureDatabaseReady();
 
-    const slug = String(params?.slug || "");
+    const resolvedParams = await params;
+    const slug = String(resolvedParams?.slug || "");
     const body = await request.json();
     const sourceData = body?.data && typeof body.data === "object" ? body.data : body;
     const submittedData =

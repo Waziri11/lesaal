@@ -21,6 +21,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { createCsrfHeaders } from "../../lib/csrf-client";
 import AdminThemeToggle from "./AdminThemeToggle";
 import { Button } from "../ui/button";
+import { Spinner } from "../ui/spinner";
+import Swal from "sweetalert2";
+import { useState } from "react";
 
 const PRIMARY_ITEMS = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -73,17 +76,36 @@ function getInitials(admin) {
 export default function AdminSidebar({ admin = null }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const companyName = String(admin?.companyName || "").trim() || "Lesaal";
   const initials = getInitials(admin);
 
   async function handleLogout() {
-    await fetch("/api/admin/logout", {
-      method: "POST",
-      headers: createCsrfHeaders(),
-    });
-    router.push("/");
-    router.refresh();
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      const response = await fetch("/api/admin/logout", {
+        method: "POST",
+        headers: createCsrfHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to logout. Please try again.");
+      }
+
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "Logout failed",
+        text: error.message || "Unable to logout. Please try again.",
+      });
+      setIsLoggingOut(false);
+    }
   }
 
   return (
@@ -208,8 +230,15 @@ export default function AdminSidebar({ admin = null }) {
 
       <div className="mt-auto border-t border-[color:var(--ui-border)] pt-3">
         <div className="mt-2 flex items-center gap-2">
-          <Button type="button" variant="outline" className="h-9 flex-1" onClick={handleLogout}>
-            Logout
+          <Button type="button" variant="outline" className="h-9 flex-1" onClick={handleLogout} disabled={isLoggingOut}>
+            {isLoggingOut ? (
+              <>
+                <Spinner className="mr-2 h-4 w-4" />
+                logging out
+              </>
+            ) : (
+              "Logout"
+            )}
           </Button>
           <AdminThemeToggle />
         </div>

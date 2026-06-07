@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpDown,
@@ -37,6 +37,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Spinner } from "../ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { createCsrfHeaders } from "../../lib/csrf-client";
+import Swal from "sweetalert2";
 
 const SORT_OPTIONS = {
   updated_desc: [{ id: "updatedAt", desc: true }],
@@ -195,6 +196,8 @@ export default function CampaignsManager() {
   const [rowSelection, setRowSelection] = useState({});
   const [updatingCampaignId, setUpdatingCampaignId] = useState(null);
   const [deletingCampaignId, setDeletingCampaignId] = useState(null);
+  const [openingCampaignId, setOpeningCampaignId] = useState(null);
+  const [isOpeningCampaign, startOpenCampaignTransition] = useTransition();
 
   const campaignStats = useMemo(() => {
     const total = campaigns.length;
@@ -398,10 +401,24 @@ export default function CampaignsManager() {
         throw new Error(payload.error || "Unable to update campaign status.");
       }
 
-      setStatusSuccess(`Campaign ${payload.campaign.isPublished ? "enabled" : "disabled"} successfully.`);
+      const nextStateLabel = payload.campaign.isPublished ? "enabled" : "disabled";
+      setStatusSuccess(`Campaign ${nextStateLabel} successfully.`);
+      await Swal.fire({
+        icon: "success",
+        title: "Campaign updated",
+        text: `Campaign ${nextStateLabel} successfully.`,
+        timer: 1400,
+        showConfirmButton: false,
+      });
       await loadCampaigns();
     } catch (error) {
-      setCampaignError(error.message || "Unable to update campaign status.");
+      const message = error.message || "Unable to update campaign status.";
+      setCampaignError(message);
+      await Swal.fire({
+        icon: "error",
+        title: "Update failed",
+        text: message,
+      });
     } finally {
       setUpdatingCampaignId(null);
     }
@@ -410,8 +427,18 @@ export default function CampaignsManager() {
   async function deleteCampaign(campaign) {
     if (!campaign?.id || deletingCampaignId) return;
 
-    const confirmed = window.confirm(`Delete \"${campaign.title}\" and all responses?`);
-    if (!confirmed) return;
+    const decision = await Swal.fire({
+      icon: "warning",
+      title: "Delete campaign?",
+      text: `Delete "${campaign.title}" and all responses?`,
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+    if (!decision.isConfirmed) return;
 
     setDeletingCampaignId(campaign.id);
     setCampaignError("");
@@ -430,13 +457,38 @@ export default function CampaignsManager() {
       }
 
       setStatusSuccess("Campaign deleted successfully.");
+      await Swal.fire({
+        icon: "success",
+        title: "Campaign deleted",
+        text: "Campaign deleted successfully.",
+        timer: 1400,
+        showConfirmButton: false,
+      });
       await loadCampaigns();
     } catch (error) {
-      setCampaignError(error.message || "Unable to delete campaign.");
+      const message = error.message || "Unable to delete campaign.";
+      setCampaignError(message);
+      await Swal.fire({
+        icon: "error",
+        title: "Delete failed",
+        text: message,
+      });
     } finally {
       setDeletingCampaignId(null);
     }
   }
+
+  const openCampaign = useCallback(
+    (campaign) => {
+      if (!campaign?.id || isOpeningCampaign) return;
+
+      setOpeningCampaignId(campaign.id);
+      startOpenCampaignTransition(() => {
+        router.push(`/admin/campaigns/${campaign.id}`);
+      });
+    },
+    [isOpeningCampaign, router]
+  );
 
   const columns = useMemo(
     () => [
@@ -554,6 +606,7 @@ export default function CampaignsManager() {
           const campaign = row.original;
           const isUpdating = updatingCampaignId === campaign.id;
           const isDeleting = deletingCampaignId === campaign.id;
+          const isOpening = isOpeningCampaign && openingCampaignId === campaign.id;
 
           return (
             <div className="flex justify-end" onClick={(event) => event.stopPropagation()}>
@@ -567,14 +620,16 @@ export default function CampaignsManager() {
                   <button
                     type="button"
                     className={MENU_ITEM_CLASS}
-                    onClick={() => router.push(`/admin/campaigns/${campaign.id}`)}
+                    disabled={isUpdating || isDeleting || isOpeningCampaign}
+                    onClick={() => openCampaign(campaign)}
                   >
-                    View campaign
+                    {isOpening ? <Spinner className="mr-2 h-4 w-4" /> : null}
+                    {isOpening ? "Opening..." : "View campaign"}
                   </button>
                   <button
                     type="button"
                     className={MENU_ITEM_CLASS}
-                    disabled={isUpdating || isDeleting}
+                    disabled={isUpdating || isDeleting || isOpeningCampaign}
                     onClick={() => toggleCampaignState(campaign)}
                   >
                     {isUpdating ? <Spinner className="mr-2 h-4 w-4" /> : null}
@@ -583,7 +638,7 @@ export default function CampaignsManager() {
                   <button
                     type="button"
                     className={`${MENU_ITEM_CLASS} text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]`}
-                    disabled={isDeleting || isUpdating}
+                    disabled={isDeleting || isUpdating || isOpeningCampaign}
                     onClick={() => deleteCampaign(campaign)}
                   >
                     {isDeleting ? <Spinner className="mr-2 h-4 w-4" /> : null}
@@ -596,7 +651,7 @@ export default function CampaignsManager() {
         },
       },
     ],
-    [deletingCampaignId, router, updatingCampaignId]
+    [deletingCampaignId, isOpeningCampaign, openCampaign, openingCampaignId, updatingCampaignId]
   );
 
   const table = useReactTable({
@@ -903,8 +958,8 @@ export default function CampaignsManager() {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="cursor-pointer"
-                  onClick={() => router.push(`/admin/campaigns/${row.original.id}`)}
+                  className={`cursor-pointer ${isOpeningCampaign ? "pointer-events-none opacity-80" : ""}`}
+                  onClick={() => openCampaign(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -992,6 +1047,15 @@ export default function CampaignsManager() {
           </div>
         </div>
       </div>
+
+      {isOpeningCampaign ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
+          <div className="inline-flex items-center gap-3 rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] px-4 py-3 text-sm text-[color:var(--ui-foreground)] shadow-lg">
+            <Spinner className="h-4 w-4" />
+            <span>Opening campaign...</span>
+          </div>
+        </div>
+      ) : null}
 
     </section>
   );

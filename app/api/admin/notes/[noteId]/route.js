@@ -52,7 +52,8 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const noteId = String(params?.noteId || "");
+    const resolvedParams = await params;
+    const noteId = String(resolvedParams?.noteId || "");
     let note;
 
     try {
@@ -93,7 +94,8 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const noteId = String(params?.noteId || "");
+    const resolvedParams = await params;
+    const noteId = String(resolvedParams?.noteId || "");
     let existing;
 
     try {
@@ -159,7 +161,8 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const noteId = String(params?.noteId || "");
+    const resolvedParams = await params;
+    const noteId = String(resolvedParams?.noteId || "");
     let existing;
 
     try {

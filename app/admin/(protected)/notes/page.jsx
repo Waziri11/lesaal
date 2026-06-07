@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Input } from "../../../../components/ui/input";
 import { Textarea } from "../../../../components/ui/textarea";
 import { createCsrfHeaders } from "../../../../lib/csrf-client";
+import Swal from "sweetalert2";
 
 const PAGE_LIMIT = 30;
 
@@ -203,8 +204,18 @@ export default function AdminNotesPage() {
   async function handleDeleteNote() {
     if (!selectedNote || deletingNote) return;
 
-    const confirmed = window.confirm(`Delete "${selectedNote.title}"?`);
-    if (!confirmed) return;
+    const decision = await Swal.fire({
+      icon: "warning",
+      title: "Delete note?",
+      text: `Delete "${selectedNote.title}"?`,
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+    if (!decision.isConfirmed) return;
 
     setDeletingNote(true);
     setStatusError("");

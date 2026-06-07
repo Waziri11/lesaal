@@ -19,7 +19,8 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const campaignId = String(params?.campaignId || "");
+    const resolvedParams = await params;
+    const campaignId = String(resolvedParams?.campaignId || "");
     const campaign = await getCampaignByIdForAdmin(campaignId);
 
     if (!campaign) {
@@ -54,7 +55,8 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const campaignId = String(params?.campaignId || "");
+    const resolvedParams = await params;
+    const campaignId = String(resolvedParams?.campaignId || "");
     const body = await request.json();
 
     const existing = await getCampaignByIdForAdmin(campaignId);
@@ -95,7 +97,8 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const campaignId = String(params?.campaignId || "");
+    const resolvedParams = await params;
+    const campaignId = String(resolvedParams?.campaignId || "");
     const existing = await getCampaignByIdForAdmin(campaignId);
 
     if (!existing) {
@@ -132,7 +135,8 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const campaignId = String(params?.campaignId || "");
+    const resolvedParams = await params;
+    const campaignId = String(resolvedParams?.campaignId || "");
     const body = await request.json();
     const isPublished = body?.isPublished;
 

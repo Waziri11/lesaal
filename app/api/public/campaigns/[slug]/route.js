@@ -5,7 +5,8 @@ export const revalidate = 60;
 
 export async function GET(_request, { params }) {
   try {
-    const slug = String(params?.slug || "");
+    const resolvedParams = await params;
+    const slug = String(resolvedParams?.slug || "");
     const campaign = await getCampaignBySlugForPublic(slug);
 
     if (!campaign) {

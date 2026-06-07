@@ -46,7 +46,8 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const campaignId = String(params?.campaignId || "");
+    const resolvedParams = await params;
+    const campaignId = String(resolvedParams?.campaignId || "");
     const format = request.nextUrl.searchParams.get("format");
 
     if (format === "csv") {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
@@ -515,7 +516,7 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
 
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <div className="flex gap-2">
+                <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -523,16 +524,19 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="********"
                     disabled={loading}
+                    className="pr-11"
                     required
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-[color:var(--ui-muted-foreground)] transition hover:text-[color:var(--ui-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ui-ring)]"
                     onClick={() => setShowPassword((current) => !current)}
                     disabled={loading}
                   >
-                    {showPassword ? "Hide" : "Show"}
-                  </Button>
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
               </div>
 

@@ -2,23 +2,42 @@ import Link from "next/link";
 import Image from "next/image";
 import CampaignResponseForm from "../../../components/CampaignResponseForm";
 import PageState from "../../../components/shared/PageState";
-import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
 import { getCampaignBySlugForPublic, isCampaignTableMissingError } from "../../../lib/campaigns";
 import { getSecurityConfig } from "../../../lib/security-config";
 
 export const revalidate = 60;
 
-function formatDate(value) {
-  if (!value) return "";
+function formatTimeRemaining(value, nowTimestamp = Date.now()) {
+  if (!value) return "No deadline";
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "";
-  return parsed.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  if (Number.isNaN(parsed.getTime())) return "No deadline";
+
+  const diffMs = parsed.getTime() - nowTimestamp;
+  if (diffMs <= 0) return "Expired";
+
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  if (totalMinutes < 60) {
+    return `${Math.max(1, totalMinutes)} minute${totalMinutes === 1 ? "" : "s"}`;
+  }
+
+  const totalHours = Math.floor(totalMinutes / 60);
+  if (totalHours < 24) {
+    return `${totalHours} hour${totalHours === 1 ? "" : "s"}`;
+  }
+
+  const totalDays = Math.floor(totalHours / 24);
+  if (totalDays < 30) {
+    return `${totalDays} day${totalDays === 1 ? "" : "s"}`;
+  }
+
+  const totalMonths = Math.floor(totalDays / 30);
+  if (totalMonths < 12) {
+    return `${totalMonths} month${totalMonths === 1 ? "" : "s"}`;
+  }
+
+  const totalYears = Math.floor(totalDays / 365);
+  return `${totalYears} year${totalYears === 1 ? "" : "s"}`;
 }
 
 function isLocalImageSrc(src) {
@@ -96,47 +115,44 @@ export default async function CampaignDetailPage({ params }) {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
-      <Card>
-        <CardHeader className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            {campaign.targetMarket ? <Badge variant="secondary">Target: {campaign.targetMarket}</Badge> : null}
-            {campaign.deadline ? <Badge variant="secondary">Deadline: {formatDate(campaign.deadline)}</Badge> : null}
+      <div className="overflow-hidden rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]">
+        {campaign.imageUrl ? (
+          <Image
+            src={campaign.imageUrl}
+            alt={campaign.title}
+            width={1920}
+            height={1080}
+            sizes="100vw"
+            priority
+            unoptimized={!isLocalImageSrc(campaign.imageUrl)}
+            className="h-[260px] w-full object-cover md:h-[360px] lg:h-[440px]"
+          />
+        ) : (
+          <div className="flex h-[260px] items-center justify-center text-sm text-[color:var(--ui-muted-foreground)] md:h-[360px] lg:h-[440px]">
+            Campaign image
           </div>
-          <div>
-            <CardTitle>{campaign.title}</CardTitle>
-            <CardDescription>{campaign.description}</CardDescription>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild>
-              <Link href="/campaigns">View all campaigns</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/">Back to Homepage</Link>
-            </Button>
-          </div>
-        </CardHeader>
-      </Card>
+        )}
+      </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <div className="overflow-hidden rounded-xl">
-            {campaign.imageUrl ? (
-              <Image
-                src={campaign.imageUrl}
-                alt={campaign.title}
-                width={1280}
-                height={720}
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                priority
-                unoptimized={!isLocalImageSrc(campaign.imageUrl)}
-                className="h-full min-h-[280px] w-full object-cover"
-              />
-            ) : (
-              <div className="flex min-h-[280px] items-center justify-center text-sm text-[color:var(--ui-muted-foreground)]">Campaign image</div>
-            )}
-          </div>
-        </Card>
+      <section className="space-y-3 rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-5 md:p-6">
+        <h1 className="text-2xl font-semibold text-[color:var(--ui-foreground)] md:text-3xl">{campaign.title}</h1>
+        <p className="text-base leading-relaxed text-[color:var(--ui-muted-foreground)]">
+          {campaign.description || "Campaign details coming soon."}
+        </p>
+        <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-[color:var(--ui-muted-foreground)] md:text-base">
+          {campaign.targetMarket ? (
+            <p>
+              <strong className="font-semibold text-[color:var(--ui-foreground)]">Target market:</strong> {campaign.targetMarket}
+            </p>
+          ) : null}
+          <p>
+            <strong className="font-semibold text-[color:var(--ui-foreground)]">Time remaining:</strong>{" "}
+            {formatTimeRemaining(campaign.deadline)}
+          </p>
+        </div>
+      </section>
 
+      <div>
         <CampaignResponseForm campaign={campaign} turnstileSiteKey={turnstileSiteKey} />
       </div>
     </div>

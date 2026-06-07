@@ -2,9 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import PageState from "./shared/PageState";
-import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -13,17 +11,6 @@ import { Textarea } from "./ui/textarea";
 
 function toOptionsArray(value) {
   return Array.isArray(value) ? value : [];
-}
-
-function formatDeadline(value) {
-  if (!value) return "";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "";
-  return parsed.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 }
 
 function buildSections(campaign) {
@@ -278,67 +265,54 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-center gap-2">
-          {campaign?.targetMarket ? <Badge variant="secondary">Target: {campaign.targetMarket}</Badge> : null}
-          {campaign?.deadline ? <Badge variant="secondary">Deadline: {formatDeadline(campaign.deadline)}</Badge> : null}
-        </div>
-        <CardTitle>{campaign.title}</CardTitle>
-        <CardDescription>{campaign.description}</CardDescription>
-      </CardHeader>
+    <form className="space-y-4 rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-5 md:p-6" onSubmit={handleSubmit}>
+      <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden">
+        <label htmlFor="website-field">
+          Website
+          <Input
+            id="website-field"
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypotWebsite}
+            onChange={(event) => setHoneypotWebsite(event.target.value)}
+          />
+        </label>
+      </div>
 
-      <CardContent>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden">
-            <label htmlFor="website-field">
-              Website
-              <Input
-                id="website-field"
-                type="text"
-                name="website"
-                tabIndex={-1}
-                autoComplete="off"
-                value={honeypotWebsite}
-                onChange={(event) => setHoneypotWebsite(event.target.value)}
-              />
-            </label>
+      {sections.map((section, index) => (
+        <section key={section.key || `section_${index + 1}`} className="space-y-3 rounded-lg border border-[color:var(--ui-border)] p-4">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-primary)]">Section {index + 1}</p>
+            <h3 className="text-lg font-semibold text-[color:var(--ui-foreground)]">{section.title}</h3>
+            {section.description ? <p className="text-sm text-[color:var(--ui-muted-foreground)]">{section.description}</p> : null}
           </div>
 
-          {sections.map((section, index) => (
-            <section key={section.key || `section_${index + 1}`} className="space-y-3 rounded-lg border border-[color:var(--ui-border)] p-4">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-primary)]">Section {index + 1}</p>
-                <h3 className="text-lg font-semibold text-[color:var(--ui-foreground)]">{section.title}</h3>
-                {section.description ? <p className="text-sm text-[color:var(--ui-muted-foreground)]">{section.description}</p> : null}
-              </div>
+          <div className="space-y-4">{section.questions.map((question) => renderQuestion(question))}</div>
+        </section>
+      ))}
 
-              <div className="space-y-4">{section.questions.map((question) => renderQuestion(question))}</div>
-            </section>
-          ))}
+      {turnstileSiteKey ? (
+        <div className="space-y-2 rounded-lg border border-[color:var(--ui-border)] p-3">
+          <div ref={captchaRef} />
+          {!captchaReady ? (
+            <p className="flex items-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
+              <Spinner />
+              Loading captcha challenge...
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <p className="text-sm text-[color:var(--ui-destructive)]">Captcha is not configured.</p>
+      )}
 
-          {turnstileSiteKey ? (
-            <div className="space-y-2 rounded-lg border border-[color:var(--ui-border)] p-3">
-              <div ref={captchaRef} />
-              {!captchaReady ? (
-                <p className="flex items-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
-                  <Spinner />
-                  Loading captcha challenge...
-                </p>
-              ) : null}
-            </div>
-          ) : (
-            <p className="text-sm text-[color:var(--ui-destructive)]">Captcha is not configured.</p>
-          )}
+      {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
+      {success ? <p className="text-sm text-[color:var(--ui-success)]">{success}</p> : null}
 
-          {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
-          {success ? <p className="text-sm text-[color:var(--ui-success)]">{success}</p> : null}
-
-          <Button type="submit" disabled={submitting}>
-            {submitting ? "Submitting..." : "Submit Response"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+      <Button type="submit" disabled={submitting}>
+        {submitting ? "Submitting..." : "Submit Response"}
+      </Button>
+    </form>
   );
 }

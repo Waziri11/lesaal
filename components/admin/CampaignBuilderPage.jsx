@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -444,37 +445,6 @@ export default function CampaignBuilderPage() {
         const nextQuestions = [...section.questions];
         const [moved] = nextQuestions.splice(questionIndex, 1);
         nextQuestions.splice(nextIndex, 0, moved);
-
-        return {
-          ...section,
-          questions: nextQuestions.map((question, index) => ({
-            ...question,
-            order: index,
-          })),
-        };
-      }),
-    }));
-  }
-
-  function duplicateQuestion(sectionIndex, questionIndex) {
-    setDraft((current) => ({
-      ...current,
-      sections: current.sections.map((section, currentSectionIndex) => {
-        if (currentSectionIndex !== sectionIndex) return section;
-
-        const source = section.questions[questionIndex];
-        if (!source) return section;
-
-        const baseKey = source.key || `field_${questionIndex + 1}`;
-        const clone = {
-          ...source,
-          id: `temp_q_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-          key: `${baseKey}_copy_${section.questions.length + 1}`,
-          options: Array.isArray(source.options) ? [...source.options] : [],
-        };
-
-        const nextQuestions = [...section.questions];
-        nextQuestions.splice(questionIndex + 1, 0, clone);
 
         return {
           ...section,
@@ -946,8 +916,45 @@ export default function CampaignBuilderPage() {
                           />
                         </div>
 
-                        <div className="w-full space-y-2 sm:w-56">
-                          <Label className="text-[color:var(--ui-foreground)]">Response Type</Label>
+                        <div className="w-full space-y-2 sm:w-64">
+                          <div className="flex items-center justify-between gap-2">
+                            <Label className="text-[color:var(--ui-foreground)]">Response Type</Label>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="outline"
+                                className="h-8 w-8"
+                                onClick={() => moveQuestion(sectionIndex, questionIndex, "up")}
+                                disabled={questionIndex === 0}
+                                aria-label="Move question up"
+                              >
+                                <ArrowUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="outline"
+                                className="h-8 w-8"
+                                onClick={() => moveQuestion(sectionIndex, questionIndex, "down")}
+                                disabled={questionIndex === section.questions.length - 1}
+                                aria-label="Move question down"
+                              >
+                                <ArrowDown className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="outline"
+                                className="h-8 w-8 border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
+                                onClick={() => removeQuestion(sectionIndex, questionIndex)}
+                                disabled={section.questions.length === 1}
+                                aria-label="Remove question"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
                           <Select
                             value={question.type}
                             onValueChange={(value) => handleQuestionChange(sectionIndex, questionIndex, "type", value)}
@@ -1004,65 +1011,29 @@ export default function CampaignBuilderPage() {
                         <div className="mt-3">{renderQuestionPreview(question)}</div>
                       </div>
 
-                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--ui-border)] pt-3">
-                        <div className="flex flex-wrap items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id={`required-${sectionIndex}-${questionIndex}`}
-                              className="border-[color:var(--ui-border)] data-[state=checked]:border-[color:var(--ui-primary)] data-[state=checked]:bg-[color:var(--ui-primary)]"
-                              checked={Boolean(question.required)}
-                              onCheckedChange={(checked) => handleQuestionChange(sectionIndex, questionIndex, "required", Boolean(checked))}
-                            />
-                            <Label className="text-[color:var(--ui-foreground)]" htmlFor={`required-${sectionIndex}-${questionIndex}`}>
-                              Required
-                            </Label>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id={`visible-${sectionIndex}-${questionIndex}`}
-                              className="border-[color:var(--ui-border)] data-[state=checked]:border-[color:var(--ui-primary)] data-[state=checked]:bg-[color:var(--ui-primary)]"
-                              checked={question.isVisible !== false}
-                              onCheckedChange={(checked) => handleQuestionChange(sectionIndex, questionIndex, "isVisible", Boolean(checked))}
-                            />
-                            <Label className="text-[color:var(--ui-foreground)]" htmlFor={`visible-${sectionIndex}-${questionIndex}`}>
-                              Visible
-                            </Label>
-                          </div>
+                      <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-[color:var(--ui-border)] pt-3">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={`required-${sectionIndex}-${questionIndex}`}
+                            className="border-[color:var(--ui-border)] data-[state=checked]:border-[color:var(--ui-primary)] data-[state=checked]:bg-[color:var(--ui-primary)]"
+                            checked={Boolean(question.required)}
+                            onCheckedChange={(checked) => handleQuestionChange(sectionIndex, questionIndex, "required", Boolean(checked))}
+                          />
+                          <Label className="text-[color:var(--ui-foreground)]" htmlFor={`required-${sectionIndex}-${questionIndex}`}>
+                            Required
+                          </Label>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => moveQuestion(sectionIndex, questionIndex, "up")}
-                            disabled={questionIndex === 0}
-                          >
-                            Move Up
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => moveQuestion(sectionIndex, questionIndex, "down")}
-                            disabled={questionIndex === section.questions.length - 1}
-                          >
-                            Move Down
-                          </Button>
-                          <Button type="button" size="sm" variant="outline" onClick={() => duplicateQuestion(sectionIndex, questionIndex)}>
-                            Duplicate
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            className="border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
-                            onClick={() => removeQuestion(sectionIndex, questionIndex)}
-                            disabled={section.questions.length === 1}
-                          >
-                            Remove
-                          </Button>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={`visible-${sectionIndex}-${questionIndex}`}
+                            className="border-[color:var(--ui-border)] data-[state=checked]:border-[color:var(--ui-primary)] data-[state=checked]:bg-[color:var(--ui-primary)]"
+                            checked={question.isVisible !== false}
+                            onCheckedChange={(checked) => handleQuestionChange(sectionIndex, questionIndex, "isVisible", Boolean(checked))}
+                          />
+                          <Label className="text-[color:var(--ui-foreground)]" htmlFor={`visible-${sectionIndex}-${questionIndex}`}>
+                            Visible
+                          </Label>
                         </div>
                       </div>
                     </div>

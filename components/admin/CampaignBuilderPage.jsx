@@ -1079,43 +1079,40 @@ export default function CampaignBuilderPage() {
                           <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-primary)]">
                             Question {questionIndex + 1}
                           </p>
-                          <div className="flex items-center gap-2">
-                            <Label className="text-[color:var(--ui-foreground)]">Response Type</Label>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                type="button"
-                                size="icon"
-                                variant="outline"
-                                className="h-8 w-8"
-                                onClick={() => moveQuestion(sectionIndex, questionIndex, "up")}
-                                disabled={questionIndex === 0}
-                                aria-label="Move question up"
-                              >
-                                <ArrowUp className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                type="button"
-                                size="icon"
-                                variant="outline"
-                                className="h-8 w-8"
-                                onClick={() => moveQuestion(sectionIndex, questionIndex, "down")}
-                                disabled={questionIndex === section.questions.length - 1}
-                                aria-label="Move question down"
-                              >
-                                <ArrowDown className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                type="button"
-                                size="icon"
-                                variant="outline"
-                                className="h-8 w-8 border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
-                                onClick={() => removeQuestion(sectionIndex, questionIndex)}
-                                disabled={section.questions.length === 1}
-                                aria-label="Remove question"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="outline"
+                              className="h-8 w-8"
+                              onClick={() => moveQuestion(sectionIndex, questionIndex, "up")}
+                              disabled={questionIndex === 0}
+                              aria-label="Move question up"
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="outline"
+                              className="h-8 w-8"
+                              onClick={() => moveQuestion(sectionIndex, questionIndex, "down")}
+                              disabled={questionIndex === section.questions.length - 1}
+                              aria-label="Move question down"
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="outline"
+                              className="h-8 w-8 border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
+                              onClick={() => removeQuestion(sectionIndex, questionIndex)}
+                              disabled={section.questions.length === 1}
+                              aria-label="Remove question"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
 
@@ -1127,21 +1124,24 @@ export default function CampaignBuilderPage() {
                           required
                         />
 
-                        <Select
-                          value={question.type}
-                          onValueChange={(value) => handleQuestionChange(sectionIndex, questionIndex, "type", value)}
-                        >
-                          <SelectTrigger className={LIGHT_SELECT_TRIGGER_CLASS}>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="text">Short answer</SelectItem>
-                            <SelectItem value="email">Email</SelectItem>
-                            <SelectItem value="tel">Phone</SelectItem>
-                            <SelectItem value="textarea">Paragraph</SelectItem>
-                            <SelectItem value="select">Multiple choice</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className="space-y-2">
+                          <Label className="text-[color:var(--ui-foreground)]">Response Type</Label>
+                          <Select
+                            value={question.type}
+                            onValueChange={(value) => handleQuestionChange(sectionIndex, questionIndex, "type", value)}
+                          >
+                            <SelectTrigger className={LIGHT_SELECT_TRIGGER_CLASS}>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text">Short answer</SelectItem>
+                              <SelectItem value="email">Email</SelectItem>
+                              <SelectItem value="tel">Phone</SelectItem>
+                              <SelectItem value="textarea">Paragraph</SelectItem>
+                              <SelectItem value="select">Multiple choice</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
                       <div className="mt-4 space-y-2">

@@ -88,40 +88,40 @@ export default function AdminSidebar({ admin = null }) {
   }
 
   return (
-    <aside className="flex min-h-screen flex-col border-r border-[color:var(--ui-border)] bg-[color:var(--ui-card)]/70 px-3 py-4 lg:h-screen lg:min-h-0 lg:overflow-hidden">
-      <div className="mb-2 flex items-center gap-3 rounded-xl px-2 py-2">
+    <aside className="flex min-h-screen flex-col border-r border-[color:var(--ui-border)] bg-[color:var(--ui-card)]/70 px-2.5 py-3 lg:h-screen lg:min-h-0 lg:overflow-hidden">
+      <div className="mb-1 flex items-center gap-2.5 rounded-xl px-1.5 py-1.5">
         {admin?.profileImageUrl ? (
           <img
             src={admin.profileImageUrl}
             alt={companyName}
-            className="h-12 w-12 rounded-full border border-[color:var(--ui-border)] object-cover"
+            className="h-10 w-10 rounded-full border border-[color:var(--ui-border)] object-cover"
           />
         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--ui-border)] bg-[color:var(--ui-primary-soft)] text-sm font-semibold text-[color:var(--ui-primary)]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--ui-border)] bg-[color:var(--ui-primary-soft)] text-xs font-semibold text-[color:var(--ui-primary)]">
             {initials}
           </div>
         )}
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[22px] font-semibold leading-none text-[color:var(--ui-foreground)]">{companyName}</p>
+          <p className="truncate text-[20px] font-semibold leading-none text-[color:var(--ui-foreground)]">{companyName}</p>
           <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">Admin workspace</p>
         </div>
 
         <ChevronDown className="h-4 w-4 text-[color:var(--ui-muted-foreground)]" />
       </div>
 
-      <div className="mb-3 flex items-center justify-end px-2">
+      <div className="mb-2 flex items-center justify-end px-1">
         <button
           type="button"
-          className="rounded-md p-2 text-[color:var(--ui-muted-foreground)] transition hover:bg-[color:var(--ui-accent)] hover:text-[color:var(--ui-foreground)]"
+          className="rounded-md p-1.5 text-[color:var(--ui-muted-foreground)] transition hover:bg-[color:var(--ui-accent)] hover:text-[color:var(--ui-foreground)]"
           aria-label="Search"
           title="Search"
         >
-          <Search className="h-5 w-5" />
+          <Search className="h-4 w-4" />
         </button>
       </div>
 
-      <nav className="space-y-1 px-1">
+      <nav className="space-y-0.5 px-0.5">
         {PRIMARY_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -130,7 +130,7 @@ export default function AdminSidebar({ admin = null }) {
             <Button
               key={item.href}
               variant="ghost"
-              className={`h-11 w-full justify-start rounded-xl px-3 text-lg font-medium ${
+              className={`h-10 w-full justify-start rounded-lg px-2.5 text-base font-medium ${
                 isActive
                   ? "bg-[color:var(--ui-accent)] text-[color:var(--ui-foreground)]"
                   : "text-[color:var(--ui-muted-foreground)] hover:text-[color:var(--ui-foreground)]"
@@ -138,7 +138,7 @@ export default function AdminSidebar({ admin = null }) {
               asChild
             >
               <Link href={item.href}>
-                <Icon className="mr-3 h-5 w-5" />
+                <Icon className="mr-2.5 h-4 w-4" />
                 <span>{item.label}</span>
               </Link>
             </Button>
@@ -146,12 +146,12 @@ export default function AdminSidebar({ admin = null }) {
         })}
       </nav>
 
-      <div className="mt-8 flex items-center justify-between px-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--ui-muted-foreground)]">Folders</p>
+      <div className="mt-5 flex items-center justify-between px-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--ui-muted-foreground)]">Folders</p>
         <div className="flex items-center gap-1">
           <button
             type="button"
-            className="rounded-md p-1.5 text-[color:var(--ui-muted-foreground)] transition hover:bg-[color:var(--ui-accent)] hover:text-[color:var(--ui-foreground)]"
+            className="rounded-md p-1 text-[color:var(--ui-muted-foreground)] transition hover:bg-[color:var(--ui-accent)] hover:text-[color:var(--ui-foreground)]"
             aria-label="Search folders"
             title="Search folders"
           >
@@ -160,7 +160,7 @@ export default function AdminSidebar({ admin = null }) {
 
           <button
             type="button"
-            className="rounded-md p-1.5 text-[color:var(--ui-muted-foreground)] transition hover:bg-[color:var(--ui-accent)] hover:text-[color:var(--ui-foreground)]"
+            className="rounded-md p-1 text-[color:var(--ui-muted-foreground)] transition hover:bg-[color:var(--ui-accent)] hover:text-[color:var(--ui-foreground)]"
             aria-label="Create note"
             title="Create note"
             onClick={() => router.push("/admin/notes")}
@@ -170,7 +170,7 @@ export default function AdminSidebar({ admin = null }) {
         </div>
       </div>
 
-      <div className="mt-3 space-y-1 px-1">
+      <div className="mt-2 space-y-0.5 px-0.5">
         {FOLDER_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = item.isEnabled && pathname === item.href;
@@ -179,9 +179,9 @@ export default function AdminSidebar({ admin = null }) {
             return (
               <div
                 key={item.label}
-                className="flex h-10 items-center rounded-xl px-3 text-base text-[color:var(--ui-muted-foreground)]/60"
+                className="flex h-9 items-center rounded-lg px-2.5 text-sm text-[color:var(--ui-muted-foreground)]/60"
               >
-                <Icon className="mr-3 h-5 w-5" />
+                <Icon className="mr-2.5 h-4 w-4" />
                 <span>{item.label}</span>
               </div>
             );
@@ -191,7 +191,7 @@ export default function AdminSidebar({ admin = null }) {
             <Button
               key={item.label}
               variant="ghost"
-              className={`h-10 w-full justify-start rounded-xl px-3 text-base font-medium ${
+              className={`h-9 w-full justify-start rounded-lg px-2.5 text-sm font-medium ${
                 isActive
                   ? "bg-[color:var(--ui-accent)] text-[color:var(--ui-foreground)]"
                   : "text-[color:var(--ui-muted-foreground)] hover:text-[color:var(--ui-foreground)]"
@@ -199,7 +199,7 @@ export default function AdminSidebar({ admin = null }) {
               asChild
             >
               <Link href={item.href}>
-                <Icon className="mr-3 h-5 w-5" />
+                <Icon className="mr-2.5 h-4 w-4" />
                 <span>{item.label}</span>
               </Link>
             </Button>
@@ -207,16 +207,16 @@ export default function AdminSidebar({ admin = null }) {
         })}
       </div>
 
-      <div className="mt-auto border-t border-[color:var(--ui-border)] pt-4">
-        <div className="rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-          <div className="mb-3 flex items-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
+      <div className="mt-auto border-t border-[color:var(--ui-border)] pt-3">
+        <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-2.5">
+          <div className="mb-2 flex items-center gap-2 text-xs text-[color:var(--ui-muted-foreground)]">
             <Settings className="h-4 w-4" />
             <span>Appearance</span>
           </div>
           <AdminThemeToggle />
         </div>
 
-        <Button type="button" variant="outline" className="mt-3 w-full" onClick={handleLogout}>
+        <Button type="button" variant="outline" className="mt-2 h-9 w-full" onClick={handleLogout}>
           Logout
         </Button>
       </div>

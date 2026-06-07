@@ -717,31 +717,33 @@ export default function CampaignsManager() {
       </div>
 
       {viewerCampaign ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" onClick={closeCampaignViewer}>
+        <div className="fixed inset-0 z-50 bg-black/45" onClick={closeCampaignViewer}>
           <div
             role="dialog"
             aria-modal="true"
             aria-label={`Campaign details for ${viewerCampaign.title}`}
-            className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] shadow-2xl"
+            className="h-full w-full overflow-y-auto bg-[color:var(--ui-card)] shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-[color:var(--ui-border)] p-5">
-              <div className="space-y-2">
-                <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Campaign viewer</p>
-                <h3 className="text-2xl font-semibold text-[color:var(--ui-foreground)]">{viewerCampaign.title}</h3>
-                <div className="flex flex-wrap items-center gap-2">
-                  {viewerStatus ? <Badge variant={viewerStatus.variant}>{viewerStatus.label}</Badge> : null}
-                  <Badge variant="outline">/{viewerCampaign.slug}</Badge>
-                  <Badge variant="outline">{Number(viewerCampaign.responseCount || 0)} responses</Badge>
+            <div className="sticky top-0 z-10 border-b border-[color:var(--ui-border)] bg-[color:var(--ui-card)]/95 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--ui-card)]/90">
+              <div className="mx-auto flex w-full max-w-6xl items-start justify-between gap-4 p-5 md:px-6">
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Campaign viewer</p>
+                  <h3 className="text-2xl font-semibold text-[color:var(--ui-foreground)]">{viewerCampaign.title}</h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {viewerStatus ? <Badge variant={viewerStatus.variant}>{viewerStatus.label}</Badge> : null}
+                    <Badge variant="outline">/{viewerCampaign.slug}</Badge>
+                    <Badge variant="outline">{Number(viewerCampaign.responseCount || 0)} responses</Badge>
+                  </div>
                 </div>
-              </div>
 
-              <Button type="button" variant="outline" onClick={closeCampaignViewer}>
-                Close
-              </Button>
+                <Button type="button" variant="outline" onClick={closeCampaignViewer}>
+                  Close
+                </Button>
+              </div>
             </div>
 
-            <div className="space-y-5 p-5">
+            <div className="mx-auto w-full max-w-6xl space-y-5 p-5 md:px-6 md:py-6">
               {viewerLoading ? (
                 <div className="flex items-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
                   <Spinner className="h-4 w-4" />
@@ -840,10 +842,12 @@ export default function CampaignsManager() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 border-t border-[color:var(--ui-border)] p-4">
-              <Button type="button" variant="outline" onClick={closeCampaignViewer}>
-                Close
-              </Button>
+            <div className="sticky bottom-0 z-10 border-t border-[color:var(--ui-border)] bg-[color:var(--ui-card)]/95 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--ui-card)]/90">
+              <div className="mx-auto flex w-full max-w-6xl items-center justify-end gap-2 p-4 md:px-6">
+                <Button type="button" variant="outline" onClick={closeCampaignViewer}>
+                  Close
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -642,12 +642,10 @@ export default function CampaignsManager() {
   const pageEnd = filteredRowsCount ? Math.min((pagination.pageIndex + 1) * pagination.pageSize, filteredRowsCount) : 0;
   if (loadingCampaigns) {
     return (
-      <section className="space-y-6">
-        <div className="rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-6">
-          <div className="flex items-center gap-3 text-sm text-[color:var(--ui-muted-foreground)]">
-            <Spinner className="h-5 w-5" />
-            <span>Loading campaigns...</span>
-          </div>
+      <section className="flex min-h-[70vh] items-center justify-center">
+        <div className="flex items-center gap-3 text-sm text-[color:var(--ui-muted-foreground)]">
+          <Spinner className="h-5 w-5" />
+          <span>Loading campaigns...</span>
         </div>
       </section>
     );

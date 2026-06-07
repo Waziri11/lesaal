@@ -47,12 +47,12 @@ export default function PageState({
 
   if (status === "loading") {
     return (
-      <Card className={className}>
-        <CardContent className="flex items-center gap-3 p-6">
+      <div className={`flex min-h-[70vh] w-full items-center justify-center ${className}`.trim()}>
+        <div className="flex items-center gap-3">
           <Spinner className="h-5 w-5" />
           <p className="text-sm text-[color:var(--ui-muted-foreground)]">{loadingMessage}</p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 

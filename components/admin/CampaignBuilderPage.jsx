@@ -12,6 +12,7 @@ import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Spinner } from "../ui/spinner";
 import { Textarea } from "../ui/textarea";
+import Swal from "sweetalert2";
 import { createCsrfHeaders } from "../../lib/csrf-client";
 
 const LIGHT_INPUT_CLASS =
@@ -616,12 +617,24 @@ export default function CampaignBuilderPage() {
     return "";
   }
 
-  async function saveCampaign() {
+  function goToPreviewStep() {
     if (editorStep === 1) {
       goToQuestionsStep();
       return;
     }
 
+    const validationError = validateBeforeSave();
+    if (validationError) {
+      setStatusError(validationError);
+      return;
+    }
+
+    setStatusError("");
+    setStatusSuccess("");
+    setEditorStep(3);
+  }
+
+  async function saveCampaign() {
     if (saving) return;
 
     const validationError = validateBeforeSave();
@@ -652,6 +665,11 @@ export default function CampaignBuilderPage() {
         throw new Error(payload.error || "Unable to create campaign.");
       }
 
+      await Swal.fire({
+        icon: "success",
+        title: "Campaign created",
+        text: "Campaign was created successfully.",
+      });
       router.push("/admin/campaigns");
       router.refresh();
     } catch (error) {
@@ -716,6 +734,25 @@ export default function CampaignBuilderPage() {
             }}
           >
             2. Campaign Form Builder
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isUploadingImage}
+            className={
+              editorStep === 3
+                ? "border-[color:var(--ui-primary)] bg-[color:var(--ui-primary-soft)] text-[color:var(--ui-primary)]"
+                : ""
+            }
+            onClick={() => {
+              if (editorStep === 1) {
+                goToQuestionsStep();
+                return;
+              }
+              goToPreviewStep();
+            }}
+          >
+            3. Preview & Confirm
           </Button>
         </div>
 
@@ -921,7 +958,7 @@ export default function CampaignBuilderPage() {
                 </div>
               </div>
             </div>
-          ) : (
+          ) : editorStep === 2 ? (
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -1145,13 +1182,6 @@ export default function CampaignBuilderPage() {
                         </div>
                       ) : null}
 
-                      <div className="mt-4 rounded-md border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-3">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Preview</p>
-                        <p className="mt-2 text-sm font-medium text-[color:var(--ui-foreground)]">{question.label || "Untitled Question"}</p>
-                        <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">{getQuestionTypeLabel(question.type)}</p>
-                        <div className="mt-3">{renderQuestionPreview(question)}</div>
-                      </div>
-
                       <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-[color:var(--ui-border)] pt-3">
                         <div className="flex items-center gap-2">
                           <Checkbox
@@ -1205,6 +1235,99 @@ export default function CampaignBuilderPage() {
                 </Button>
               </div>
             </div>
+          ) : (
+            <div className="mx-auto w-full max-w-4xl space-y-5">
+              <div className="overflow-hidden rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]">
+                {draft.imageUrl ? (
+                  <img src={draft.imageUrl} alt="Campaign cover" className="h-56 w-full object-cover md:h-72" />
+                ) : null}
+                <div className="space-y-3 p-4 md:p-5">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Campaign Preview</p>
+                    <h3 className="mt-1 text-2xl font-semibold text-[color:var(--ui-foreground)]">
+                      {draft.title || "Untitled Campaign"}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-[color:var(--ui-muted-foreground)]">{draft.description || "No description provided."}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline">Target: {draft.targetMarket || "N/A"}</Badge>
+                    <Badge variant="outline">Deadline: {formatDate(draft.deadline) || "No deadline"}</Badge>
+                    <Badge variant="outline">Slug: {draft.slug || slugify(draft.title) || "n/a"}</Badge>
+                    <Badge variant="outline">{draft.isPublished ? "Published" : "Draft"}</Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-4 md:p-5">
+                <div>
+                  <h3 className="text-lg font-semibold text-[color:var(--ui-foreground)]">Full Form Preview</h3>
+                  <p className="text-sm text-[color:var(--ui-muted-foreground)]">
+                    Review the final respondent experience before saving this campaign.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {draft.sections.map((section, sectionIndex) => {
+                    const visibleQuestions = (section.questions || []).filter((question) => question.isVisible !== false);
+
+                    return (
+                      <div
+                        key={section.id || `${section.key}_preview_${sectionIndex}`}
+                        className="space-y-4 rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4"
+                      >
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-primary)]">
+                            Section {sectionIndex + 1}
+                          </p>
+                          <h4 className="mt-1 text-base font-semibold text-[color:var(--ui-foreground)]">
+                            {section.title || `Section ${sectionIndex + 1}`}
+                          </h4>
+                          {section.description ? (
+                            <p className="mt-1 text-sm text-[color:var(--ui-muted-foreground)]">{section.description}</p>
+                          ) : null}
+                        </div>
+
+                        {visibleQuestions.length ? (
+                          <div className="space-y-4">
+                            {visibleQuestions.map((question, visibleQuestionIndex) => (
+                              <div
+                                key={question.id || `${question.key}_preview_${visibleQuestionIndex}`}
+                                className="space-y-2 rounded-md border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-3"
+                              >
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                  <Label className="text-[color:var(--ui-foreground)]">
+                                    {question.label || "Untitled Question"}
+                                    {question.required ? <span className="ml-1 text-[color:var(--ui-destructive)]">*</span> : null}
+                                  </Label>
+                                  <p className="text-xs text-[color:var(--ui-muted-foreground)]">{getQuestionTypeLabel(question.type)}</p>
+                                </div>
+                                {renderQuestionPreview(question)}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-[color:var(--ui-muted-foreground)]">
+                            This section currently has no visible questions.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
+                  <p className="text-sm text-[color:var(--ui-muted-foreground)]">Need to change anything before publishing?</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button type="button" variant="outline" onClick={() => setEditorStep(1)}>
+                      Edit Campaign Info
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setEditorStep(2)}>
+                      Edit Form Builder
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
           <div className="mt-6 border-t border-[color:var(--ui-border)] pt-4">
@@ -1219,15 +1342,25 @@ export default function CampaignBuilderPage() {
                     Back
                   </Button>
                 ) : null}
+                {editorStep === 3 ? (
+                  <Button type="button" variant="outline" onClick={() => setEditorStep(2)}>
+                    Back to Edit
+                  </Button>
+                ) : null}
                 {editorStep === 1 ? (
                   <Button type="button" onClick={goToQuestionsStep} disabled={isUploadingImage}>
                     {isUploadingImage ? <Spinner className="mr-2 h-4 w-4" /> : null}
                     {isUploadingImage ? "Uploading Image..." : "Continue to Form Builder"}
                   </Button>
+                ) : editorStep === 2 ? (
+                  <Button type="button" disabled={isUploadingImage} onClick={goToPreviewStep}>
+                    {isUploadingImage ? <Spinner className="mr-2 h-4 w-4" /> : null}
+                    {isUploadingImage ? "Uploading Image..." : "Create Campaign"}
+                  </Button>
                 ) : (
                   <Button type="button" disabled={saving || isUploadingImage} onClick={saveCampaign}>
                     {saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
-                    {saving ? "Creating..." : "Create Campaign"}
+                    {saving ? "Creating..." : "Confirm & Save Campaign"}
                   </Button>
                 )}
               </div>

@@ -7,32 +7,41 @@ import { Button } from "../../../../../components/ui/button";
 import { Card, CardContent } from "../../../../../components/ui/card";
 import { getCampaignByIdForAdmin, isCampaignTableMissingError } from "../../../../../lib/campaigns";
 
-function formatDate(value) {
-  if (!value) return "-";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "-";
-
-  return parsed.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
 function formatCount(value) {
   return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(Number(value) || 0);
 }
 
-function getDurationLabel(campaign) {
-  const createdAt = new Date(campaign.createdAt);
-  const deadline = campaign.deadline ? new Date(campaign.deadline) : null;
+function getTimeRemainingLabel(deadlineValue) {
+  if (!deadlineValue) return "No deadline";
 
-  if (Number.isNaN(createdAt.getTime()) || !deadline || Number.isNaN(deadline.getTime())) {
-    return "No deadline";
+  const deadline = new Date(deadlineValue);
+  if (Number.isNaN(deadline.getTime())) return "No deadline";
+
+  const diffMs = deadline.getTime() - Date.now();
+  if (diffMs <= 0) return "Expired";
+
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  if (totalMinutes < 60) {
+    return `${Math.max(1, totalMinutes)} minute${totalMinutes === 1 ? "" : "s"}`;
   }
 
-  const days = Math.max(1, Math.ceil((deadline.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24)));
-  return `${formatDate(createdAt)} to ${formatDate(deadline)} (${days} days)`;
+  const totalHours = Math.floor(totalMinutes / 60);
+  if (totalHours < 24) {
+    return `${totalHours} hour${totalHours === 1 ? "" : "s"}`;
+  }
+
+  const totalDays = Math.floor(totalHours / 24);
+  if (totalDays < 30) {
+    return `${totalDays} day${totalDays === 1 ? "" : "s"}`;
+  }
+
+  const totalMonths = Math.floor(totalDays / 30);
+  if (totalMonths < 12) {
+    return `${totalMonths} month${totalMonths === 1 ? "" : "s"}`;
+  }
+
+  const totalYears = Math.floor(totalDays / 365);
+  return `${totalYears} year${totalYears === 1 ? "" : "s"}`;
 }
 
 function getStatus(campaign) {
@@ -86,76 +95,61 @@ export default async function CampaignViewerPage({ params }) {
     }
 
     const status = getStatus(campaign);
+    const timeRemainingLabel = getTimeRemainingLabel(campaign.deadline);
     const sections = getSections(campaign);
 
     return (
       <section className="space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Campaign viewer</p>
-            <h2 className="text-2xl font-semibold text-[color:var(--ui-foreground)]">{campaign.title}</h2>
-            <div className="flex flex-wrap items-center gap-2">
+        <div className="rounded-3xl border border-white/15 bg-[linear-gradient(90deg,#04103b_0%,#08204f_45%,#3a3529_100%)] p-5 md:p-6">
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+              asChild
+            >
+              <Link href="/admin/campaigns" aria-label="Back to campaigns">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <h2 className="text-4xl font-semibold tracking-tight text-white">{campaign.title}</h2>
+          </div>
+          <div className="mt-5 relative overflow-hidden rounded-2xl border border-white/20 bg-black/30">
+            <div className="absolute left-4 top-4 z-10 flex flex-wrap items-center gap-2">
               <Badge variant={status.variant}>{status.label}</Badge>
               <Badge variant="secondary">/{campaign.slug}</Badge>
               <Badge variant="default">{formatCount(campaign.responseCount)} responses</Badge>
             </div>
-          </div>
-
-          <Button type="button" variant="outline" asChild>
-            <Link href="/admin/campaigns">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to campaigns
-            </Link>
-          </Button>
-        </div>
-
-        <Card>
-          <CardContent className="space-y-5 p-5 md:p-6">
-            {campaign.imageUrl ? (
-              <img
-                src={campaign.imageUrl}
-                alt={`${campaign.title} banner`}
-                className="h-56 w-full rounded-xl border border-[color:var(--ui-border)] object-cover"
-              />
-            ) : null}
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Target market</p>
-                <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">{campaign.targetMarket || "-"}</p>
-              </div>
-              <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Deadline</p>
-                <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">
-                  {campaign.deadline ? formatDate(campaign.deadline) : "No deadline"}
-                </p>
-              </div>
-              <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Duration</p>
-                <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">{getDurationLabel(campaign)}</p>
-              </div>
-              <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Created</p>
-                <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">{formatDate(campaign.createdAt)}</p>
-              </div>
-              <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Last updated</p>
-                <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">{formatDate(campaign.updatedAt)}</p>
-              </div>
-              <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Questions</p>
-                <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">{Number(campaign.questionCount || 0)}</p>
-              </div>
-            </div>
-
             <div>
-              <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">Description</p>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-[color:var(--ui-muted-foreground)]">
-                {campaign.description || "No description provided."}
-              </p>
+              {campaign.imageUrl ? (
+                <img
+                  src={campaign.imageUrl}
+                  alt={`${campaign.title} banner`}
+                  className="h-[520px] w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-[520px] items-center justify-center text-sm text-[color:var(--ui-muted-foreground)]">
+                  Campaign image
+                </div>
+              )}
+
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-6 md:p-8">
+                <p className="max-w-5xl whitespace-pre-wrap text-lg leading-relaxed text-white/90 md:text-[22px]">
+                  {campaign.description || "No description provided."}
+                </p>
+                <div className="mt-4 flex items-end gap-3">
+                  <p className="text-2xl text-white/95">
+                    <strong className="font-semibold text-white">Target market:</strong> {campaign.targetMarket || "General audience"}
+                  </p>
+                  <p className="ml-auto text-right text-2xl text-white/95">
+                    <strong className="font-semibold text-white">Time remaining:</strong> {timeRemainingLabel}
+                  </p>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <Card>
           <CardContent className="space-y-3 p-5 md:p-6">

@@ -11,10 +11,12 @@ import {
   CircleCheck,
   CircleOff,
   Filter,
+  LayoutGrid,
   ListChecks,
   MessageSquare,
   MoreHorizontal,
   Plus,
+  Table2,
   Search,
   SlidersHorizontal,
   TrendingDown,
@@ -146,6 +148,46 @@ function getDurationLabel(campaign) {
   return `${formatDate(createdAt)} to ${formatDate(deadline)} (${days} days)`;
 }
 
+function getTimeRemainingLabel(campaign) {
+  if (!campaign?.deadline) {
+    return "No deadline";
+  }
+
+  const deadline = new Date(campaign.deadline);
+  if (Number.isNaN(deadline.getTime())) {
+    return "No deadline";
+  }
+
+  const diffMs = deadline.getTime() - Date.now();
+
+  if (diffMs <= 0) {
+    return "Expired";
+  }
+
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  if (totalMinutes < 60) {
+    return `${Math.max(1, totalMinutes)} minute${totalMinutes === 1 ? "" : "s"} left`;
+  }
+
+  const totalHours = Math.floor(totalMinutes / 60);
+  if (totalHours < 24) {
+    return `${totalHours} hour${totalHours === 1 ? "" : "s"} left`;
+  }
+
+  const totalDays = Math.floor(totalHours / 24);
+  if (totalDays < 30) {
+    return `${totalDays} day${totalDays === 1 ? "" : "s"} left`;
+  }
+
+  const totalMonths = Math.floor(totalDays / 30);
+  if (totalMonths < 12) {
+    return `${totalMonths} month${totalMonths === 1 ? "" : "s"} left`;
+  }
+
+  const totalYears = Math.floor(totalDays / 365);
+  return `${totalYears} year${totalYears === 1 ? "" : "s"} left`;
+}
+
 function getStatus(campaign) {
   const deadline = campaign.deadline ? new Date(campaign.deadline) : null;
   const isExpired = deadline && !Number.isNaN(deadline.getTime()) && deadline.getTime() < Date.now();
@@ -191,6 +233,7 @@ export default function CampaignsManager() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("updated_desc");
+  const [viewMode, setViewMode] = useState("table");
   const [sorting, setSorting] = useState(SORT_OPTIONS.updated_desc);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -692,6 +735,7 @@ export default function CampaignsManager() {
   });
 
   const filteredRowsCount = table.getFilteredRowModel().rows.length;
+  const tableRows = table.getRowModel().rows;
   const pagination = table.getState().pagination;
   const pageStart = filteredRowsCount ? pagination.pageIndex * pagination.pageSize + 1 : 0;
   const pageEnd = filteredRowsCount ? Math.min((pagination.pageIndex + 1) * pagination.pageSize, filteredRowsCount) : 0;
@@ -723,7 +767,7 @@ export default function CampaignsManager() {
     <section className="space-y-6">
       <div className="space-y-2 px-1">
         <h2 className="text-2xl font-semibold text-[color:var(--ui-foreground)]">Campaign Library</h2>
-        <p className="text-sm text-[color:var(--ui-muted-foreground)]">Search, filter, and manage campaigns from one clean table.</p>
+        <p className="text-sm text-[color:var(--ui-muted-foreground)]">Search, filter, and manage campaigns in table or card view.</p>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {campaignStatCards.map((stat) => {
@@ -931,50 +975,182 @@ export default function CampaignsManager() {
             </Select>
           </div>
 
-          <Button
-            type="button"
-            className="h-10 shrink-0 bg-black text-white hover:bg-black/90 dark:bg-black dark:text-white"
-            onClick={() => router.push("/admin/campaigns/new")}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New campaign
-          </Button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="inline-flex h-10 items-center rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-1">
+              <Button
+                type="button"
+                size="sm"
+                variant={viewMode === "table" ? "default" : "ghost"}
+                className="h-8 px-2.5"
+                onClick={() => setViewMode("table")}
+                aria-label="Switch to table view"
+              >
+                <Table2 className="mr-1.5 h-4 w-4" />
+                Table
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={viewMode === "cards" ? "default" : "ghost"}
+                className="h-8 px-2.5"
+                onClick={() => setViewMode("cards")}
+                aria-label="Switch to card view"
+              >
+                <LayoutGrid className="mr-1.5 h-4 w-4" />
+                Cards
+              </Button>
+            </div>
+
+            <Button
+              type="button"
+              className="h-10 shrink-0 bg-black text-white hover:bg-black/90 dark:bg-black dark:text-white"
+              onClick={() => router.push("/admin/campaigns/new")}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              New campaign
+            </Button>
+          </div>
         </div>
 
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className={`cursor-pointer ${isOpeningCampaign ? "pointer-events-none opacity-80" : ""}`}
-                  onClick={() => openCampaign(row.original)}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+        {viewMode === "table" ? (
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
+              ))}
+            </TableHeader>
+            <TableBody>
+              {tableRows.length ? (
+                tableRows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className={`cursor-pointer ${isOpeningCampaign ? "pointer-events-none opacity-80" : ""}`}
+                    onClick={() => openCampaign(row.original)}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center text-[color:var(--ui-muted-foreground)]">
+                    No campaigns match your current search/filter.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="p-4">
+            {tableRows.length ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {tableRows.map((row) => {
+                  const campaign = row.original;
+                  const isUpdating = updatingCampaignId === campaign.id;
+                  const isDeleting = deletingCampaignId === campaign.id;
+                  const isOpening = isOpeningCampaign && openingCampaignId === campaign.id;
+                  const status = getStatus(campaign);
+
+                  return (
+                    <article
+                      key={row.id}
+                      className={`group overflow-hidden rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+                        isOpeningCampaign ? "pointer-events-none opacity-80" : ""
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        className="relative block w-full text-left"
+                        onClick={() => openCampaign(campaign)}
+                      >
+                        <div className="relative aspect-[16/9] overflow-hidden bg-[color:var(--ui-border)]">
+                          {campaign.imageUrl ? (
+                            <img
+                              src={campaign.imageUrl}
+                              alt={`${campaign.title} cover`}
+                              className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                            />
+                          ) : (
+                            <div className="h-full w-full bg-[color:var(--ui-border)]" style={getCampaignAvatarStyle(campaign)} />
+                          )}
+
+                          <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-xs font-semibold text-black shadow">
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            <span>{formatInteger(campaign.responseCount)}</span>
+                          </div>
+
+                          <div className="absolute right-3 top-3">
+                            <Badge variant={status.variant}>{status.label}</Badge>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 p-3.5">
+                          <h4 className="line-clamp-1 text-base font-semibold text-[color:var(--ui-foreground)]">{campaign.title}</h4>
+                          <p className="text-sm font-medium text-[color:var(--ui-muted-foreground)]">
+                            Time remaining: {getTimeRemainingLabel(campaign)}
+                          </p>
+                        </div>
+                      </button>
+
+                      <div className="flex items-center justify-between border-t border-[color:var(--ui-border)] px-3.5 py-2.5">
+                        <p className="truncate text-xs text-[color:var(--ui-muted-foreground)]">/{campaign.slug}</p>
+                        <div onClick={(event) => event.stopPropagation()}>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button type="button" size="icon" variant="ghost" className="h-8 w-8" aria-label="Open actions menu">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" className="w-44 p-1">
+                              <button
+                                type="button"
+                                className={MENU_ITEM_CLASS}
+                                disabled={isUpdating || isDeleting || isOpeningCampaign}
+                                onClick={() => openCampaign(campaign)}
+                              >
+                                {isOpening ? <Spinner className="mr-2 h-4 w-4" /> : null}
+                                {isOpening ? "Opening..." : "View campaign"}
+                              </button>
+                              <button
+                                type="button"
+                                className={MENU_ITEM_CLASS}
+                                disabled={isUpdating || isDeleting || isOpeningCampaign}
+                                onClick={() => toggleCampaignState(campaign)}
+                              >
+                                {isUpdating ? <Spinner className="mr-2 h-4 w-4" /> : null}
+                                {isUpdating ? "Updating..." : campaign.isPublished ? "Disable campaign" : "Enable campaign"}
+                              </button>
+                              <button
+                                type="button"
+                                className={`${MENU_ITEM_CLASS} text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]`}
+                                disabled={isDeleting || isUpdating || isOpeningCampaign}
+                                onClick={() => deleteCampaign(campaign)}
+                              >
+                                {isDeleting ? <Spinner className="mr-2 h-4 w-4" /> : null}
+                                {isDeleting ? "Deleting..." : "Delete campaign"}
+                              </button>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-[color:var(--ui-muted-foreground)]">
-                  No campaigns match your current search/filter.
-                </TableCell>
-              </TableRow>
+              <div className="flex min-h-[220px] items-center justify-center">
+                <p className="text-sm text-[color:var(--ui-muted-foreground)]">No campaigns match your current search/filter.</p>
+              </div>
             )}
-          </TableBody>
-        </Table>
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--ui-border)] px-4 py-3">
           <div className="flex flex-wrap items-center gap-6 text-sm text-[color:var(--ui-muted-foreground)]">
@@ -993,7 +1169,9 @@ export default function CampaignsManager() {
                 </SelectContent>
               </Select>
             </div>
-            {Object.keys(rowSelection || {}).length ? <p>{table.getFilteredSelectedRowModel().rows.length} selected</p> : null}
+            {viewMode === "table" && Object.keys(rowSelection || {}).length ? (
+              <p>{table.getFilteredSelectedRowModel().rows.length} selected</p>
+            ) : null}
           </div>
 
           <div className="flex items-center gap-2">

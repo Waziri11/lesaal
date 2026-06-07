@@ -115,6 +115,23 @@ function formatCampaignTimeRemaining(value, nowTimestamp = Date.now()) {
   return `${totalYears} year${totalYears === 1 ? "" : "s"}`;
 }
 
+function normalizeBillingMode(value) {
+  return String(value || "").toLowerCase() === "annual" ? "annual" : "monthly";
+}
+
+function resolvePlanPrice(item, billingMode) {
+  const extra = item?.extra && typeof item.extra === "object" ? item.extra : {};
+  const monthlyPrice = String(extra.monthlyPrice || "").trim();
+  const annualPrice = String(extra.annualPrice || "").trim();
+  const defaultPrice = String(item?.value || "").trim();
+
+  if (billingMode === "annual") {
+    return annualPrice || monthlyPrice || defaultPrice || "$49 / year";
+  }
+
+  return monthlyPrice || annualPrice || defaultPrice || "$49 / month";
+}
+
 function toPhoneHref(value) {
   const normalized = String(value || "")
     .trim()
@@ -195,6 +212,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
   const [activeFaqItemId, setActiveFaqItemId] = useState(null);
   const [activeCampaignIndex, setActiveCampaignIndex] = useState(0);
   const [nowTimestamp, setNowTimestamp] = useState(() => Date.now());
+  const [pricingBillingModes, setPricingBillingModes] = useState({});
 
   const sections = Array.isArray(config?.sections) ? config.sections : [];
 
@@ -220,6 +238,36 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
     }
 
     return anchorsById;
+  }, [visibleSections]);
+
+  useEffect(() => {
+    setPricingBillingModes((current) => {
+      const pricingSectionIds = new Set();
+      let hasChanges = false;
+      const nextModes = { ...current };
+
+      for (const section of visibleSections) {
+        if (section.type !== "PRICING") {
+          continue;
+        }
+
+        pricingSectionIds.add(section.id);
+
+        if (!nextModes[section.id]) {
+          nextModes[section.id] = normalizeBillingMode(section.settings?.defaultBillingMode);
+          hasChanges = true;
+        }
+      }
+
+      for (const sectionId of Object.keys(nextModes)) {
+        if (!pricingSectionIds.has(sectionId)) {
+          delete nextModes[sectionId];
+          hasChanges = true;
+        }
+      }
+
+      return hasChanges ? nextModes : current;
+    });
   }, [visibleSections]);
 
   const navigationLinks = useMemo(() => {
@@ -625,6 +673,10 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
           if (section.type === "PRICING") {
             const recommendedKey = String(settings.recommendedPlanKey || "").trim();
             const items = sortItems(section.items);
+            const monthlyLabel = String(settings.monthlyLabel || "Monthly billing");
+            const annualLabel = String(settings.annualLabel || "Annual billing");
+            const saveLabel = String(settings.saveLabel || "Save 30%");
+            const billingMode = pricingBillingModes[section.id] || normalizeBillingMode(settings.defaultBillingMode);
 
             return (
               <motion.section
@@ -639,10 +691,32 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                   <p className={`lp-section-copy ${textClass}`}>{settings.subheading || "Tap to edit this section intro."}</p>
                 </div>
 
-                <div className="lp-pricing-toggle" aria-hidden="true">
-                  <span className="is-active">Monthly billing</span>
-                  <span>Annual billing</span>
-                  <span>Save 30%</span>
+                <div className="lp-pricing-toggle" role="group" aria-label="Billing cycle">
+                  <button
+                    type="button"
+                    className={billingMode === "monthly" ? "is-active" : ""}
+                    onClick={() =>
+                      setPricingBillingModes((current) => ({
+                        ...current,
+                        [section.id]: "monthly",
+                      }))
+                    }
+                  >
+                    {monthlyLabel}
+                  </button>
+                  <button
+                    type="button"
+                    className={billingMode === "annual" ? "is-active" : ""}
+                    onClick={() =>
+                      setPricingBillingModes((current) => ({
+                        ...current,
+                        [section.id]: "annual",
+                      }))
+                    }
+                  >
+                    {annualLabel}
+                  </button>
+                  {saveLabel ? <span className="lp-pricing-toggle-note">{saveLabel}</span> : null}
                 </div>
 
                 <div className="lp-pricing-grid">
@@ -652,6 +726,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                     const isRecommended = Boolean(itemKey && itemKey === recommendedKey);
                     const ctaText = String(item.extra?.ctaText || "Get started");
                     const ctaLink = String(item.extra?.ctaLink || "#campaign-form");
+                    const planPrice = resolvePlanPrice(item, billingMode);
 
                     return (
                       <article key={item.id} className={`lp-plan-card${isRecommended ? " is-recommended" : ""}`}>
@@ -669,7 +744,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                         ) : null}
                         <h3>{item.title || "Plan"}</h3>
                         <p className="lp-plan-label">{item.label || "Plan summary"}</p>
-                        <p className="lp-plan-price">{item.value || "$49 / month"}</p>
+                        <p className="lp-plan-price">{planPrice}</p>
                         <p className="lp-plan-description">{item.description || "Plan description"}</p>
 
                         <p className="lp-plan-features-label">FEATURES</p>

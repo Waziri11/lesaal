@@ -224,6 +224,8 @@ function createDefaultItemForSection(sectionType, order) {
         key: createTempId("plan"),
         ctaText: "Get started",
         ctaLink: "#campaign-form",
+        monthlyPrice: "$0 / month",
+        annualPrice: "$0 / year",
         features: ["New feature"],
       },
     };
@@ -1358,6 +1360,52 @@ export default function LandingEditor() {
                   <div className="section-context-group">
                     <h4 className="section-context-group-title">Pricing Settings</h4>
                     <div className="section-context-grid">
+                  <label>
+                    Default Billing Mode
+                    <SelectNative
+                      value={menuSection.settings?.defaultBillingMode || "monthly"}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "defaultBillingMode", event.target.value)
+                      }
+                    >
+                      <option value="monthly">Monthly</option>
+                      <option value="annual">Annual</option>
+                    </SelectNative>
+                  </label>
+
+                  <label>
+                    Monthly Toggle Label
+                    <Input
+                      type="text"
+                      value={menuSection.settings?.monthlyLabel || "Monthly billing"}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "monthlyLabel", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    Annual Toggle Label
+                    <Input
+                      type="text"
+                      value={menuSection.settings?.annualLabel || "Annual billing"}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "annualLabel", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    Savings Label
+                    <Input
+                      type="text"
+                      value={menuSection.settings?.saveLabel || "Save 30%"}
+                      onChange={(event) =>
+                        updateSectionSettingFromPreview(menuSection.id, "saveLabel", event.target.value)
+                      }
+                    />
+                  </label>
+
                   <label className="field-full">
                     Recommended Plan
                     <SelectNative
@@ -1377,6 +1425,62 @@ export default function LandingEditor() {
                       })}
                     </SelectNative>
                   </label>
+
+                  {menuSection.items.length ? (
+                    <div className="field-full">
+                      <h5>Plan Prices</h5>
+                      <div className="section-context-grid">
+                        {menuSection.items
+                          .slice()
+                          .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+                          .map((item) => {
+                            const monthlyPrice = String(item.extra?.monthlyPrice || item.value || "");
+                            const annualPrice = String(item.extra?.annualPrice || "");
+
+                            return (
+                              <div key={item.id} className="field-full">
+                                <p>{item.title || "Untitled plan"}</p>
+                                <div className="section-context-grid">
+                                  <label>
+                                    Monthly Price
+                                    <Input
+                                      type="text"
+                                      value={monthlyPrice}
+                                      onChange={(event) =>
+                                        updateItem(menuSection.id, item.id, (current) => ({
+                                          ...current,
+                                          extra: {
+                                            ...(current.extra || {}),
+                                            monthlyPrice: event.target.value,
+                                          },
+                                        }))
+                                      }
+                                    />
+                                  </label>
+
+                                  <label>
+                                    Annual Price
+                                    <Input
+                                      type="text"
+                                      value={annualPrice}
+                                      onChange={(event) =>
+                                        updateItem(menuSection.id, item.id, (current) => ({
+                                          ...current,
+                                          extra: {
+                                            ...(current.extra || {}),
+                                            annualPrice: event.target.value,
+                                          },
+                                        }))
+                                      }
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  ) : null}
                     </div>
                   </div>
                 ) : null}

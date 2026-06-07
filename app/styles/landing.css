@@ -707,6 +707,7 @@
   gap: 0.3rem;
 }
 
+.lp-pricing-toggle button,
 .lp-pricing-toggle span {
   border-radius: 999px;
   padding: 0.3rem 0.66rem;
@@ -714,10 +715,23 @@
   color: #577097;
 }
 
+.lp-pricing-toggle button {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.lp-pricing-toggle button.is-active,
 .lp-pricing-toggle span.is-active {
   background: #eef3ff;
   color: #1f3c72;
   font-weight: 700;
+}
+
+.lp-pricing-toggle-note {
+  color: #577097;
 }
 
 .lp-pricing-grid {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 import CampaignResponseForm from "../../../components/CampaignResponseForm";
 import PageState from "../../../components/shared/PageState";
 import { Button } from "../../../components/ui/button";
@@ -115,6 +116,14 @@ export default async function CampaignDetailPage({ params }) {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
+      <div className="flex justify-start">
+        <Button asChild variant="outline" size="icon">
+          <Link href="/" aria-label="Back to homepage">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+
       <div className="overflow-hidden rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]">
         {campaign.imageUrl ? (
           <Image

@@ -43,6 +43,47 @@ function formatDate(value) {
   });
 }
 
+function buildAnswerKeySeed(value) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s_-]/g, "")
+    .replace(/[\s-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  return normalized;
+}
+
+function withGeneratedAnswerKeys(sections = []) {
+  const usedKeys = new Set();
+
+  return sections.map((section, sectionIndex) => {
+    const sectionLabel = buildAnswerKeySeed(section?.title) || `section_${sectionIndex + 1}`;
+    const questions = Array.isArray(section?.questions) ? section.questions : [];
+
+    return {
+      ...section,
+      questions: questions.map((question, questionIndex) => {
+        const baseKey = buildAnswerKeySeed(question?.label) || `${sectionLabel}_field_${questionIndex + 1}`;
+
+        let uniqueKey = baseKey;
+        let suffix = 2;
+        while (usedKeys.has(uniqueKey)) {
+          uniqueKey = `${baseKey}_${suffix}`;
+          suffix += 1;
+        }
+        usedKeys.add(uniqueKey);
+
+        return {
+          ...question,
+          key: uniqueKey,
+        };
+      }),
+    };
+  });
+}
+
 function createEmptyQuestion(index = 0, type = "text") {
   const defaults = {
     text: { label: "Short answer question", placeholder: "Short answer text" },
@@ -604,10 +645,6 @@ export default function CampaignBuilderPage() {
           return `Question ${questionIndex + 1} in section ${sectionIndex + 1} needs a label.`;
         }
 
-        if (!String(question.key || "").trim()) {
-          return `Question ${questionIndex + 1} in section ${sectionIndex + 1} needs an answer key.`;
-        }
-
         if (question.type === "select" && (!Array.isArray(question.options) || !question.options.length)) {
           return `Add at least one option for question ${questionIndex + 1} in section ${sectionIndex + 1}.`;
         }
@@ -648,14 +685,19 @@ export default function CampaignBuilderPage() {
     setStatusSuccess("");
 
     try {
+      const draftWithGeneratedKeys = {
+        ...draft,
+        sections: withGeneratedAnswerKeys(draft.sections),
+      };
+
       const response = await fetch("/api/admin/campaigns", {
         method: "POST",
         headers: createCsrfHeaders({
           "Content-Type": "application/json",
         }),
         body: JSON.stringify({
-          ...draft,
-          slug: draft.slug || slugify(draft.title),
+          ...draftWithGeneratedKeys,
+          slug: draftWithGeneratedKeys.slug || slugify(draftWithGeneratedKeys.title),
         }),
       });
 
@@ -1102,24 +1144,13 @@ export default function CampaignBuilderPage() {
                         </Select>
                       </div>
 
-                      <div className="mt-4 grid gap-3 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label className="text-[color:var(--ui-foreground)]">Answer Key</Label>
-                          <Input
-                            value={question.key}
-                            className={LIGHT_INPUT_CLASS}
-                            onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "key", event.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-[color:var(--ui-foreground)]">Placeholder Text</Label>
-                          <Input
-                            value={question.placeholder || ""}
-                            className={LIGHT_INPUT_CLASS}
-                            onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "placeholder", event.target.value)}
-                          />
-                        </div>
+                      <div className="mt-4 space-y-2">
+                        <Label className="text-[color:var(--ui-foreground)]">Placeholder Text</Label>
+                        <Input
+                          value={question.placeholder || ""}
+                          className={LIGHT_INPUT_CLASS}
+                          onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "placeholder", event.target.value)}
+                        />
                       </div>
 
                       {question.type === "select" ? (

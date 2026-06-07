@@ -14,7 +14,6 @@ import {
   Megaphone,
   Plus,
   Search,
-  Settings,
   User,
   Users,
 } from "lucide-react";
@@ -208,17 +207,12 @@ export default function AdminSidebar({ admin = null }) {
       </div>
 
       <div className="mt-auto border-t border-[color:var(--ui-border)] pt-3">
-        <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-2.5">
-          <div className="mb-2 flex items-center gap-2 text-xs text-[color:var(--ui-muted-foreground)]">
-            <Settings className="h-4 w-4" />
-            <span>Appearance</span>
-          </div>
+        <div className="mt-2 flex items-center gap-2">
+          <Button type="button" variant="outline" className="h-9 flex-1" onClick={handleLogout}>
+            Logout
+          </Button>
           <AdminThemeToggle />
         </div>
-
-        <Button type="button" variant="outline" className="mt-2 h-9 w-full" onClick={handleLogout}>
-          Logout
-        </Button>
       </div>
     </aside>
   );

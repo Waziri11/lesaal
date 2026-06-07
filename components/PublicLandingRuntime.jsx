@@ -978,11 +978,9 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
             const contactEmail = settings.contactEmail || "leilawaziri@lesaal.com";
             const contactPhone = String(settings.contactPhone || "").trim();
             const contactAddress = String(settings.contactAddress || "").trim();
-            const supportHours = String(settings.supportHours || "").trim();
             const copyrightText = settings.copyrightText || "Lesaal cc 2023";
             const rightsText = settings.rightsText || "All rights reserved.";
             const contactPhoneHref = toPhoneHref(contactPhone);
-            const linkItems = sortItems(section.items);
 
             return (
               <motion.section
@@ -992,17 +990,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                 {...sectionMotion}
                 style={sectionTextVars}
               >
-                <div className="lp-footer-cta">
-                  <div>
-                    <h2>{settings.heading || "Start your 30-day free trial"}</h2>
-                    <p>{settings.body || "Join over 4,000+ startups already growing with Lesaal."}</p>
-                  </div>
-                  <a href={settings.ctaLink || "#campaign-form"} className="lp-btn lp-btn-primary">
-                    {settings.ctaText || "Get started"}
-                  </a>
-                </div>
-
-                <div className="lp-footer-main">
+                <div className="lp-footer-main lp-footer-main-minimal">
                   <div className="lp-footer-brand">
                     <a href="#top">
                       <LandingImage src="/images/logo/LESAAL.png" alt="Lesaal logo" width={84} height={84} sizes="84px" />
@@ -1011,20 +999,11 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                     <p>{brandDescription}</p>
                   </div>
 
-                  <div className="lp-footer-links">
-                    {linkItems.map((item) => (
-                      <a key={item.id} href={item.value || "#"} className="lp-footer-link">
-                        {item.title || "Footer Link"}
-                      </a>
-                    ))}
-                  </div>
-
                   <div className="lp-footer-contact">
                     <h4>{contactHeading}</h4>
                     <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
                     {contactPhone && contactPhoneHref ? <a href={contactPhoneHref}>{contactPhone}</a> : null}
                     {contactAddress ? <p>{contactAddress}</p> : null}
-                    {supportHours ? <p>{supportHours}</p> : null}
                   </div>
                 </div>
 

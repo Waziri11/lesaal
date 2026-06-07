@@ -1538,10 +1538,8 @@ export default function PublicLanding({
             const contactPhone = String(settings.contactPhone || "").trim();
             const contactPhoneHref = toPhoneHref(contactPhone) || "#";
             const contactAddress = String(settings.contactAddress || "").trim();
-            const supportHours = String(settings.supportHours || "").trim();
             const copyrightText = settings.copyrightText || "Lesaal cc 2023";
             const rightsText = settings.rightsText || "All rights reserved.";
-            const linkItems = section.items.slice().sort((a, b) => a.order - b.order);
 
             return (
               <motion.section
@@ -1562,42 +1560,7 @@ export default function PublicLanding({
                 onTouchMove={sectionProps.onTouchMove}
                 onTouchCancel={sectionProps.onTouchCancel}
               >
-                <div className="lp-footer-cta">
-                  <div>
-                    <EditableText
-                      editorMode={editorMode}
-                      as="h2"
-                      value={settings.heading || ""}
-                      fallback="Start your 30-day free trial"
-                      onActivate={() => onSelectSection?.(section.id)}
-                      onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "heading", nextValue)}
-                    />
-                    <EditableText
-                      editorMode={editorMode}
-                      as="p"
-                      value={settings.body || ""}
-                      fallback="Join over 4,000+ startups already growing with Lesaal."
-                      multiline
-                      onActivate={() => onSelectSection?.(section.id)}
-                      onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "body", nextValue)}
-                    />
-                  </div>
-                  <a
-                    href={settings.ctaLink || "#campaign-form"}
-                    className="lp-btn lp-btn-primary"
-                    onClick={(event) => handlePreviewLinkClick(event, section.id)}
-                  >
-                    <EditableText
-                      editorMode={editorMode}
-                      value={settings.ctaText || ""}
-                      fallback="Get started"
-                      onActivate={() => onSelectSection?.(section.id)}
-                      onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "ctaText", nextValue)}
-                    />
-                  </a>
-                </div>
-
-                <div className="lp-footer-main">
+                <div className="lp-footer-main lp-footer-main-minimal">
                   <div className="lp-footer-brand">
                     <a href="#top" onClick={(event) => handlePreviewLinkClick(event)}>
                       <img src="/images/logo/LESAAL.png" alt="Lesaal logo" />
@@ -1612,31 +1575,6 @@ export default function PublicLanding({
                       onActivate={() => onSelectSection?.(section.id)}
                       onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "brandDescription", nextValue)}
                     />
-                  </div>
-
-                  <div className="lp-footer-links">
-                    {linkItems.map((item) => {
-                      const itemProps = getItemProps(section.id, item.id);
-
-                      return (
-                        <a
-                          key={item.id}
-                          href={item.value || "#"}
-                          className={`lp-footer-link${itemProps.className}`}
-                          draggable={itemProps.draggable}
-                          onClick={(event) => {
-                            itemProps.onClick?.(event);
-                            handlePreviewLinkClick(event, section.id);
-                          }}
-                          onDragStart={itemProps.onDragStart}
-                          onDragOver={itemProps.onDragOver}
-                          onDrop={itemProps.onDrop}
-                          onDragEnd={itemProps.onDragEnd}
-                        >
-                          {renderItemText(section.id, item, "title", "Footer Link")}
-                        </a>
-                      );
-                    })}
                   </div>
 
                   <div className="lp-footer-contact">
@@ -1674,14 +1612,6 @@ export default function PublicLanding({
                       multiline
                       onActivate={() => onSelectSection?.(section.id)}
                       onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "contactAddress", nextValue)}
-                    />
-                    <EditableText
-                      editorMode={editorMode}
-                      as="p"
-                      value={supportHours}
-                      fallback="Mon - Fri, 9:00 AM - 6:00 PM"
-                      onActivate={() => onSelectSection?.(section.id)}
-                      onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "supportHours", nextValue)}
                     />
                   </div>
                 </div>

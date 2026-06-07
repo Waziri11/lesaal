@@ -819,9 +819,9 @@ export default function CampaignsManager() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--ui-border)] p-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative w-full min-w-[260px] max-w-[560px]">
+        <div className="flex flex-col gap-3 border-b border-[color:var(--ui-border)] p-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:min-w-0 lg:flex-1 lg:flex-nowrap">
+            <div className="relative w-full sm:min-w-[260px] lg:min-w-[320px] lg:flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--ui-muted-foreground)]" />
               <Input
                 value={globalFilter}
@@ -838,7 +838,7 @@ export default function CampaignsManager() {
                 table.getColumn("status")?.setFilterValue(value === "all" ? undefined : value);
               }}
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-full sm:w-[140px] lg:w-[150px]">
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4" />
                   <SelectValue placeholder="Filter" />
@@ -859,7 +859,7 @@ export default function CampaignsManager() {
                 setSorting(SORT_OPTIONS[value] || SORT_OPTIONS.updated_desc);
               }}
             >
-              <SelectTrigger className="w-[190px]">
+              <SelectTrigger className="w-full sm:w-[190px] lg:w-[210px]">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="h-4 w-4" />
                   <SelectValue placeholder="Sort" />
@@ -878,7 +878,7 @@ export default function CampaignsManager() {
 
           <Button
             type="button"
-            className="bg-black text-white hover:bg-black/90 dark:bg-black dark:text-white"
+            className="h-10 shrink-0 bg-black text-white hover:bg-black/90 dark:bg-black dark:text-white"
             onClick={() => router.push("/admin/campaigns/new")}
           >
             <Plus className="mr-2 h-4 w-4" />

@@ -221,6 +221,7 @@ export default function CampaignBuilderPage() {
   const imageInputRef = useRef(null);
 
   const [draft, setDraft] = useState(createEmptyCampaignDraft());
+  const [optionDrafts, setOptionDrafts] = useState({});
   const [editorStep, setEditorStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [isDraggingImage, setIsDraggingImage] = useState(false);
@@ -305,12 +306,16 @@ export default function CampaignBuilderPage() {
             if (currentQuestionIndex !== questionIndex) return question;
 
             if (key === "options") {
+              const normalizedOptions = Array.isArray(value)
+                ? value.map((entry) => String(entry || "").trim()).filter(Boolean)
+                : String(value)
+                    .split(/[\n,]/)
+                    .map((entry) => entry.trim())
+                    .filter(Boolean);
+
               return {
                 ...question,
-                options: String(value)
-                  .split(/[\n,]/)
-                  .map((entry) => entry.trim())
-                  .filter(Boolean),
+                options: normalizedOptions,
               };
             }
 
@@ -324,6 +329,86 @@ export default function CampaignBuilderPage() {
             return {
               ...question,
               [key]: value,
+            };
+          }),
+        };
+      }),
+    }));
+  }
+
+  function updateQuestionOption(sectionIndex, questionIndex, optionIndex, value) {
+    setDraft((current) => ({
+      ...current,
+      sections: current.sections.map((section, currentSectionIndex) => {
+        if (currentSectionIndex !== sectionIndex) return section;
+
+        return {
+          ...section,
+          questions: section.questions.map((question, currentQuestionIndex) => {
+            if (currentQuestionIndex !== questionIndex) return question;
+
+            const existingOptions = Array.isArray(question.options) ? question.options : [];
+            const nextOptions = existingOptions.map((optionValue, currentOptionIndex) =>
+              currentOptionIndex === optionIndex ? value : optionValue
+            );
+
+            return {
+              ...question,
+              options: nextOptions,
+            };
+          }),
+        };
+      }),
+    }));
+  }
+
+  function addQuestionOption(sectionIndex, questionIndex, optionDraftKey) {
+    const nextOption = String(optionDrafts[optionDraftKey] || "").trim();
+    if (!nextOption) return;
+
+    setDraft((current) => ({
+      ...current,
+      sections: current.sections.map((section, currentSectionIndex) => {
+        if (currentSectionIndex !== sectionIndex) return section;
+
+        return {
+          ...section,
+          questions: section.questions.map((question, currentQuestionIndex) => {
+            if (currentQuestionIndex !== questionIndex) return question;
+
+            const existingOptions = Array.isArray(question.options) ? question.options : [];
+
+            return {
+              ...question,
+              options: [...existingOptions, nextOption],
+            };
+          }),
+        };
+      }),
+    }));
+
+    setOptionDrafts((current) => ({
+      ...current,
+      [optionDraftKey]: "",
+    }));
+  }
+
+  function removeQuestionOption(sectionIndex, questionIndex, optionIndex) {
+    setDraft((current) => ({
+      ...current,
+      sections: current.sections.map((section, currentSectionIndex) => {
+        if (currentSectionIndex !== sectionIndex) return section;
+
+        return {
+          ...section,
+          questions: section.questions.map((question, currentQuestionIndex) => {
+            if (currentQuestionIndex !== questionIndex) return question;
+
+            const existingOptions = Array.isArray(question.options) ? question.options : [];
+
+            return {
+              ...question,
+              options: existingOptions.filter((_, currentOptionIndex) => currentOptionIndex !== optionIndex),
             };
           }),
         };
@@ -994,13 +1079,62 @@ export default function CampaignBuilderPage() {
                       </div>
 
                       {question.type === "select" ? (
-                        <div className="mt-4 space-y-2">
-                          <Label className="text-[color:var(--ui-foreground)]">Multiple Choice Options (comma or new line separated)</Label>
-                          <Textarea
-                            value={(question.options || []).join("\n")}
-                            className={LIGHT_TEXTAREA_CLASS}
-                            onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "options", event.target.value)}
-                          />
+                        <div className="mt-4 space-y-3">
+                          <Label className="text-[color:var(--ui-foreground)]">Multiple Choice Options</Label>
+                          <div className="space-y-2">
+                            {(question.options || []).map((option, optionIndex) => (
+                              <div key={`${question.id || question.key}_option_${optionIndex}`} className="flex items-center gap-2">
+                                <Input
+                                  value={option}
+                                  className={LIGHT_INPUT_CLASS}
+                                  placeholder={`Option ${optionIndex + 1}`}
+                                  onChange={(event) => updateQuestionOption(sectionIndex, questionIndex, optionIndex, event.target.value)}
+                                />
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="outline"
+                                  className="h-9 w-9 border-[color:var(--ui-destructive)] text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]"
+                                  onClick={() => removeQuestionOption(sectionIndex, questionIndex, optionIndex)}
+                                  disabled={(question.options || []).length <= 1}
+                                  aria-label={`Remove option ${optionIndex + 1}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Input
+                              value={optionDrafts[String(question.id || `${sectionIndex}_${questionIndex}`)] || ""}
+                              className={LIGHT_INPUT_CLASS}
+                              placeholder="Type option and click Add option"
+                              onChange={(event) =>
+                                setOptionDrafts((current) => ({
+                                  ...current,
+                                  [String(question.id || `${sectionIndex}_${questionIndex}`)]: event.target.value,
+                                }))
+                              }
+                              onKeyDown={(event) => {
+                                if (event.key !== "Enter") return;
+                                event.preventDefault();
+                                addQuestionOption(sectionIndex, questionIndex, String(question.id || `${sectionIndex}_${questionIndex}`));
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => addQuestionOption(sectionIndex, questionIndex, String(question.id || `${sectionIndex}_${questionIndex}`))}
+                              disabled={!String(optionDrafts[String(question.id || `${sectionIndex}_${questionIndex}`)] || "").trim()}
+                            >
+                              Add option
+                            </Button>
+                          </div>
+
+                          <p className="text-xs text-[color:var(--ui-muted-foreground)]">
+                            Add options one at a time.
+                          </p>
                         </div>
                       ) : null}
 

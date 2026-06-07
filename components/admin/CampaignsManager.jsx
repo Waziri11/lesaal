@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpDown,
@@ -131,10 +131,6 @@ export default function CampaignsManager() {
   const [rowSelection, setRowSelection] = useState({});
   const [updatingCampaignId, setUpdatingCampaignId] = useState(null);
   const [deletingCampaignId, setDeletingCampaignId] = useState(null);
-  const [viewerCampaign, setViewerCampaign] = useState(null);
-  const [viewerLoading, setViewerLoading] = useState(false);
-  const [viewerError, setViewerError] = useState("");
-  const viewerRequestRef = useRef(0);
 
   const campaignStats = useMemo(() => {
     const total = campaigns.length;
@@ -227,69 +223,6 @@ export default function CampaignsManager() {
   useEffect(() => {
     loadCampaigns();
   }, []);
-
-  useEffect(() => {
-    if (!viewerCampaign) return undefined;
-
-    const previousOverflow = document.body.style.overflow;
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        closeCampaignViewer();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleEscape);
-
-    return () => {
-      window.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [viewerCampaign]);
-
-  function closeCampaignViewer() {
-    viewerRequestRef.current += 1;
-    setViewerCampaign(null);
-    setViewerError("");
-    setViewerLoading(false);
-  }
-
-  async function openCampaignViewer(campaign) {
-    if (!campaign?.id) return;
-
-    viewerRequestRef.current += 1;
-    const requestId = viewerRequestRef.current;
-
-    setViewerCampaign(campaign);
-    setViewerError("");
-    setViewerLoading(true);
-
-    try {
-      const response = await fetch(`/api/admin/campaigns/${campaign.id}`, { cache: "no-store" });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error || "Unable to load campaign details.");
-      }
-
-      if (requestId !== viewerRequestRef.current) {
-        return;
-      }
-
-      if (payload?.campaign) {
-        setViewerCampaign(payload.campaign);
-      }
-    } catch (error) {
-      if (requestId !== viewerRequestRef.current) {
-        return;
-      }
-      setViewerError(error.message || "Unable to load campaign details.");
-    } finally {
-      if (requestId === viewerRequestRef.current) {
-        setViewerLoading(false);
-      }
-    }
-  }
 
   async function toggleCampaignState(campaign) {
     if (!campaign?.id || updatingCampaignId) return;
@@ -484,7 +417,7 @@ export default function CampaignsManager() {
                   <button
                     type="button"
                     className={MENU_ITEM_CLASS}
-                    onClick={() => openCampaignViewer(campaign)}
+                    onClick={() => router.push(`/admin/campaigns/${campaign.id}`)}
                   >
                     View campaign
                   </button>
@@ -513,7 +446,7 @@ export default function CampaignsManager() {
         },
       },
     ],
-    [deletingCampaignId, openCampaignViewer, router, updatingCampaignId]
+    [deletingCampaignId, router, updatingCampaignId]
   );
 
   const table = useReactTable({
@@ -557,21 +490,6 @@ export default function CampaignsManager() {
   const pagination = table.getState().pagination;
   const pageStart = filteredRowsCount ? pagination.pageIndex * pagination.pageSize + 1 : 0;
   const pageEnd = filteredRowsCount ? Math.min((pagination.pageIndex + 1) * pagination.pageSize, filteredRowsCount) : 0;
-  const viewerStatus = viewerCampaign ? getStatus(viewerCampaign) : null;
-  const viewerSections = Array.isArray(viewerCampaign?.sections)
-    ? viewerCampaign.sections
-    : Array.isArray(viewerCampaign?.questions) && viewerCampaign.questions.length
-      ? [
-          {
-            id: "general",
-            key: "general",
-            title: "Form questions",
-            description: "",
-            questions: viewerCampaign.questions,
-          },
-        ]
-      : [];
-
   if (loadingCampaigns) {
     return (
       <section className="space-y-6">
@@ -724,7 +642,7 @@ export default function CampaignsManager() {
                 <TableRow
                   key={row.id}
                   className="cursor-pointer"
-                  onClick={() => openCampaignViewer(row.original)}
+                  onClick={() => router.push(`/admin/campaigns/${row.original.id}`)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -813,142 +731,6 @@ export default function CampaignsManager() {
         </div>
       </div>
 
-      {viewerCampaign ? (
-        <div className="fixed inset-0 z-50 bg-black/45" onClick={closeCampaignViewer}>
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Campaign details for ${viewerCampaign.title}`}
-            className="h-full w-full overflow-y-auto bg-[color:var(--ui-card)] shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="sticky top-0 z-10 border-b border-[color:var(--ui-border)] bg-[color:var(--ui-card)]/95 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--ui-card)]/90">
-              <div className="mx-auto flex w-full max-w-6xl items-start justify-between gap-4 p-5 md:px-6">
-                <div className="space-y-2">
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Campaign viewer</p>
-                  <h3 className="text-2xl font-semibold text-[color:var(--ui-foreground)]">{viewerCampaign.title}</h3>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {viewerStatus ? <Badge variant={viewerStatus.variant}>{viewerStatus.label}</Badge> : null}
-                    <Badge variant="outline">/{viewerCampaign.slug}</Badge>
-                    <Badge variant="outline">{Number(viewerCampaign.responseCount || 0)} responses</Badge>
-                  </div>
-                </div>
-
-                <Button type="button" variant="outline" onClick={closeCampaignViewer}>
-                  Close
-                </Button>
-              </div>
-            </div>
-
-            <div className="mx-auto w-full max-w-6xl space-y-5 p-5 md:px-6 md:py-6">
-              {viewerLoading ? (
-                <div className="flex items-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
-                  <Spinner className="h-4 w-4" />
-                  <span>Refreshing campaign details...</span>
-                </div>
-              ) : null}
-
-              {viewerError ? <p className="text-sm text-[color:var(--ui-destructive)]">{viewerError}</p> : null}
-
-              {viewerCampaign.imageUrl ? (
-                <img
-                  src={viewerCampaign.imageUrl}
-                  alt={`${viewerCampaign.title} banner`}
-                  className="h-48 w-full rounded-xl border border-[color:var(--ui-border)] object-cover"
-                />
-              ) : null}
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Target market</p>
-                  <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">{viewerCampaign.targetMarket || "-"}</p>
-                </div>
-                <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Deadline</p>
-                  <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">
-                    {viewerCampaign.deadline ? formatDate(viewerCampaign.deadline) : "No deadline"}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Created</p>
-                  <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">{formatDate(viewerCampaign.createdAt)}</p>
-                </div>
-                <div className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-3">
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Last updated</p>
-                  <p className="mt-1 text-sm font-medium text-[color:var(--ui-foreground)]">{formatDate(viewerCampaign.updatedAt)}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">Description</p>
-                <p className="mt-2 whitespace-pre-wrap text-sm text-[color:var(--ui-muted-foreground)]">
-                  {viewerCampaign.description || "No description provided."}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">Form sections</p>
-                {viewerSections.length ? (
-                  <div className="mt-3 space-y-3">
-                    {viewerSections.map((section, index) => (
-                      <div
-                        key={section?.id || section?.key || `${index}-${section?.title || "section"}`}
-                        className="rounded-xl border border-[color:var(--ui-border)] p-3"
-                      >
-                        <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">
-                          {section?.title || `Section ${index + 1}`}
-                        </p>
-                        {section?.description ? (
-                          <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">{section.description}</p>
-                        ) : null}
-
-                        <div className="mt-3 space-y-2">
-                          {(section?.questions || []).map((question, questionIndex) => (
-                            <div
-                              key={question?.id || question?.key || `${index}-${questionIndex}`}
-                              className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-2.5"
-                            >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-sm font-medium text-[color:var(--ui-foreground)]">
-                                  {question?.label || question?.key || `Question ${questionIndex + 1}`}
-                                </span>
-                                <Badge variant="outline" className="text-xs">
-                                  {question?.type || "text"}
-                                </Badge>
-                                {question?.required ? <Badge variant="default" className="text-xs">Required</Badge> : null}
-                              </div>
-                              {question?.placeholder ? (
-                                <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">
-                                  Placeholder: {question.placeholder}
-                                </p>
-                              ) : null}
-                              {question?.type === "select" && Array.isArray(question?.options) && question.options.length ? (
-                                <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">
-                                  Options: {question.options.join(", ")}
-                                </p>
-                              ) : null}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="mt-2 text-sm text-[color:var(--ui-muted-foreground)]">No form sections configured.</p>
-                )}
-              </div>
-            </div>
-
-            <div className="sticky bottom-0 z-10 border-t border-[color:var(--ui-border)] bg-[color:var(--ui-card)]/95 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--ui-card)]/90">
-              <div className="mx-auto flex w-full max-w-6xl items-center justify-end gap-2 p-4 md:px-6">
-                <Button type="button" variant="outline" onClick={closeCampaignViewer}>
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </section>
   );
 }

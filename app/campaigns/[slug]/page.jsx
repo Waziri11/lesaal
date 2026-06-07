@@ -125,7 +125,7 @@ export default async function CampaignDetailPage({ params }) {
         <h1 className="text-2xl font-semibold text-[color:var(--ui-foreground)] md:text-3xl">{campaign.title}</h1>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]">
+      <div className="relative overflow-hidden rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)]">
         {campaign.imageUrl ? (
           <Image
             src={campaign.imageUrl}
@@ -142,24 +142,23 @@ export default async function CampaignDetailPage({ params }) {
             Campaign image
           </div>
         )}
-      </div>
 
-      <section className="space-y-3 rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-5 md:p-6">
-        <p className="text-base leading-relaxed text-[color:var(--ui-muted-foreground)]">
-          {campaign.description || "Campaign details coming soon."}
-        </p>
-        <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-[color:var(--ui-muted-foreground)] md:text-base">
-          {campaign.targetMarket ? (
-            <p>
-              <strong className="font-semibold text-[color:var(--ui-foreground)]">Target market:</strong> {campaign.targetMarket}
-            </p>
-          ) : null}
-          <p>
-            <strong className="font-semibold text-[color:var(--ui-foreground)]">Time remaining:</strong>{" "}
-            {formatTimeRemaining(campaign.deadline)}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/60 to-transparent p-4 md:p-6">
+          <p className="max-w-4xl text-sm leading-relaxed text-white/90 md:text-base">
+            {campaign.description || "Campaign details coming soon."}
           </p>
+          <div className="mt-3 flex items-end gap-3">
+            {campaign.targetMarket ? (
+              <p className="text-sm text-white/90 md:text-base">
+                <strong className="font-semibold text-white">Target market:</strong> {campaign.targetMarket}
+              </p>
+            ) : null}
+            <p className="ml-auto text-right text-sm text-white/90 md:text-base">
+              <strong className="font-semibold text-white">Time remaining:</strong> {formatTimeRemaining(campaign.deadline)}
+            </p>
+          </div>
         </div>
-      </section>
+      </div>
 
       <div>
         <CampaignResponseForm campaign={campaign} turnstileSiteKey={turnstileSiteKey} />

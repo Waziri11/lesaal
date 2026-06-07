@@ -1000,20 +1000,12 @@ export default function CampaignBuilderPage() {
                       key={question.id || `${question.key}_${questionIndex}`}
                       className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4"
                     >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="flex-1 space-y-2">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-primary)]">Question {questionIndex + 1}</p>
-                          <Input
-                            value={question.label}
-                            className={LIGHT_INPUT_CLASS}
-                            onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "label", event.target.value)}
-                            placeholder="Untitled Question"
-                            required
-                          />
-                        </div>
-
-                        <div className="w-full space-y-2 sm:w-64">
-                          <div className="flex items-center justify-between gap-2">
+                      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_320px]">
+                        <div className="flex flex-wrap items-center justify-between gap-2 md:col-span-2">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-primary)]">
+                            Question {questionIndex + 1}
+                          </p>
+                          <div className="flex items-center gap-2">
                             <Label className="text-[color:var(--ui-foreground)]">Response Type</Label>
                             <div className="flex items-center gap-1">
                               <Button
@@ -1051,22 +1043,31 @@ export default function CampaignBuilderPage() {
                               </Button>
                             </div>
                           </div>
-                          <Select
-                            value={question.type}
-                            onValueChange={(value) => handleQuestionChange(sectionIndex, questionIndex, "type", value)}
-                          >
-                            <SelectTrigger className={LIGHT_SELECT_TRIGGER_CLASS}>
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="text">Short answer</SelectItem>
-                              <SelectItem value="email">Email</SelectItem>
-                              <SelectItem value="tel">Phone</SelectItem>
-                              <SelectItem value="textarea">Paragraph</SelectItem>
-                              <SelectItem value="select">Multiple choice</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </div>
+
+                        <Input
+                          value={question.label}
+                          className={LIGHT_INPUT_CLASS}
+                          onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "label", event.target.value)}
+                          placeholder="Untitled Question"
+                          required
+                        />
+
+                        <Select
+                          value={question.type}
+                          onValueChange={(value) => handleQuestionChange(sectionIndex, questionIndex, "type", value)}
+                        >
+                          <SelectTrigger className={LIGHT_SELECT_TRIGGER_CLASS}>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="text">Short answer</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="tel">Phone</SelectItem>
+                            <SelectItem value="textarea">Paragraph</SelectItem>
+                            <SelectItem value="select">Multiple choice</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="mt-4 grid gap-3 md:grid-cols-2">

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 import PageState from "./shared/PageState";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -46,13 +48,13 @@ function buildSections(campaign) {
 }
 
 export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }) {
+  const router = useRouter();
   const [formData, setFormData] = useState({});
   const [honeypotWebsite, setHoneypotWebsite] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaReady, setCaptchaReady] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const captchaRef = useRef(null);
   const widgetIdRef = useRef(null);
 
@@ -158,7 +160,6 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
 
     setSubmitting(true);
     setError("");
-    setSuccess("");
 
     if (!turnstileSiteKey) {
       setError("Captcha is not configured.");
@@ -187,7 +188,6 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
         throw new Error(payload.error || "Unable to submit response.");
       }
 
-      setSuccess(payload.message || "Response submitted successfully.");
       setFormData({});
       setHoneypotWebsite("");
       setCaptchaToken("");
@@ -197,6 +197,23 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
         } catch (error) {
           console.warn("Unable to reset Turnstile widget.", error);
         }
+      }
+
+      const decision = await Swal.fire({
+        icon: "success",
+        title: "Response received successfully",
+        text: "What would you like to do next?",
+        showDenyButton: true,
+        confirmButtonText: "More Campaigns",
+        denyButtonText: "Home",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
+
+      if (decision.isConfirmed) {
+        router.push("/campaigns");
+      } else if (decision.isDenied) {
+        router.push("/");
       }
     } catch (submitError) {
       setError(submitError.message || "Unable to submit response.");
@@ -308,7 +325,6 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
       )}
 
       {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
-      {success ? <p className="text-sm text-[color:var(--ui-success)]">{success}</p> : null}
 
       <Button type="submit" disabled={submitting}>
         {submitting ? "Submitting..." : "Submit Response"}

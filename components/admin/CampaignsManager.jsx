@@ -631,8 +631,144 @@ export default function CampaignsManager() {
         const subjectElement = document.getElementById("bulk-respond-subject");
         const messageElement = document.getElementById("bulk-respond-message");
         const variableButtons = Array.from(document.querySelectorAll("[data-template-variable]"));
+        const popupElement = Swal.getPopup();
 
         let activeInput = messageElement || subjectElement;
+        let mentionState = null;
+        let filteredAutocompleteVariables = [];
+        let highlightedAutocompleteIndex = 0;
+
+        const autocompleteMenu = document.createElement("div");
+        autocompleteMenu.id = "bulk-respond-autocomplete-menu";
+        autocompleteMenu.style.position = "absolute";
+        autocompleteMenu.style.zIndex = "1200";
+        autocompleteMenu.style.display = "none";
+        autocompleteMenu.style.border = "1px solid rgba(148,163,184,0.35)";
+        autocompleteMenu.style.background = "#081a3a";
+        autocompleteMenu.style.borderRadius = "10px";
+        autocompleteMenu.style.boxShadow = "0 10px 24px rgba(2, 6, 23, 0.45)";
+        autocompleteMenu.style.padding = "4px";
+        autocompleteMenu.style.maxHeight = "220px";
+        autocompleteMenu.style.overflowY = "auto";
+
+        if (popupElement) {
+          const currentPosition = String(popupElement.style.position || "").trim();
+          if (!currentPosition) {
+            popupElement.style.position = "relative";
+          }
+          popupElement.appendChild(autocompleteMenu);
+        }
+
+        const hideAutocomplete = () => {
+          mentionState = null;
+          filteredAutocompleteVariables = [];
+          highlightedAutocompleteIndex = 0;
+          autocompleteMenu.style.display = "none";
+          autocompleteMenu.innerHTML = "";
+        };
+
+        const getMentionStateFromInput = (inputElement) => {
+          if (!inputElement) return null;
+
+          const cursorIndex = Number.isFinite(inputElement.selectionStart) ? inputElement.selectionStart : String(inputElement.value || "").length;
+          const beforeCursor = String(inputElement.value || "").slice(0, cursorIndex);
+          const mentionMatch = beforeCursor.match(/(^|[\s([{>])@([a-zA-Z0-9_]*)$/);
+
+          if (!mentionMatch) return null;
+
+          const query = String(mentionMatch[2] || "");
+          const mentionStart = cursorIndex - query.length - 1;
+          if (mentionStart < 0) return null;
+
+          return {
+            inputElement,
+            start: mentionStart,
+            end: cursorIndex,
+            query: query.toLowerCase(),
+          };
+        };
+
+        const renderAutocompleteMenu = () => {
+          if (!popupElement || !activeInput || !mentionState || !filteredAutocompleteVariables.length) {
+            hideAutocomplete();
+            return;
+          }
+
+          const popupRect = popupElement.getBoundingClientRect();
+          const inputRect = activeInput.getBoundingClientRect();
+          const menuTop = Math.min(inputRect.bottom - popupRect.top + 4, popupRect.height - 180);
+          const menuLeft = Math.max(14, inputRect.left - popupRect.left);
+          const menuWidth = Math.min(inputRect.width, popupRect.width - menuLeft - 14);
+          const safeMenuWidth = Math.max(180, Math.min(menuWidth, Math.max(180, popupRect.width - 20)));
+
+          autocompleteMenu.style.top = `${Math.max(10, menuTop)}px`;
+          autocompleteMenu.style.left = `${menuLeft}px`;
+          autocompleteMenu.style.width = `${safeMenuWidth}px`;
+          autocompleteMenu.style.display = "block";
+
+          autocompleteMenu.innerHTML = filteredAutocompleteVariables
+            .map((item, index) => {
+              const isActive = index === highlightedAutocompleteIndex;
+              const backgroundStyle = isActive ? "background:rgba(37,99,235,0.25);" : "background:transparent;";
+              return `
+                <button
+                  type="button"
+                  data-autocomplete-index="${index}"
+                  style="width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 10px;border:none;border-radius:8px;color:#e8efff;cursor:pointer;${backgroundStyle}"
+                >
+                  <span style="font-size:13px;font-weight:700;">@${item.key}</span>
+                  <span style="font-size:12px;opacity:0.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeForHtml(item.label)}</span>
+                </button>
+              `;
+            })
+            .join("");
+        };
+
+        const updateAutocomplete = (inputElement) => {
+          const nextMentionState = getMentionStateFromInput(inputElement);
+          if (!nextMentionState) {
+            hideAutocomplete();
+            return;
+          }
+
+          const matches = variableSuggestions
+            .filter((item) => {
+              if (!nextMentionState.query) return true;
+              const key = String(item.key || "").toLowerCase();
+              const label = String(item.label || "").toLowerCase();
+              return key.includes(nextMentionState.query) || label.includes(nextMentionState.query);
+            })
+            .slice(0, 8);
+
+          if (!matches.length) {
+            hideAutocomplete();
+            return;
+          }
+
+          mentionState = nextMentionState;
+          filteredAutocompleteVariables = matches;
+          highlightedAutocompleteIndex = 0;
+          renderAutocompleteMenu();
+        };
+
+        const applyAutocompleteSelection = (variableKey) => {
+          const target = mentionState?.inputElement || activeInput || messageElement || subjectElement;
+          if (!target) return;
+
+          const start = Number.isFinite(mentionState?.start) ? mentionState.start : target.selectionStart || 0;
+          const end = Number.isFinite(mentionState?.end) ? mentionState.end : target.selectionEnd || start;
+          const currentValue = String(target.value || "");
+          const token = `@${variableKey}`;
+          const nextValue = `${currentValue.slice(0, start)}${token}${currentValue.slice(end)}`;
+          target.value = nextValue;
+          target.focus();
+
+          const nextCursorPosition = start + token.length;
+          target.selectionStart = nextCursorPosition;
+          target.selectionEnd = nextCursorPosition;
+
+          hideAutocomplete();
+        };
 
         const setActiveInput = (event) => {
           const target = event?.target;
@@ -655,18 +791,88 @@ export default function CampaignsManager() {
           const nextCursorPosition = start + token.length;
           target.selectionStart = nextCursorPosition;
           target.selectionEnd = nextCursorPosition;
+          hideAutocomplete();
+        };
+
+        autocompleteMenu.addEventListener("mousedown", (event) => {
+          event.preventDefault();
+          const eventTarget = event.target instanceof Element ? event.target : null;
+          const button = eventTarget?.closest("[data-autocomplete-index]");
+          if (!button) return;
+          const index = Number(button.getAttribute("data-autocomplete-index"));
+          const selected = filteredAutocompleteVariables[index];
+          if (!selected?.key) return;
+          applyAutocompleteSelection(selected.key);
+        });
+
+        const bindAutocompleteEvents = (inputElement) => {
+          if (!inputElement) return;
+
+          inputElement.addEventListener("focus", (event) => {
+            setActiveInput(event);
+            updateAutocomplete(inputElement);
+          });
+          inputElement.addEventListener("click", (event) => {
+            setActiveInput(event);
+            updateAutocomplete(inputElement);
+          });
+          inputElement.addEventListener("keyup", (event) => {
+            setActiveInput(event);
+            updateAutocomplete(inputElement);
+          });
+          inputElement.addEventListener("input", (event) => {
+            setActiveInput(event);
+            updateAutocomplete(inputElement);
+          });
+          inputElement.addEventListener("blur", () => {
+            setTimeout(() => {
+              if (!autocompleteMenu.matches(":hover")) {
+                hideAutocomplete();
+              }
+            }, 100);
+          });
+          inputElement.addEventListener("keydown", (event) => {
+            if (!filteredAutocompleteVariables.length || autocompleteMenu.style.display === "none") {
+              return;
+            }
+
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
+              highlightedAutocompleteIndex = (highlightedAutocompleteIndex + 1) % filteredAutocompleteVariables.length;
+              renderAutocompleteMenu();
+              return;
+            }
+
+            if (event.key === "ArrowUp") {
+              event.preventDefault();
+              highlightedAutocompleteIndex =
+                (highlightedAutocompleteIndex - 1 + filteredAutocompleteVariables.length) % filteredAutocompleteVariables.length;
+              renderAutocompleteMenu();
+              return;
+            }
+
+            if (event.key === "Enter" || event.key === "Tab") {
+              event.preventDefault();
+              const selected = filteredAutocompleteVariables[highlightedAutocompleteIndex];
+              if (selected?.key) {
+                applyAutocompleteSelection(selected.key);
+              }
+              return;
+            }
+
+            if (event.key === "Escape") {
+              event.preventDefault();
+              hideAutocomplete();
+            }
+          });
         };
 
         if (subjectElement) {
-          subjectElement.addEventListener("focus", setActiveInput);
-          subjectElement.addEventListener("click", setActiveInput);
-          subjectElement.addEventListener("keyup", setActiveInput);
+          bindAutocompleteEvents(subjectElement);
         }
 
         if (messageElement) {
-          messageElement.addEventListener("focus", setActiveInput);
-          messageElement.addEventListener("click", setActiveInput);
-          messageElement.addEventListener("keyup", setActiveInput);
+          bindAutocompleteEvents(messageElement);
         }
 
         variableButtons.forEach((button) => {

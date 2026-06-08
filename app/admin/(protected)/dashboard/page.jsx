@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import PageState from "../../../../components/shared/PageState";
-import { Badge } from "../../../../components/ui/badge";
 import { Card, CardContent } from "../../../../components/ui/card";
 import { prisma } from "../../../../lib/prisma";
 import { getAuthenticatedAdminFromCookies } from "../../../../lib/auth";
@@ -64,15 +63,15 @@ export default async function DashboardPage() {
 
     return (
       <section className="space-y-4">
-        <div className="flex flex-row flex-wrap items-start justify-between gap-3">
-          <div>
+        <header className="flex flex-row flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
             <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Admin Dashboard</p>
-            <h1 className="mt-2 text-3xl font-semibold text-[color:var(--ui-foreground)]">{`${greeting} ${displayName}`}</h1>
+            <h1 className="text-3xl font-semibold text-[color:var(--ui-foreground)]">{`${greeting} ${displayName}`}</h1>
           </div>
-          <Badge>{userChip}</Badge>
-        </div>
+          <p className="pt-1 text-sm font-semibold text-[color:var(--ui-muted-foreground)]">{userChip}</p>
+        </header>
 
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <h2 className="text-2xl font-semibold text-[color:var(--ui-foreground)]">{`${companyName} Day Summary`}</h2>
           <p className="text-base text-[color:var(--ui-muted-foreground)]">Business activity for {companyName}, updated in real time.</p>
         </div>

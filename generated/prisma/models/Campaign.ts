@@ -43,6 +43,10 @@ export type CampaignMinAggregateOutputType = {
   description: string | null
   imageUrl: string | null
   isPublished: boolean | null
+  autoResponseEnabled: boolean | null
+  autoResponseSubject: string | null
+  autoResponseBody: string | null
+  autoResponseUpdatedAt: Date | null
   order: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -57,6 +61,10 @@ export type CampaignMaxAggregateOutputType = {
   description: string | null
   imageUrl: string | null
   isPublished: boolean | null
+  autoResponseEnabled: boolean | null
+  autoResponseSubject: string | null
+  autoResponseBody: string | null
+  autoResponseUpdatedAt: Date | null
   order: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -71,6 +79,10 @@ export type CampaignCountAggregateOutputType = {
   description: number
   imageUrl: number
   isPublished: number
+  autoResponseEnabled: number
+  autoResponseSubject: number
+  autoResponseBody: number
+  autoResponseUpdatedAt: number
   order: number
   createdAt: number
   updatedAt: number
@@ -95,6 +107,10 @@ export type CampaignMinAggregateInputType = {
   description?: true
   imageUrl?: true
   isPublished?: true
+  autoResponseEnabled?: true
+  autoResponseSubject?: true
+  autoResponseBody?: true
+  autoResponseUpdatedAt?: true
   order?: true
   createdAt?: true
   updatedAt?: true
@@ -109,6 +125,10 @@ export type CampaignMaxAggregateInputType = {
   description?: true
   imageUrl?: true
   isPublished?: true
+  autoResponseEnabled?: true
+  autoResponseSubject?: true
+  autoResponseBody?: true
+  autoResponseUpdatedAt?: true
   order?: true
   createdAt?: true
   updatedAt?: true
@@ -123,6 +143,10 @@ export type CampaignCountAggregateInputType = {
   description?: true
   imageUrl?: true
   isPublished?: true
+  autoResponseEnabled?: true
+  autoResponseSubject?: true
+  autoResponseBody?: true
+  autoResponseUpdatedAt?: true
   order?: true
   createdAt?: true
   updatedAt?: true
@@ -224,6 +248,10 @@ export type CampaignGroupByOutputType = {
   description: string
   imageUrl: string | null
   isPublished: boolean
+  autoResponseEnabled: boolean
+  autoResponseSubject: string | null
+  autoResponseBody: string | null
+  autoResponseUpdatedAt: Date | null
   order: number
   createdAt: Date
   updatedAt: Date
@@ -261,6 +289,10 @@ export type CampaignWhereInput = {
   description?: Prisma.StringFilter<"Campaign"> | string
   imageUrl?: Prisma.StringNullableFilter<"Campaign"> | string | null
   isPublished?: Prisma.BoolFilter<"Campaign"> | boolean
+  autoResponseEnabled?: Prisma.BoolFilter<"Campaign"> | boolean
+  autoResponseSubject?: Prisma.StringNullableFilter<"Campaign"> | string | null
+  autoResponseBody?: Prisma.StringNullableFilter<"Campaign"> | string | null
+  autoResponseUpdatedAt?: Prisma.DateTimeNullableFilter<"Campaign"> | Date | string | null
   order?: Prisma.IntFilter<"Campaign"> | number
   createdAt?: Prisma.DateTimeFilter<"Campaign"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Campaign"> | Date | string
@@ -278,6 +310,10 @@ export type CampaignOrderByWithRelationInput = {
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublished?: Prisma.SortOrder
+  autoResponseEnabled?: Prisma.SortOrder
+  autoResponseSubject?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoResponseBody?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoResponseUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -298,6 +334,10 @@ export type CampaignWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringFilter<"Campaign"> | string
   imageUrl?: Prisma.StringNullableFilter<"Campaign"> | string | null
   isPublished?: Prisma.BoolFilter<"Campaign"> | boolean
+  autoResponseEnabled?: Prisma.BoolFilter<"Campaign"> | boolean
+  autoResponseSubject?: Prisma.StringNullableFilter<"Campaign"> | string | null
+  autoResponseBody?: Prisma.StringNullableFilter<"Campaign"> | string | null
+  autoResponseUpdatedAt?: Prisma.DateTimeNullableFilter<"Campaign"> | Date | string | null
   order?: Prisma.IntFilter<"Campaign"> | number
   createdAt?: Prisma.DateTimeFilter<"Campaign"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Campaign"> | Date | string
@@ -315,6 +355,10 @@ export type CampaignOrderByWithAggregationInput = {
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublished?: Prisma.SortOrder
+  autoResponseEnabled?: Prisma.SortOrder
+  autoResponseSubject?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoResponseBody?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoResponseUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -337,6 +381,10 @@ export type CampaignScalarWhereWithAggregatesInput = {
   description?: Prisma.StringWithAggregatesFilter<"Campaign"> | string
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Campaign"> | string | null
   isPublished?: Prisma.BoolWithAggregatesFilter<"Campaign"> | boolean
+  autoResponseEnabled?: Prisma.BoolWithAggregatesFilter<"Campaign"> | boolean
+  autoResponseSubject?: Prisma.StringNullableWithAggregatesFilter<"Campaign"> | string | null
+  autoResponseBody?: Prisma.StringNullableWithAggregatesFilter<"Campaign"> | string | null
+  autoResponseUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Campaign"> | Date | string | null
   order?: Prisma.IntWithAggregatesFilter<"Campaign"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Campaign"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Campaign"> | Date | string
@@ -351,6 +399,10 @@ export type CampaignCreateInput = {
   description: string
   imageUrl?: string | null
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: string | null
+  autoResponseBody?: string | null
+  autoResponseUpdatedAt?: Date | string | null
   order?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -368,6 +420,10 @@ export type CampaignUncheckedCreateInput = {
   description: string
   imageUrl?: string | null
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: string | null
+  autoResponseBody?: string | null
+  autoResponseUpdatedAt?: Date | string | null
   order?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -385,6 +441,10 @@ export type CampaignUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -402,6 +462,10 @@ export type CampaignUncheckedUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -419,6 +483,10 @@ export type CampaignCreateManyInput = {
   description: string
   imageUrl?: string | null
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: string | null
+  autoResponseBody?: string | null
+  autoResponseUpdatedAt?: Date | string | null
   order?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -433,6 +501,10 @@ export type CampaignUpdateManyMutationInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -447,6 +519,10 @@ export type CampaignUncheckedUpdateManyInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -461,6 +537,10 @@ export type CampaignCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
+  autoResponseEnabled?: Prisma.SortOrder
+  autoResponseSubject?: Prisma.SortOrder
+  autoResponseBody?: Prisma.SortOrder
+  autoResponseUpdatedAt?: Prisma.SortOrder
   order?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -479,6 +559,10 @@ export type CampaignMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
+  autoResponseEnabled?: Prisma.SortOrder
+  autoResponseSubject?: Prisma.SortOrder
+  autoResponseBody?: Prisma.SortOrder
+  autoResponseUpdatedAt?: Prisma.SortOrder
   order?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -493,6 +577,10 @@ export type CampaignMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
+  autoResponseEnabled?: Prisma.SortOrder
+  autoResponseSubject?: Prisma.SortOrder
+  autoResponseBody?: Prisma.SortOrder
+  autoResponseUpdatedAt?: Prisma.SortOrder
   order?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -565,6 +653,10 @@ export type CampaignCreateWithoutQuestionsInput = {
   description: string
   imageUrl?: string | null
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: string | null
+  autoResponseBody?: string | null
+  autoResponseUpdatedAt?: Date | string | null
   order?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -581,6 +673,10 @@ export type CampaignUncheckedCreateWithoutQuestionsInput = {
   description: string
   imageUrl?: string | null
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: string | null
+  autoResponseBody?: string | null
+  autoResponseUpdatedAt?: Date | string | null
   order?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -613,6 +709,10 @@ export type CampaignUpdateWithoutQuestionsInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -629,6 +729,10 @@ export type CampaignUncheckedUpdateWithoutQuestionsInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -645,6 +749,10 @@ export type CampaignCreateWithoutResponsesInput = {
   description: string
   imageUrl?: string | null
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: string | null
+  autoResponseBody?: string | null
+  autoResponseUpdatedAt?: Date | string | null
   order?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -661,6 +769,10 @@ export type CampaignUncheckedCreateWithoutResponsesInput = {
   description: string
   imageUrl?: string | null
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: string | null
+  autoResponseBody?: string | null
+  autoResponseUpdatedAt?: Date | string | null
   order?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -693,6 +805,10 @@ export type CampaignUpdateWithoutResponsesInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -709,6 +825,10 @@ export type CampaignUncheckedUpdateWithoutResponsesInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -725,6 +845,10 @@ export type CampaignCreateWithoutNotificationsInput = {
   description: string
   imageUrl?: string | null
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: string | null
+  autoResponseBody?: string | null
+  autoResponseUpdatedAt?: Date | string | null
   order?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -741,6 +865,10 @@ export type CampaignUncheckedCreateWithoutNotificationsInput = {
   description: string
   imageUrl?: string | null
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: string | null
+  autoResponseBody?: string | null
+  autoResponseUpdatedAt?: Date | string | null
   order?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -773,6 +901,10 @@ export type CampaignUpdateWithoutNotificationsInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -789,6 +921,10 @@ export type CampaignUncheckedUpdateWithoutNotificationsInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  autoResponseSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoResponseUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -854,6 +990,10 @@ export type CampaignSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   description?: boolean
   imageUrl?: boolean
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: boolean
+  autoResponseBody?: boolean
+  autoResponseUpdatedAt?: boolean
   order?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -872,6 +1012,10 @@ export type CampaignSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   description?: boolean
   imageUrl?: boolean
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: boolean
+  autoResponseBody?: boolean
+  autoResponseUpdatedAt?: boolean
   order?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -886,6 +1030,10 @@ export type CampaignSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   description?: boolean
   imageUrl?: boolean
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: boolean
+  autoResponseBody?: boolean
+  autoResponseUpdatedAt?: boolean
   order?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -900,12 +1048,16 @@ export type CampaignSelectScalar = {
   description?: boolean
   imageUrl?: boolean
   isPublished?: boolean
+  autoResponseEnabled?: boolean
+  autoResponseSubject?: boolean
+  autoResponseBody?: boolean
+  autoResponseUpdatedAt?: boolean
   order?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CampaignOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "targetMarket" | "deadline" | "description" | "imageUrl" | "isPublished" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["campaign"]>
+export type CampaignOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "targetMarket" | "deadline" | "description" | "imageUrl" | "isPublished" | "autoResponseEnabled" | "autoResponseSubject" | "autoResponseBody" | "autoResponseUpdatedAt" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["campaign"]>
 export type CampaignInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   questions?: boolean | Prisma.Campaign$questionsArgs<ExtArgs>
   responses?: boolean | Prisma.Campaign$responsesArgs<ExtArgs>
@@ -931,6 +1083,10 @@ export type $CampaignPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     description: string
     imageUrl: string | null
     isPublished: boolean
+    autoResponseEnabled: boolean
+    autoResponseSubject: string | null
+    autoResponseBody: string | null
+    autoResponseUpdatedAt: Date | null
     order: number
     createdAt: Date
     updatedAt: Date
@@ -1368,6 +1524,10 @@ export interface CampaignFieldRefs {
   readonly description: Prisma.FieldRef<"Campaign", 'String'>
   readonly imageUrl: Prisma.FieldRef<"Campaign", 'String'>
   readonly isPublished: Prisma.FieldRef<"Campaign", 'Boolean'>
+  readonly autoResponseEnabled: Prisma.FieldRef<"Campaign", 'Boolean'>
+  readonly autoResponseSubject: Prisma.FieldRef<"Campaign", 'String'>
+  readonly autoResponseBody: Prisma.FieldRef<"Campaign", 'String'>
+  readonly autoResponseUpdatedAt: Prisma.FieldRef<"Campaign", 'DateTime'>
   readonly order: Prisma.FieldRef<"Campaign", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Campaign", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Campaign", 'DateTime'>

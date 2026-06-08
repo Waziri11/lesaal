@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { verifyTurnstileToken } from "../../../../../../lib/captcha";
-import { isCampaignTableMissingError, normalizeCampaignResponseData } from "../../../../../../lib/campaigns";
-import { sendCampaignNotification } from "../../../../../../lib/mailer";
+import {
+  buildCampaignResponseTemplateVariables,
+  getCampaignResponseRecipientEmail,
+  isCampaignTableMissingError,
+  normalizeCampaignResponseData,
+} from "../../../../../../lib/campaigns";
+import { sendCampaignNotification, sendCampaignResponseTemplateEmail } from "../../../../../../lib/mailer";
 import { ensureDatabaseReady, prisma } from "../../../../../../lib/prisma";
 import { consumeRateLimit } from "../../../../../../lib/rate-limit";
 import { getClientIpAddress } from "../../../../../../lib/request-utils";
@@ -114,6 +119,34 @@ export async function POST(request, { params }) {
       campaignTitle: campaign.title,
       campaignSlug: campaign.slug,
     });
+
+    if (campaign.autoResponseEnabled && campaign.autoResponseSubject && campaign.autoResponseBody) {
+      const responderEmail = getCampaignResponseRecipientEmail(campaign.questions, cleanedData);
+
+      if (responderEmail) {
+        try {
+          const variables = buildCampaignResponseTemplateVariables({
+            campaign,
+            response,
+            questions: campaign.questions,
+          });
+
+          await sendCampaignResponseTemplateEmail({
+            to: responderEmail,
+            subjectTemplate: campaign.autoResponseSubject,
+            bodyTemplate: campaign.autoResponseBody,
+            variables,
+          });
+        } catch (autoResponseError) {
+          console.error("Campaign auto response delivery failed", {
+            campaignId: campaign.id,
+            responseId: response.id,
+            responderEmail,
+            error: autoResponseError,
+          });
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,

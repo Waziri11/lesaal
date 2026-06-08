@@ -13,6 +13,7 @@ import {
   Filter,
   LayoutGrid,
   ListChecks,
+  Mail,
   MessageSquare,
   MoreHorizontal,
   Plus,
@@ -219,6 +220,32 @@ function getCampaignAvatarStyle(campaign) {
   };
 }
 
+function getTemplateVariableSuggestions(campaign) {
+  const builtIns = [
+    { key: "campaign_title", label: "Campaign title" },
+    { key: "campaign_slug", label: "Campaign slug" },
+    { key: "target_market", label: "Target market" },
+    { key: "submitted_at", label: "Submitted at (ISO)" },
+  ];
+
+  const questionVariables = (Array.isArray(campaign?.questions) ? campaign.questions : [])
+    .map((question) => ({
+      key: String(question?.key || "").trim(),
+      label: String(question?.label || "").trim() || String(question?.key || "").trim(),
+    }))
+    .filter((entry) => entry.key);
+
+  const seen = new Set();
+  return [...builtIns, ...questionVariables].filter((entry) => {
+    if (seen.has(entry.key)) {
+      return false;
+    }
+
+    seen.add(entry.key);
+    return true;
+  });
+}
+
 export default function CampaignsManager() {
   const trendDays = 30;
   const router = useRouter();
@@ -240,6 +267,7 @@ export default function CampaignsManager() {
   const [updatingCampaignId, setUpdatingCampaignId] = useState(null);
   const [deletingCampaignId, setDeletingCampaignId] = useState(null);
   const [openingCampaignId, setOpeningCampaignId] = useState(null);
+  const [bulkRespondingCampaignId, setBulkRespondingCampaignId] = useState(null);
   const [isOpeningCampaign, startOpenCampaignTransition] = useTransition();
 
   const campaignStats = useMemo(() => {
@@ -521,6 +549,178 @@ export default function CampaignsManager() {
     }
   }
 
+  async function bulkRespondCampaign(campaign) {
+    if (!campaign?.id || bulkRespondingCampaignId) return;
+
+    if (Number(campaign?.responseCount || 0) <= 0) {
+      await Swal.fire({
+        icon: "info",
+        title: "No responses yet",
+        text: "Bulk respond is available once this campaign has received responses.",
+      });
+      return;
+    }
+
+    const variableSuggestions = getTemplateVariableSuggestions(campaign);
+    const escapeForHtml = (value) =>
+      String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    const variableTagsHtml = variableSuggestions
+      .map(
+        (item) => `
+          <span style="display:inline-flex;align-items:center;border:1px solid rgba(148,163,184,0.35);border-radius:999px;padding:2px 10px;font-size:12px;color:#c8d8f5;background:rgba(15,23,42,0.45);">
+            {{${escapeForHtml(item.key)}}}
+          </span>
+        `
+      )
+      .join(" ");
+
+    const defaultSubject = String(campaign?.autoResponseSubject || "").trim() || `Update about {{campaign_title}}`;
+    const defaultMessage =
+      String(campaign?.autoResponseBody || "").trim() ||
+      "Hi {{full_name}},\n\nThank you for your response to {{campaign_title}}.\nWe have received your submission and our team will review it.\n\nRegards,\nLesaal Team";
+
+    const modalResult = await Swal.fire({
+      title: `Bulk respond: ${campaign.title}`,
+      width: "min(860px, 94vw)",
+      html: `
+        <div style="display:grid;gap:12px;text-align:left;">
+          <div style="display:grid;gap:6px;">
+            <label for="bulk-respond-mode" style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#9fb3d7;">Mode</label>
+            <select id="bulk-respond-mode" style="width:100%;height:40px;border-radius:8px;border:1px solid rgba(148,163,184,0.38);background:#091a39;color:#eef4ff;padding:0 10px;">
+              <option value="one_time">One-time (send to current responders)</option>
+              <option value="ongoing">Ongoing (auto-send to future responders)</option>
+            </select>
+            <label id="bulk-respond-send-now-wrapper" style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#c8d8f5;">
+              <input id="bulk-respond-send-now" type="checkbox" style="margin-top:2px;" />
+              Also send now to current responders when selecting ongoing mode
+            </label>
+          </div>
+          <div style="display:grid;gap:6px;">
+            <label for="bulk-respond-subject" style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#9fb3d7;">Email subject</label>
+            <input id="bulk-respond-subject" value="${escapeForHtml(defaultSubject)}" style="width:100%;height:40px;border-radius:8px;border:1px solid rgba(148,163,184,0.38);background:#091a39;color:#eef4ff;padding:0 10px;" />
+          </div>
+          <div style="display:grid;gap:6px;">
+            <label for="bulk-respond-message" style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#9fb3d7;">Email message</label>
+            <textarea id="bulk-respond-message" rows="9" style="width:100%;border-radius:8px;border:1px solid rgba(148,163,184,0.38);background:#091a39;color:#eef4ff;padding:10px;resize:vertical;">${escapeForHtml(defaultMessage)}</textarea>
+          </div>
+          <div style="display:grid;gap:6px;">
+            <p style="margin:0;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#9fb3d7;">Available variables</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">${variableTagsHtml}</div>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Send",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#2563eb",
+      background: "#071633",
+      color: "#edf3ff",
+      focusConfirm: false,
+      didOpen: () => {
+        const modeElement = document.getElementById("bulk-respond-mode");
+        const sendNowWrapper = document.getElementById("bulk-respond-send-now-wrapper");
+
+        const toggleSendNowVisibility = () => {
+          if (!modeElement || !sendNowWrapper) return;
+          sendNowWrapper.style.display = modeElement.value === "ongoing" ? "flex" : "none";
+        };
+
+        if (modeElement) {
+          modeElement.addEventListener("change", toggleSendNowVisibility);
+          toggleSendNowVisibility();
+        }
+      },
+      preConfirm: () => {
+        const modeElement = document.getElementById("bulk-respond-mode");
+        const subjectElement = document.getElementById("bulk-respond-subject");
+        const messageElement = document.getElementById("bulk-respond-message");
+        const sendNowElement = document.getElementById("bulk-respond-send-now");
+
+        const mode = String(modeElement?.value || "").trim();
+        const subject = String(subjectElement?.value || "").trim();
+        const message = String(messageElement?.value || "").trim();
+        const sendNow = Boolean(sendNowElement?.checked);
+
+        if (mode !== "one_time" && mode !== "ongoing") {
+          Swal.showValidationMessage("Select a valid response mode.");
+          return null;
+        }
+
+        if (!subject) {
+          Swal.showValidationMessage("Email subject is required.");
+          return null;
+        }
+
+        if (!message) {
+          Swal.showValidationMessage("Email message is required.");
+          return null;
+        }
+
+        return { mode, subject, message, sendNow };
+      },
+    });
+
+    if (!modalResult.isConfirmed || !modalResult.value) {
+      return;
+    }
+
+    setBulkRespondingCampaignId(campaign.id);
+    setCampaignError("");
+    setStatusSuccess("");
+
+    try {
+      const response = await fetch(`/api/admin/campaigns/${campaign.id}/bulk-respond`, {
+        method: "POST",
+        headers: createCsrfHeaders({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify(modalResult.value),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to send campaign response emails.");
+      }
+
+      const statusLines = [
+        `Sent: ${payload.sentCount || 0}`,
+        `Skipped (no email): ${payload.skippedCount || 0}`,
+        `Failed: ${payload.failedCount || 0}`,
+      ];
+
+      await Swal.fire({
+        icon: "success",
+        title: payload.ongoingSaved ? "Ongoing responder saved" : "Bulk response sent",
+        html: `<div style="text-align:left;">${statusLines.map((line) => `<p style="margin:0 0 6px;">${line}</p>`).join("")}</div>`,
+        confirmButtonColor: "#2563eb",
+      });
+
+      if (payload.ongoingSaved) {
+        setStatusSuccess("Ongoing responder saved and ready for new submissions.");
+      } else {
+        setStatusSuccess("Bulk response sent successfully.");
+      }
+
+      await loadCampaigns();
+    } catch (error) {
+      const message = error.message || "Unable to send campaign response emails.";
+      setCampaignError(message);
+
+      await Swal.fire({
+        icon: "error",
+        title: "Bulk respond failed",
+        text: message,
+      });
+    } finally {
+      setBulkRespondingCampaignId(null);
+    }
+  }
+
   const openCampaign = useCallback(
     (campaign) => {
       if (!campaign?.id || isOpeningCampaign) return;
@@ -649,6 +849,7 @@ export default function CampaignsManager() {
           const campaign = row.original;
           const isUpdating = updatingCampaignId === campaign.id;
           const isDeleting = deletingCampaignId === campaign.id;
+          const isBulkResponding = bulkRespondingCampaignId === campaign.id;
           const isOpening = isOpeningCampaign && openingCampaignId === campaign.id;
 
           return (
@@ -663,16 +864,27 @@ export default function CampaignsManager() {
                   <button
                     type="button"
                     className={MENU_ITEM_CLASS}
-                    disabled={isUpdating || isDeleting || isOpeningCampaign}
+                    disabled={isUpdating || isDeleting || isOpeningCampaign || isBulkResponding}
                     onClick={() => openCampaign(campaign)}
                   >
                     {isOpening ? <Spinner className="mr-2 h-4 w-4" /> : null}
                     {isOpening ? "Opening..." : "View campaign"}
                   </button>
+                  {Number(campaign.responseCount || 0) > 0 ? (
+                    <button
+                      type="button"
+                      className={MENU_ITEM_CLASS}
+                      disabled={isUpdating || isDeleting || isOpeningCampaign || isBulkResponding}
+                      onClick={() => bulkRespondCampaign(campaign)}
+                    >
+                      {isBulkResponding ? <Spinner className="mr-2 h-4 w-4" /> : <Mail className="mr-2 h-4 w-4" />}
+                      {isBulkResponding ? "Sending..." : "Bulk respond"}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className={MENU_ITEM_CLASS}
-                    disabled={isUpdating || isDeleting || isOpeningCampaign}
+                    disabled={isUpdating || isDeleting || isOpeningCampaign || isBulkResponding}
                     onClick={() => toggleCampaignState(campaign)}
                   >
                     {isUpdating ? <Spinner className="mr-2 h-4 w-4" /> : null}
@@ -681,7 +893,7 @@ export default function CampaignsManager() {
                   <button
                     type="button"
                     className={`${MENU_ITEM_CLASS} text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]`}
-                    disabled={isDeleting || isUpdating || isOpeningCampaign}
+                    disabled={isDeleting || isUpdating || isOpeningCampaign || isBulkResponding}
                     onClick={() => deleteCampaign(campaign)}
                   >
                     {isDeleting ? <Spinner className="mr-2 h-4 w-4" /> : null}
@@ -694,7 +906,7 @@ export default function CampaignsManager() {
         },
       },
     ],
-    [deletingCampaignId, isOpeningCampaign, openCampaign, openingCampaignId, updatingCampaignId]
+    [bulkRespondingCampaignId, deletingCampaignId, isOpeningCampaign, openCampaign, openingCampaignId, updatingCampaignId]
   );
 
   const table = useReactTable({
@@ -1055,6 +1267,7 @@ export default function CampaignsManager() {
                   const campaign = row.original;
                   const isUpdating = updatingCampaignId === campaign.id;
                   const isDeleting = deletingCampaignId === campaign.id;
+                  const isBulkResponding = bulkRespondingCampaignId === campaign.id;
                   const isOpening = isOpeningCampaign && openingCampaignId === campaign.id;
                   const status = getStatus(campaign);
 
@@ -1112,16 +1325,27 @@ export default function CampaignsManager() {
                               <button
                                 type="button"
                                 className={MENU_ITEM_CLASS}
-                                disabled={isUpdating || isDeleting || isOpeningCampaign}
+                                disabled={isUpdating || isDeleting || isOpeningCampaign || isBulkResponding}
                                 onClick={() => openCampaign(campaign)}
                               >
                                 {isOpening ? <Spinner className="mr-2 h-4 w-4" /> : null}
                                 {isOpening ? "Opening..." : "View campaign"}
                               </button>
+                              {Number(campaign.responseCount || 0) > 0 ? (
+                                <button
+                                  type="button"
+                                  className={MENU_ITEM_CLASS}
+                                  disabled={isUpdating || isDeleting || isOpeningCampaign || isBulkResponding}
+                                  onClick={() => bulkRespondCampaign(campaign)}
+                                >
+                                  {isBulkResponding ? <Spinner className="mr-2 h-4 w-4" /> : <Mail className="mr-2 h-4 w-4" />}
+                                  {isBulkResponding ? "Sending..." : "Bulk respond"}
+                                </button>
+                              ) : null}
                               <button
                                 type="button"
                                 className={MENU_ITEM_CLASS}
-                                disabled={isUpdating || isDeleting || isOpeningCampaign}
+                                disabled={isUpdating || isDeleting || isOpeningCampaign || isBulkResponding}
                                 onClick={() => toggleCampaignState(campaign)}
                               >
                                 {isUpdating ? <Spinner className="mr-2 h-4 w-4" /> : null}
@@ -1130,7 +1354,7 @@ export default function CampaignsManager() {
                               <button
                                 type="button"
                                 className={`${MENU_ITEM_CLASS} text-[color:var(--ui-destructive)] hover:bg-[color:var(--ui-destructive-soft)]`}
-                                disabled={isDeleting || isUpdating || isOpeningCampaign}
+                                disabled={isDeleting || isUpdating || isOpeningCampaign || isBulkResponding}
                                 onClick={() => deleteCampaign(campaign)}
                               >
                                 {isDeleting ? <Spinner className="mr-2 h-4 w-4" /> : null}

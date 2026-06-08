@@ -128,6 +128,9 @@ function createEmptyCampaignDraft(order = 0) {
     description: "",
     imageUrl: "",
     isPublished: true,
+    autoResponseEnabled: false,
+    autoResponseSubject: "",
+    autoResponseBody: "",
     order,
     sections: [
       {
@@ -264,6 +267,32 @@ export default function CampaignBuilderPage() {
     () => draft.sections.reduce((total, section) => total + (Array.isArray(section.questions) ? section.questions.length : 0), 0),
     [draft.sections]
   );
+
+  const autoResponseVariables = useMemo(() => {
+    const generatedSections = withGeneratedAnswerKeys(draft.sections || []);
+    const variables = [
+      { key: "campaign_title", label: "Campaign title" },
+      { key: "campaign_slug", label: "Campaign slug" },
+      { key: "target_market", label: "Target market" },
+      { key: "submitted_at", label: "Submitted at (ISO)" },
+    ];
+
+    for (const section of generatedSections) {
+      for (const question of section.questions || []) {
+        const key = String(question?.key || "").trim();
+        const label = String(question?.label || "").trim() || key;
+        if (!key) continue;
+        variables.push({ key, label });
+      }
+    }
+
+    const seen = new Set();
+    return variables.filter((entry) => {
+      if (seen.has(entry.key)) return false;
+      seen.add(entry.key);
+      return true;
+    });
+  }, [draft.sections]);
 
   function goToQuestionsStep() {
     const nextSlug = draft.slug || slugify(draft.title);
@@ -623,6 +652,16 @@ export default function CampaignBuilderPage() {
   }
 
   function validateBeforeSave() {
+    if (draft.autoResponseEnabled) {
+      if (!String(draft.autoResponseSubject || "").trim()) {
+        return "Auto response subject is required when ongoing auto response is enabled.";
+      }
+
+      if (!String(draft.autoResponseBody || "").trim()) {
+        return "Auto response message is required when ongoing auto response is enabled.";
+      }
+    }
+
     if (!draft.sections.length) {
       return "Add at least one section.";
     }
@@ -999,6 +1038,82 @@ export default function CampaignBuilderPage() {
                   </div>
                 </div>
               </div>
+
+              <div className="space-y-3 rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-[color:var(--ui-foreground)]">Auto responder (optional)</p>
+                    <p className="mt-1 text-xs text-[color:var(--ui-muted-foreground)]">
+                      Enable ongoing follow-up emails for every new campaign response.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="campaign-auto-response-enabled"
+                      className="border-[color:var(--ui-border)] data-[state=checked]:border-[color:var(--ui-primary)] data-[state=checked]:bg-[color:var(--ui-primary)]"
+                      checked={Boolean(draft.autoResponseEnabled)}
+                      onCheckedChange={(checked) => handleDraftValue("autoResponseEnabled", Boolean(checked))}
+                    />
+                    <Label className="text-[color:var(--ui-foreground)]" htmlFor="campaign-auto-response-enabled">
+                      Enable ongoing mode
+                    </Label>
+                  </div>
+                </div>
+
+                {draft.autoResponseEnabled ? (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label className="text-[color:var(--ui-foreground)]" htmlFor="campaign-auto-response-subject">
+                        Auto response subject
+                      </Label>
+                      <Input
+                        id="campaign-auto-response-subject"
+                        value={draft.autoResponseSubject || ""}
+                        className={LIGHT_INPUT_CLASS}
+                        placeholder="Thanks for joining {{campaign_title}}"
+                        onChange={(event) => handleDraftValue("autoResponseSubject", event.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-[color:var(--ui-foreground)]" htmlFor="campaign-auto-response-body">
+                        Auto response message
+                      </Label>
+                      <Textarea
+                        id="campaign-auto-response-body"
+                        className={`${LIGHT_TEXTAREA_CLASS} min-h-[140px]`}
+                        value={draft.autoResponseBody || ""}
+                        placeholder={`Hi {{full_name}},\n\nThanks for your interest in {{campaign_title}}.\nWe'll review your response and get back to you shortly.`}
+                        onChange={(event) => handleDraftValue("autoResponseBody", event.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">
+                        Template variables
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {autoResponseVariables.map((variable) => (
+                          <button
+                            key={variable.key}
+                            type="button"
+                            className="rounded-full border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] px-2.5 py-1 text-xs text-[color:var(--ui-foreground)]"
+                            onClick={() => {
+                              const token = `{{${variable.key}}}`;
+                              const existingBody = String(draft.autoResponseBody || "");
+                              if (existingBody.includes(token)) return;
+                              handleDraftValue("autoResponseBody", existingBody ? `${existingBody}\n${token}` : token);
+                            }}
+                            title={variable.label}
+                          >
+                            {`{{${variable.key}}}`}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
           ) : editorStep === 2 ? (
             <div className="space-y-4">
@@ -1288,6 +1403,7 @@ export default function CampaignBuilderPage() {
                     <Badge variant="outline">Deadline: {formatDate(draft.deadline) || "No deadline"}</Badge>
                     <Badge variant="outline">Slug: {draft.slug || slugify(draft.title) || "n/a"}</Badge>
                     <Badge variant="outline">{draft.isPublished ? "Published" : "Draft"}</Badge>
+                    <Badge variant="outline">{draft.autoResponseEnabled ? "Ongoing responder: Enabled" : "Ongoing responder: Off"}</Badge>
                   </div>
                 </div>
               </div>

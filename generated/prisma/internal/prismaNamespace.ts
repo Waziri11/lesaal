@@ -1678,6 +1678,10 @@ export const CampaignScalarFieldEnum = {
   description: 'description',
   imageUrl: 'imageUrl',
   isPublished: 'isPublished',
+  autoResponseEnabled: 'autoResponseEnabled',
+  autoResponseSubject: 'autoResponseSubject',
+  autoResponseBody: 'autoResponseBody',
+  autoResponseUpdatedAt: 'autoResponseUpdatedAt',
   order: 'order',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

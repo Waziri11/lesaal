@@ -180,6 +180,10 @@ model Campaign {
   description String
   imageUrl    String?
   isPublished Boolean            @default(true)
+  autoResponseEnabled   Boolean  @default(false)
+  autoResponseSubject   String?
+  autoResponseBody      String?
+  autoResponseUpdatedAt DateTime?
   order       Int                @default(0)
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt

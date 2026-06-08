@@ -252,6 +252,27 @@ function reminderLabel(minutesBefore) {
   return `${minutes} minute(s) before`;
 }
 
+function buildPayloadFromExistingItem(item, { startAt, endAt, allDay }) {
+  return {
+    type: item.type,
+    title: item.title || "",
+    description: item.description || "",
+    location: item.location || "",
+    color: item.color || "",
+    allDay: Boolean(allDay),
+    startAt: startAt.toISOString(),
+    endAt: endAt.toISOString(),
+    isCompleted: Boolean(item.isCompleted),
+    recurrenceRule: item.recurrenceRule,
+    reminders: Array.isArray(item.reminders)
+      ? item.reminders.map((reminder) => ({
+          minutesBefore: reminder.minutesBefore,
+          channels: reminder.channels,
+        }))
+      : [],
+  };
+}
+
 export default function AdminCalendarWorkspace() {
   const calendarRef = useRef(null);
   const [items, setItems] = useState([]);
@@ -538,6 +559,89 @@ export default function AdminCalendarWorkspace() {
     }
   }
 
+  async function handleCalendarEventMutation(changeInfo) {
+    const sourceItemId = String(changeInfo.event?.extendedProps?.itemId || "").trim();
+    const sourceItem = itemMap.get(sourceItemId);
+
+    if (!sourceItem) {
+      changeInfo.revert();
+      return;
+    }
+
+    const baseStart = new Date(sourceItem.startAt);
+    const baseEnd = new Date(sourceItem.endAt);
+    const fallbackDurationMs = Math.max(60 * 1000, baseEnd.getTime() - baseStart.getTime());
+
+    const oldOccurrenceStart = changeInfo.oldEvent?.start
+      ? new Date(changeInfo.oldEvent.start)
+      : new Date(changeInfo.event.extendedProps.occurrenceStartAt || sourceItem.startAt);
+    const oldOccurrenceEnd = changeInfo.oldEvent?.end
+      ? new Date(changeInfo.oldEvent.end)
+      : new Date(oldOccurrenceStart.getTime() + fallbackDurationMs);
+
+    const nextOccurrenceStart = changeInfo.event?.start
+      ? new Date(changeInfo.event.start)
+      : oldOccurrenceStart;
+    const nextOccurrenceEnd = changeInfo.event?.end
+      ? new Date(changeInfo.event.end)
+      : new Date(nextOccurrenceStart.getTime() + Math.max(60 * 1000, oldOccurrenceEnd.getTime() - oldOccurrenceStart.getTime()));
+
+    const deltaStartMs = nextOccurrenceStart.getTime() - oldOccurrenceStart.getTime();
+    const deltaEndMs = nextOccurrenceEnd.getTime() - oldOccurrenceEnd.getTime();
+
+    const nextStart = sourceItem.recurrenceRule
+      ? new Date(baseStart.getTime() + deltaStartMs)
+      : nextOccurrenceStart;
+    const nextEnd = sourceItem.recurrenceRule
+      ? new Date(baseEnd.getTime() + deltaEndMs)
+      : nextOccurrenceEnd;
+
+    if (nextEnd.getTime() <= nextStart.getTime()) {
+      changeInfo.revert();
+      return;
+    }
+
+    const optimisticItem = {
+      ...sourceItem,
+      startAt: nextStart.toISOString(),
+      endAt: nextEnd.toISOString(),
+      allDay: Boolean(changeInfo.event.allDay),
+    };
+
+    setItems((current) => current.map((item) => (item.id === sourceItem.id ? optimisticItem : item)));
+
+    try {
+      const payload = buildPayloadFromExistingItem(sourceItem, {
+        startAt: nextStart,
+        endAt: nextEnd,
+        allDay: Boolean(changeInfo.event.allDay),
+      });
+
+      const response = await fetch(`/api/admin/calendar/items/${sourceItem.id}`, {
+        method: "PUT",
+        headers: createCsrfHeaders({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify(payload),
+      });
+      const body = await response.json();
+
+      if (!response.ok) {
+        throw new Error(body.error || "Unable to reschedule item.");
+      }
+
+      if (body?.item) {
+        setItems((current) => current.map((item) => (item.id === sourceItem.id ? body.item : item)));
+      }
+
+      setStatusMessage(sourceItem.recurrenceRule ? "Series rescheduled." : "Item rescheduled.");
+    } catch (requestError) {
+      setItems((current) => current.map((item) => (item.id === sourceItem.id ? sourceItem : item)));
+      changeInfo.revert();
+      setError(requestError.message || "Unable to reschedule item.");
+    }
+  }
+
   function eventContentRenderer(eventInfo) {
     return (
       <div className="px-1 py-0.5">
@@ -715,7 +819,7 @@ export default function AdminCalendarWorkspace() {
                   timeZone={CALENDAR_TIMEZONE}
                   height="auto"
                   allDaySlot
-                  editable={false}
+                  editable
                   selectable
                   selectMirror
                   headerToolbar={{
@@ -747,6 +851,8 @@ export default function AdminCalendarWorkspace() {
                       openEditorForItem(sourceItem);
                     }
                   }}
+                  eventDrop={handleCalendarEventMutation}
+                  eventResize={handleCalendarEventMutation}
                   select={(selection) => {
                     openEditorForCreate({
                       startAt: selection.start,

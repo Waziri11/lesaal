@@ -246,6 +246,10 @@ function getTemplateVariableSuggestions(campaign) {
   });
 }
 
+function normalizeTemplateForComposer(template) {
+  return String(template ?? "").replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, "@$1");
+}
+
 export default function CampaignsManager() {
   const trendDays = 30;
   const router = useRouter();
@@ -572,17 +576,23 @@ export default function CampaignsManager() {
     const variableTagsHtml = variableSuggestions
       .map(
         (item) => `
-          <span style="display:inline-flex;align-items:center;border:1px solid rgba(148,163,184,0.35);border-radius:999px;padding:2px 10px;font-size:12px;color:#c8d8f5;background:rgba(15,23,42,0.45);">
-            {{${escapeForHtml(item.key)}}}
-          </span>
+          <button
+            type="button"
+            data-template-variable="${escapeForHtml(item.key)}"
+            title="${escapeForHtml(item.label)}"
+            style="display:inline-flex;align-items:center;border:1px solid rgba(148,163,184,0.35);border-radius:999px;padding:2px 10px;font-size:12px;color:#c8d8f5;background:rgba(15,23,42,0.45);cursor:pointer;"
+          >
+            @${escapeForHtml(item.key)}
+          </button>
         `
       )
       .join(" ");
 
-    const defaultSubject = String(campaign?.autoResponseSubject || "").trim() || `Update about {{campaign_title}}`;
+    const defaultSubject =
+      normalizeTemplateForComposer(String(campaign?.autoResponseSubject || "").trim()) || "Update about @campaign_title";
     const defaultMessage =
-      String(campaign?.autoResponseBody || "").trim() ||
-      "Hi {{full_name}},\n\nThank you for your response to {{campaign_title}}.\nWe have received your submission and our team will review it.\n\nRegards,\nLesaal Team";
+      normalizeTemplateForComposer(String(campaign?.autoResponseBody || "").trim()) ||
+      "Hi @full_name,\n\nThank you for your response to @campaign_title.\nWe have received your submission and our team will review it.\n\nRegards,\nLesaal Team";
 
     const modalResult = await Swal.fire({
       title: `Bulk respond: ${campaign.title}`,
@@ -593,12 +603,8 @@ export default function CampaignsManager() {
             <label for="bulk-respond-mode" style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#9fb3d7;">Mode</label>
             <select id="bulk-respond-mode" style="width:100%;height:40px;border-radius:8px;border:1px solid rgba(148,163,184,0.38);background:#091a39;color:#eef4ff;padding:0 10px;">
               <option value="one_time">One-time (send to current responders)</option>
-              <option value="ongoing">Ongoing (auto-send to future responders)</option>
+              <option value="ongoing">Ongoing (send now + auto-send to future responders)</option>
             </select>
-            <label id="bulk-respond-send-now-wrapper" style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#c8d8f5;">
-              <input id="bulk-respond-send-now" type="checkbox" style="margin-top:2px;" />
-              Also send now to current responders when selecting ongoing mode
-            </label>
           </div>
           <div style="display:grid;gap:6px;">
             <label for="bulk-respond-subject" style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#9fb3d7;">Email subject</label>
@@ -622,29 +628,64 @@ export default function CampaignsManager() {
       color: "#edf3ff",
       focusConfirm: false,
       didOpen: () => {
-        const modeElement = document.getElementById("bulk-respond-mode");
-        const sendNowWrapper = document.getElementById("bulk-respond-send-now-wrapper");
+        const subjectElement = document.getElementById("bulk-respond-subject");
+        const messageElement = document.getElementById("bulk-respond-message");
+        const variableButtons = Array.from(document.querySelectorAll("[data-template-variable]"));
 
-        const toggleSendNowVisibility = () => {
-          if (!modeElement || !sendNowWrapper) return;
-          sendNowWrapper.style.display = modeElement.value === "ongoing" ? "flex" : "none";
+        let activeInput = messageElement || subjectElement;
+
+        const setActiveInput = (event) => {
+          const target = event?.target;
+          if (target && (target.id === "bulk-respond-subject" || target.id === "bulk-respond-message")) {
+            activeInput = target;
+          }
         };
 
-        if (modeElement) {
-          modeElement.addEventListener("change", toggleSendNowVisibility);
-          toggleSendNowVisibility();
+        const insertTokenInActiveField = (token) => {
+          const target = activeInput || messageElement || subjectElement;
+          if (!target) return;
+
+          const start = Number.isFinite(target.selectionStart) ? target.selectionStart : target.value.length;
+          const end = Number.isFinite(target.selectionEnd) ? target.selectionEnd : target.value.length;
+          const currentValue = String(target.value || "");
+          const nextValue = `${currentValue.slice(0, start)}${token}${currentValue.slice(end)}`;
+          target.value = nextValue;
+          target.focus();
+
+          const nextCursorPosition = start + token.length;
+          target.selectionStart = nextCursorPosition;
+          target.selectionEnd = nextCursorPosition;
+        };
+
+        if (subjectElement) {
+          subjectElement.addEventListener("focus", setActiveInput);
+          subjectElement.addEventListener("click", setActiveInput);
+          subjectElement.addEventListener("keyup", setActiveInput);
         }
+
+        if (messageElement) {
+          messageElement.addEventListener("focus", setActiveInput);
+          messageElement.addEventListener("click", setActiveInput);
+          messageElement.addEventListener("keyup", setActiveInput);
+        }
+
+        variableButtons.forEach((button) => {
+          button.addEventListener("click", (event) => {
+            event.preventDefault();
+            const variableName = String(button.getAttribute("data-template-variable") || "").trim();
+            if (!variableName) return;
+            insertTokenInActiveField(`@${variableName}`);
+          });
+        });
       },
       preConfirm: () => {
         const modeElement = document.getElementById("bulk-respond-mode");
         const subjectElement = document.getElementById("bulk-respond-subject");
         const messageElement = document.getElementById("bulk-respond-message");
-        const sendNowElement = document.getElementById("bulk-respond-send-now");
 
         const mode = String(modeElement?.value || "").trim();
         const subject = String(subjectElement?.value || "").trim();
         const message = String(messageElement?.value || "").trim();
-        const sendNow = Boolean(sendNowElement?.checked);
 
         if (mode !== "one_time" && mode !== "ongoing") {
           Swal.showValidationMessage("Select a valid response mode.");
@@ -661,7 +702,7 @@ export default function CampaignsManager() {
           return null;
         }
 
-        return { mode, subject, message, sendNow };
+        return { mode, subject, message };
       },
     });
 

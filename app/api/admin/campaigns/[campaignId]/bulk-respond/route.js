@@ -38,7 +38,6 @@ export async function POST(request, { params }) {
     const mode = normalizeMode(body?.mode);
     const subject = String(body?.subject || "").trim();
     const message = String(body?.message || "").trim();
-    const sendNow = Boolean(body?.sendNow);
 
     if (!campaignId) {
       return NextResponse.json({ error: "Campaign id is required." }, { status: 400 });
@@ -81,7 +80,7 @@ export async function POST(request, { params }) {
     }
 
     let responses = [];
-    if (mode === "one_time" || sendNow) {
+    if (mode === "one_time" || mode === "ongoing") {
       responses = await prisma.campaignResponse.findMany({
         where: { campaignId: campaign.id },
         orderBy: [{ submittedAt: "desc" }, { id: "desc" }],

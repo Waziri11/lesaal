@@ -6,6 +6,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import {
+  BellRing,
   CalendarDays,
   CalendarPlus,
   ChevronLeft,
@@ -46,6 +47,7 @@ import styles from "./AdminCalendarWorkspace.module.css";
 
 const ITEM_TYPES = ["EVENT", "TASK", "REMINDER"];
 const WEEKDAY_OPTIONS = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
+const ALERT_PAGE_LIMIT = 20;
 
 const TYPE_COLORS = {
   EVENT: "#4B8CFB",
@@ -302,6 +304,14 @@ export default function AdminCalendarWorkspace() {
   const [editorError, setEditorError] = useState("");
   const [editorForm, setEditorForm] = useState(() => createEditorForm());
 
+  const [alerts, setAlerts] = useState([]);
+  const [alertsLoading, setAlertsLoading] = useState(true);
+  const [alertsError, setAlertsError] = useState("");
+  const [alertsUnreadCount, setAlertsUnreadCount] = useState(0);
+  const [alertsHasMore, setAlertsHasMore] = useState(false);
+  const [alertsNextCursor, setAlertsNextCursor] = useState(null);
+  const [markingAlerts, setMarkingAlerts] = useState(false);
+
   const itemMap = useMemo(() => {
     const map = new Map();
 
@@ -371,9 +381,113 @@ export default function AdminCalendarWorkspace() {
     }
   }
 
+  async function loadAlerts({ append = false, cursor = null, silent = false } = {}) {
+    if (!silent) {
+      setAlertsLoading(true);
+    }
+
+    setAlertsError("");
+
+    try {
+      const query = new URLSearchParams({
+        limit: String(ALERT_PAGE_LIMIT),
+      });
+
+      if (cursor) {
+        query.set("cursor", cursor);
+      }
+
+      const response = await fetch(`/api/admin/calendar/alerts?${query.toString()}`, {
+        cache: "no-store",
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to load reminder alerts.");
+      }
+
+      const nextAlerts = Array.isArray(payload.alerts) ? payload.alerts : [];
+      setAlerts((current) => (append ? [...current, ...nextAlerts] : nextAlerts));
+      setAlertsUnreadCount(Number(payload.unreadCount || 0));
+      setAlertsHasMore(Boolean(payload.hasMore));
+      setAlertsNextCursor(payload.nextCursor || null);
+    } catch (requestError) {
+      setAlertsError(requestError.message || "Unable to load reminder alerts.");
+    } finally {
+      if (!silent) {
+        setAlertsLoading(false);
+      }
+    }
+  }
+
+  async function markAlertsRead(alertId = null) {
+    if (markingAlerts) return;
+
+    setMarkingAlerts(true);
+    setAlertsError("");
+
+    try {
+      const response = await fetch("/api/admin/calendar/alerts", {
+        method: "PATCH",
+        headers: createCsrfHeaders({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify(alertId ? { alertId } : {}),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update alerts.");
+      }
+
+      setAlertsUnreadCount(Number(payload.unreadCount || 0));
+      const readTimestamp = new Date().toISOString();
+
+      setAlerts((current) =>
+        current.map((alert) => {
+          if (alertId && alert.id !== alertId) {
+            return alert;
+          }
+
+          if (!alertId && alert.readAt) {
+            return alert;
+          }
+
+          return {
+            ...alert,
+            readAt: alert.readAt || readTimestamp,
+          };
+        })
+      );
+    } catch (requestError) {
+      setAlertsError(requestError.message || "Unable to update alerts.");
+    } finally {
+      setMarkingAlerts(false);
+    }
+  }
+
   useEffect(() => {
     loadItems();
   }, [rangeStart, rangeEnd, searchTerm, typeFilters]);
+
+  useEffect(() => {
+    loadAlerts();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const refreshAlerts = () => loadAlerts({ silent: true });
+    const intervalId = window.setInterval(refreshAlerts, 45000);
+    window.addEventListener("focus", refreshAlerts);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshAlerts);
+    };
+  }, []);
 
   function toggleTypeFilter(type) {
     setTypeFilters((current) => {
@@ -754,6 +868,82 @@ export default function AdminCalendarWorkspace() {
               ) : (
                 <p className="rounded-lg border border-dashed border-[color:var(--ui-border)] px-3 py-4 text-sm text-[color:var(--ui-muted-foreground)]">
                   No upcoming items in this range.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="inline-flex items-center text-sm font-semibold">
+                  <BellRing className="mr-1.5 h-4 w-4" />
+                  Reminder alerts
+                </p>
+                <div className="flex items-center gap-2">
+                  <Badge variant={alertsUnreadCount > 0 ? "secondary" : "outline"}>{alertsUnreadCount} unread</Badge>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => markAlertsRead()}
+                    disabled={markingAlerts || alertsUnreadCount === 0}
+                  >
+                    Mark all read
+                  </Button>
+                </div>
+              </div>
+
+              {alertsError ? <p className="text-xs text-[color:var(--ui-destructive)]">{alertsError}</p> : null}
+
+              {alertsLoading ? (
+                <p className="inline-flex items-center text-xs text-[color:var(--ui-muted-foreground)]">
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  Loading alerts
+                </p>
+              ) : alerts.length ? (
+                <div className="space-y-2">
+                  {alerts.map((alert) => (
+                    <div key={alert.id} className="rounded-lg border border-[color:var(--ui-border)] bg-[color:var(--ui-card)] px-3 py-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="line-clamp-1 text-sm font-semibold">{alert.item?.title || "Calendar reminder"}</p>
+                          <p className="mt-1 text-[11px] text-[color:var(--ui-muted-foreground)]">
+                            Triggered {formatDateTimeInCalendarTimezone(alert.triggeredAt)}
+                          </p>
+                        </div>
+                        {!alert.readAt ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => markAlertsRead(alert.id)}
+                            disabled={markingAlerts}
+                          >
+                            Read
+                          </Button>
+                        ) : (
+                          <Badge variant="outline">Read</Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {alertsHasMore ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => loadAlerts({ append: true, cursor: alertsNextCursor })}
+                      disabled={!alertsNextCursor}
+                    >
+                      Load more
+                    </Button>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="rounded-lg border border-dashed border-[color:var(--ui-border)] px-3 py-4 text-sm text-[color:var(--ui-muted-foreground)]">
+                  No in-app reminder alerts yet.
                 </p>
               )}
             </div>

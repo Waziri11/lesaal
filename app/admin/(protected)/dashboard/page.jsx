@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import PageState from "../../../../components/shared/PageState";
 import { Badge } from "../../../../components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
+import { Card, CardContent } from "../../../../components/ui/card";
 import { prisma } from "../../../../lib/prisma";
 import { getAuthenticatedAdminFromCookies } from "../../../../lib/auth";
 import { getGreetingForTime, isAdminProfileComplete } from "../../../../lib/admin-profile";
@@ -64,22 +64,18 @@ export default async function DashboardPage() {
 
     return (
       <section className="space-y-4">
-        <Card>
-          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Admin Dashboard</p>
-              <CardTitle className="mt-2 text-2xl">{`${greeting} ${displayName}`}</CardTitle>
-            </div>
-            <Badge>{userChip}</Badge>
-          </CardHeader>
-        </Card>
+        <div className="flex flex-row flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Admin Dashboard</p>
+            <h1 className="mt-2 text-3xl font-semibold text-[color:var(--ui-foreground)]">{`${greeting} ${displayName}`}</h1>
+          </div>
+          <Badge>{userChip}</Badge>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{`${companyName} Day Summary`}</CardTitle>
-            <CardDescription>Business activity for {companyName}, updated in real time.</CardDescription>
-          </CardHeader>
-        </Card>
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold text-[color:var(--ui-foreground)]">{`${companyName} Day Summary`}</h2>
+          <p className="text-base text-[color:var(--ui-muted-foreground)]">Business activity for {companyName}, updated in real time.</p>
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Card>

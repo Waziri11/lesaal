@@ -1,0 +1,91 @@
+.calendarShell {
+  border: 1px solid var(--ui-border);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--ui-card) 88%, transparent);
+  padding: 0.6rem;
+}
+
+.calendarShell :global(.fc) {
+  color: var(--ui-foreground);
+  font-family: var(--font-body);
+}
+
+.calendarShell :global(.fc .fc-toolbar-title) {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.calendarShell :global(.fc .fc-button) {
+  background: var(--ui-input);
+  border-color: var(--ui-border);
+  color: var(--ui-foreground);
+  text-transform: capitalize;
+  box-shadow: none;
+}
+
+.calendarShell :global(.fc .fc-button:hover),
+.calendarShell :global(.fc .fc-button.fc-button-active) {
+  background: var(--ui-primary);
+  border-color: var(--ui-primary);
+  color: var(--ui-primary-foreground);
+}
+
+.calendarShell :global(.fc-theme-standard td),
+.calendarShell :global(.fc-theme-standard th),
+.calendarShell :global(.fc-theme-standard .fc-scrollgrid) {
+  border-color: var(--ui-border);
+}
+
+.calendarShell :global(.fc .fc-col-header-cell-cushion),
+.calendarShell :global(.fc .fc-daygrid-day-number),
+.calendarShell :global(.fc .fc-timegrid-axis-cushion) {
+  color: var(--ui-muted-foreground);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.calendarShell :global(.fc .fc-timegrid-slot-label-cushion) {
+  color: var(--ui-muted-foreground);
+  font-size: 0.78rem;
+}
+
+.calendarShell :global(.fc .fc-day-today) {
+  background: color-mix(in srgb, var(--ui-primary-soft) 45%, transparent) !important;
+}
+
+.calendarShell :global(.fc .fc-event) {
+  border: 0;
+  border-radius: 0.65rem;
+  box-shadow: 0 8px 18px rgba(2, 12, 28, 0.22);
+}
+
+.calendarShell :global(.fc .fc-event-completed) {
+  opacity: 0.62;
+  filter: grayscale(0.35);
+}
+
+.calendarShell :global(.fc .fc-now-indicator-line) {
+  border-color: #ef4444;
+}
+
+.calendarShell :global(.fc .fc-now-indicator-arrow) {
+  border-top-color: #ef4444;
+  border-bottom-color: #ef4444;
+}
+
+@media (max-width: 900px) {
+  .calendarShell {
+    padding: 0.35rem;
+  }
+
+  .calendarShell :global(.fc .fc-toolbar) {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    justify-content: flex-start;
+  }
+
+  .calendarShell :global(.fc .fc-toolbar-title) {
+    font-size: 0.95rem;
+  }
+}

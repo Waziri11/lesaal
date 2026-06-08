@@ -1,10 +1,5 @@
-import UnderDevelopmentCard from "../../../../components/admin/UnderDevelopmentCard";
+import AdminCalendarWorkspace from "../../../../components/admin/calendar/AdminCalendarWorkspace";
 
 export default function CalendarPage() {
-  return (
-    <UnderDevelopmentCard
-      title="Calendar"
-      description="Scheduling, reminders, and timeline tools are under development."
-    />
-  );
+  return <AdminCalendarWorkspace />;
 }

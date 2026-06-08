@@ -62,6 +62,23 @@ enum ScrollAnimationPreset {
   REVEAL
 }
 
+enum CalendarItemType {
+  EVENT
+  TASK
+  REMINDER
+}
+
+enum CalendarReminderChannel {
+  IN_APP
+  EMAIL
+}
+
+enum CalendarReminderDeliveryStatus {
+  SENT
+  FAILED
+  SKIPPED
+}
+
 model AdminUser {
   id           String         @id @default(cuid())
   email        String         @unique
@@ -82,6 +99,8 @@ model AdminUser {
   otpCodes           EmailOtpCode[]
   mediaAssets        MediaAsset[]
   notes              AdminNote[]
+  calendarItems      CalendarItem[]
+  calendarDeliveries CalendarReminderDelivery[]
 }
 
 model AdminSession {
@@ -308,4 +327,65 @@ model RateLimitEntry {
 
   @@index([windowStart])
   @@index([lockedUntil])
+}
+
+model CalendarItem {
+  id             String                @id @default(cuid())
+  adminId        String
+  type           CalendarItemType      @default(EVENT)
+  title          String
+  description    String?
+  location       String?
+  color          String?
+  startAt        DateTime
+  endAt          DateTime
+  allDay         Boolean               @default(false)
+  timezone       String                @default("Africa/Dar_es_Salaam")
+  isCompleted    Boolean               @default(false)
+  recurrenceRule String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  admin          AdminUser             @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  reminders      CalendarItemReminder[]
+  deliveries     CalendarReminderDelivery[]
+
+  @@index([adminId, startAt])
+  @@index([adminId, updatedAt])
+}
+
+model CalendarItemReminder {
+  id                    String                   @id @default(cuid())
+  itemId                 String
+  minutesBefore          Int
+  channels               CalendarReminderChannel[]
+  nextTriggerAt          DateTime?
+  nextOccurrenceStartAt  DateTime?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  item                   CalendarItem             @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  deliveries             CalendarReminderDelivery[]
+
+  @@index([itemId])
+  @@index([nextTriggerAt])
+}
+
+model CalendarReminderDelivery {
+  id                String                        @id @default(cuid())
+  adminId           String
+  itemId            String
+  reminderId        String
+  channel           CalendarReminderChannel
+  occurrenceStartAt DateTime
+  triggeredAt       DateTime
+  status            CalendarReminderDeliveryStatus
+  errorMessage      String?
+  readAt            DateTime?
+  createdAt         DateTime                      @default(now())
+  admin             AdminUser                     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  item              CalendarItem                  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  reminder          CalendarItemReminder          @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+
+  @@unique([reminderId, occurrenceStartAt, channel])
+  @@index([adminId, channel, readAt, createdAt])
+  @@index([itemId, createdAt])
 }

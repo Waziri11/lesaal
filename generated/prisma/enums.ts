@@ -72,3 +72,29 @@ export const ScrollAnimationPreset = {
 } as const
 
 export type ScrollAnimationPreset = (typeof ScrollAnimationPreset)[keyof typeof ScrollAnimationPreset]
+
+
+export const CalendarItemType = {
+  EVENT: 'EVENT',
+  TASK: 'TASK',
+  REMINDER: 'REMINDER'
+} as const
+
+export type CalendarItemType = (typeof CalendarItemType)[keyof typeof CalendarItemType]
+
+
+export const CalendarReminderChannel = {
+  IN_APP: 'IN_APP',
+  EMAIL: 'EMAIL'
+} as const
+
+export type CalendarReminderChannel = (typeof CalendarReminderChannel)[keyof typeof CalendarReminderChannel]
+
+
+export const CalendarReminderDeliveryStatus = {
+  SENT: 'SENT',
+  FAILED: 'FAILED',
+  SKIPPED: 'SKIPPED'
+} as const
+
+export type CalendarReminderDeliveryStatus = (typeof CalendarReminderDeliveryStatus)[keyof typeof CalendarReminderDeliveryStatus]

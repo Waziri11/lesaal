@@ -266,6 +266,8 @@ export type AdminUserWhereInput = {
   otpCodes?: Prisma.EmailOtpCodeListRelationFilter
   mediaAssets?: Prisma.MediaAssetListRelationFilter
   notes?: Prisma.AdminNoteListRelationFilter
+  calendarItems?: Prisma.CalendarItemListRelationFilter
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryListRelationFilter
 }
 
 export type AdminUserOrderByWithRelationInput = {
@@ -288,6 +290,8 @@ export type AdminUserOrderByWithRelationInput = {
   otpCodes?: Prisma.EmailOtpCodeOrderByRelationAggregateInput
   mediaAssets?: Prisma.MediaAssetOrderByRelationAggregateInput
   notes?: Prisma.AdminNoteOrderByRelationAggregateInput
+  calendarItems?: Prisma.CalendarItemOrderByRelationAggregateInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryOrderByRelationAggregateInput
 }
 
 export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
@@ -313,6 +317,8 @@ export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
   otpCodes?: Prisma.EmailOtpCodeListRelationFilter
   mediaAssets?: Prisma.MediaAssetListRelationFilter
   notes?: Prisma.AdminNoteListRelationFilter
+  calendarItems?: Prisma.CalendarItemListRelationFilter
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryListRelationFilter
 }, "id" | "email">
 
 export type AdminUserOrderByWithAggregationInput = {
@@ -377,6 +383,8 @@ export type AdminUserCreateInput = {
   otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
   notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateInput = {
@@ -399,6 +407,8 @@ export type AdminUserUncheckedCreateInput = {
   otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
   notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUpdateInput = {
@@ -421,6 +431,8 @@ export type AdminUserUpdateInput = {
   otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
   notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateInput = {
@@ -443,6 +455,8 @@ export type AdminUserUncheckedUpdateInput = {
   otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
   notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateManyInput = {
@@ -637,6 +651,34 @@ export type AdminUserUpdateOneRequiredWithoutNotesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AdminUserUpdateToOneWithWhereWithoutNotesInput, Prisma.AdminUserUpdateWithoutNotesInput>, Prisma.AdminUserUncheckedUpdateWithoutNotesInput>
 }
 
+export type AdminUserCreateNestedOneWithoutCalendarItemsInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutCalendarItemsInput, Prisma.AdminUserUncheckedCreateWithoutCalendarItemsInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutCalendarItemsInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+}
+
+export type AdminUserUpdateOneRequiredWithoutCalendarItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutCalendarItemsInput, Prisma.AdminUserUncheckedCreateWithoutCalendarItemsInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutCalendarItemsInput
+  upsert?: Prisma.AdminUserUpsertWithoutCalendarItemsInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdminUserUpdateToOneWithWhereWithoutCalendarItemsInput, Prisma.AdminUserUpdateWithoutCalendarItemsInput>, Prisma.AdminUserUncheckedUpdateWithoutCalendarItemsInput>
+}
+
+export type AdminUserCreateNestedOneWithoutCalendarDeliveriesInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutCalendarDeliveriesInput, Prisma.AdminUserUncheckedCreateWithoutCalendarDeliveriesInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutCalendarDeliveriesInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+}
+
+export type AdminUserUpdateOneRequiredWithoutCalendarDeliveriesNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutCalendarDeliveriesInput, Prisma.AdminUserUncheckedCreateWithoutCalendarDeliveriesInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutCalendarDeliveriesInput
+  upsert?: Prisma.AdminUserUpsertWithoutCalendarDeliveriesInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdminUserUpdateToOneWithWhereWithoutCalendarDeliveriesInput, Prisma.AdminUserUpdateWithoutCalendarDeliveriesInput>, Prisma.AdminUserUncheckedUpdateWithoutCalendarDeliveriesInput>
+}
+
 export type AdminUserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -656,6 +698,8 @@ export type AdminUserCreateWithoutSessionsInput = {
   otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
   notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutSessionsInput = {
@@ -677,6 +721,8 @@ export type AdminUserUncheckedCreateWithoutSessionsInput = {
   otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
   notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutSessionsInput = {
@@ -714,6 +760,8 @@ export type AdminUserUpdateWithoutSessionsInput = {
   otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
   notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutSessionsInput = {
@@ -735,6 +783,8 @@ export type AdminUserUncheckedUpdateWithoutSessionsInput = {
   otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
   notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutOtpCodesInput = {
@@ -756,6 +806,8 @@ export type AdminUserCreateWithoutOtpCodesInput = {
   sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
   notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutOtpCodesInput = {
@@ -777,6 +829,8 @@ export type AdminUserUncheckedCreateWithoutOtpCodesInput = {
   sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
   notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutOtpCodesInput = {
@@ -814,6 +868,8 @@ export type AdminUserUpdateWithoutOtpCodesInput = {
   sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
   notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutOtpCodesInput = {
@@ -835,6 +891,8 @@ export type AdminUserUncheckedUpdateWithoutOtpCodesInput = {
   sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
   notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutMediaAssetsInput = {
@@ -856,6 +914,8 @@ export type AdminUserCreateWithoutMediaAssetsInput = {
   sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
   otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
   notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutMediaAssetsInput = {
@@ -877,6 +937,8 @@ export type AdminUserUncheckedCreateWithoutMediaAssetsInput = {
   sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
   otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
   notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutMediaAssetsInput = {
@@ -914,6 +976,8 @@ export type AdminUserUpdateWithoutMediaAssetsInput = {
   sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
   otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
   notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutMediaAssetsInput = {
@@ -935,6 +999,8 @@ export type AdminUserUncheckedUpdateWithoutMediaAssetsInput = {
   sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
   otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
   notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutNotesInput = {
@@ -956,6 +1022,8 @@ export type AdminUserCreateWithoutNotesInput = {
   sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
   otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
+  calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutNotesInput = {
@@ -977,6 +1045,8 @@ export type AdminUserUncheckedCreateWithoutNotesInput = {
   sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
   otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutNotesInput = {
@@ -1014,6 +1084,8 @@ export type AdminUserUpdateWithoutNotesInput = {
   sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
   otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
+  calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutNotesInput = {
@@ -1035,6 +1107,224 @@ export type AdminUserUncheckedUpdateWithoutNotesInput = {
   sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
   otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+}
+
+export type AdminUserCreateWithoutCalendarItemsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  profileImageUrl?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
+  otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
+  mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+}
+
+export type AdminUserUncheckedCreateWithoutCalendarItemsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  profileImageUrl?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
+  otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
+  mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+}
+
+export type AdminUserCreateOrConnectWithoutCalendarItemsInput = {
+  where: Prisma.AdminUserWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutCalendarItemsInput, Prisma.AdminUserUncheckedCreateWithoutCalendarItemsInput>
+}
+
+export type AdminUserUpsertWithoutCalendarItemsInput = {
+  update: Prisma.XOR<Prisma.AdminUserUpdateWithoutCalendarItemsInput, Prisma.AdminUserUncheckedUpdateWithoutCalendarItemsInput>
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutCalendarItemsInput, Prisma.AdminUserUncheckedCreateWithoutCalendarItemsInput>
+  where?: Prisma.AdminUserWhereInput
+}
+
+export type AdminUserUpdateToOneWithWhereWithoutCalendarItemsInput = {
+  where?: Prisma.AdminUserWhereInput
+  data: Prisma.XOR<Prisma.AdminUserUpdateWithoutCalendarItemsInput, Prisma.AdminUserUncheckedUpdateWithoutCalendarItemsInput>
+}
+
+export type AdminUserUpdateWithoutCalendarItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
+  otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
+  mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+}
+
+export type AdminUserUncheckedUpdateWithoutCalendarItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
+  otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
+  mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+}
+
+export type AdminUserCreateWithoutCalendarDeliveriesInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  profileImageUrl?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
+  otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
+  mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
+}
+
+export type AdminUserUncheckedCreateWithoutCalendarDeliveriesInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  profileImageUrl?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
+  otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
+  mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
+}
+
+export type AdminUserCreateOrConnectWithoutCalendarDeliveriesInput = {
+  where: Prisma.AdminUserWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutCalendarDeliveriesInput, Prisma.AdminUserUncheckedCreateWithoutCalendarDeliveriesInput>
+}
+
+export type AdminUserUpsertWithoutCalendarDeliveriesInput = {
+  update: Prisma.XOR<Prisma.AdminUserUpdateWithoutCalendarDeliveriesInput, Prisma.AdminUserUncheckedUpdateWithoutCalendarDeliveriesInput>
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutCalendarDeliveriesInput, Prisma.AdminUserUncheckedCreateWithoutCalendarDeliveriesInput>
+  where?: Prisma.AdminUserWhereInput
+}
+
+export type AdminUserUpdateToOneWithWhereWithoutCalendarDeliveriesInput = {
+  where?: Prisma.AdminUserWhereInput
+  data: Prisma.XOR<Prisma.AdminUserUpdateWithoutCalendarDeliveriesInput, Prisma.AdminUserUncheckedUpdateWithoutCalendarDeliveriesInput>
+}
+
+export type AdminUserUpdateWithoutCalendarDeliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
+  otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
+  mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
+}
+
+export type AdminUserUncheckedUpdateWithoutCalendarDeliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
+  otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
+  mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 
@@ -1047,6 +1337,8 @@ export type AdminUserCountOutputType = {
   otpCodes: number
   mediaAssets: number
   notes: number
+  calendarItems: number
+  calendarDeliveries: number
 }
 
 export type AdminUserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1054,6 +1346,8 @@ export type AdminUserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   otpCodes?: boolean | AdminUserCountOutputTypeCountOtpCodesArgs
   mediaAssets?: boolean | AdminUserCountOutputTypeCountMediaAssetsArgs
   notes?: boolean | AdminUserCountOutputTypeCountNotesArgs
+  calendarItems?: boolean | AdminUserCountOutputTypeCountCalendarItemsArgs
+  calendarDeliveries?: boolean | AdminUserCountOutputTypeCountCalendarDeliveriesArgs
 }
 
 /**
@@ -1094,6 +1388,20 @@ export type AdminUserCountOutputTypeCountNotesArgs<ExtArgs extends runtime.Types
   where?: Prisma.AdminNoteWhereInput
 }
 
+/**
+ * AdminUserCountOutputType without action
+ */
+export type AdminUserCountOutputTypeCountCalendarItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CalendarItemWhereInput
+}
+
+/**
+ * AdminUserCountOutputType without action
+ */
+export type AdminUserCountOutputTypeCountCalendarDeliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CalendarReminderDeliveryWhereInput
+}
+
 
 export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1115,6 +1423,8 @@ export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   otpCodes?: boolean | Prisma.AdminUser$otpCodesArgs<ExtArgs>
   mediaAssets?: boolean | Prisma.AdminUser$mediaAssetsArgs<ExtArgs>
   notes?: boolean | Prisma.AdminUser$notesArgs<ExtArgs>
+  calendarItems?: boolean | Prisma.AdminUser$calendarItemsArgs<ExtArgs>
+  calendarDeliveries?: boolean | Prisma.AdminUser$calendarDeliveriesArgs<ExtArgs>
   _count?: boolean | Prisma.AdminUserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["adminUser"]>
 
@@ -1178,6 +1488,8 @@ export type AdminUserInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   otpCodes?: boolean | Prisma.AdminUser$otpCodesArgs<ExtArgs>
   mediaAssets?: boolean | Prisma.AdminUser$mediaAssetsArgs<ExtArgs>
   notes?: boolean | Prisma.AdminUser$notesArgs<ExtArgs>
+  calendarItems?: boolean | Prisma.AdminUser$calendarItemsArgs<ExtArgs>
+  calendarDeliveries?: boolean | Prisma.AdminUser$calendarDeliveriesArgs<ExtArgs>
   _count?: boolean | Prisma.AdminUserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AdminUserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1190,6 +1502,8 @@ export type $AdminUserPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     otpCodes: Prisma.$EmailOtpCodePayload<ExtArgs>[]
     mediaAssets: Prisma.$MediaAssetPayload<ExtArgs>[]
     notes: Prisma.$AdminNotePayload<ExtArgs>[]
+    calendarItems: Prisma.$CalendarItemPayload<ExtArgs>[]
+    calendarDeliveries: Prisma.$CalendarReminderDeliveryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1605,6 +1919,8 @@ export interface Prisma__AdminUserClient<T, Null = never, ExtArgs extends runtim
   otpCodes<T extends Prisma.AdminUser$otpCodesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$otpCodesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailOtpCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mediaAssets<T extends Prisma.AdminUser$mediaAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$mediaAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notes<T extends Prisma.AdminUser$notesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$notesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  calendarItems<T extends Prisma.AdminUser$calendarItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$calendarItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CalendarItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  calendarDeliveries<T extends Prisma.AdminUser$calendarDeliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$calendarDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CalendarReminderDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2135,6 +2451,54 @@ export type AdminUser$notesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.AdminNoteScalarFieldEnum | Prisma.AdminNoteScalarFieldEnum[]
+}
+
+/**
+ * AdminUser.calendarItems
+ */
+export type AdminUser$calendarItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CalendarItem
+   */
+  select?: Prisma.CalendarItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CalendarItem
+   */
+  omit?: Prisma.CalendarItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CalendarItemInclude<ExtArgs> | null
+  where?: Prisma.CalendarItemWhereInput
+  orderBy?: Prisma.CalendarItemOrderByWithRelationInput | Prisma.CalendarItemOrderByWithRelationInput[]
+  cursor?: Prisma.CalendarItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CalendarItemScalarFieldEnum | Prisma.CalendarItemScalarFieldEnum[]
+}
+
+/**
+ * AdminUser.calendarDeliveries
+ */
+export type AdminUser$calendarDeliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CalendarReminderDelivery
+   */
+  select?: Prisma.CalendarReminderDeliverySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CalendarReminderDelivery
+   */
+  omit?: Prisma.CalendarReminderDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CalendarReminderDeliveryInclude<ExtArgs> | null
+  where?: Prisma.CalendarReminderDeliveryWhereInput
+  orderBy?: Prisma.CalendarReminderDeliveryOrderByWithRelationInput | Prisma.CalendarReminderDeliveryOrderByWithRelationInput[]
+  cursor?: Prisma.CalendarReminderDeliveryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CalendarReminderDeliveryScalarFieldEnum | Prisma.CalendarReminderDeliveryScalarFieldEnum[]
 }
 
 /**

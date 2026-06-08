@@ -116,3 +116,18 @@ export type AdminNote = Prisma.AdminNoteModel
  * 
  */
 export type RateLimitEntry = Prisma.RateLimitEntryModel
+/**
+ * Model CalendarItem
+ * 
+ */
+export type CalendarItem = Prisma.CalendarItemModel
+/**
+ * Model CalendarItemReminder
+ * 
+ */
+export type CalendarItemReminder = Prisma.CalendarItemReminderModel
+/**
+ * Model CalendarReminderDelivery
+ * 
+ */
+export type CalendarReminderDelivery = Prisma.CalendarReminderDeliveryModel

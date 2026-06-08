@@ -65,7 +65,10 @@ export const ModelName = {
   EmailOtpCode: 'EmailOtpCode',
   MediaAsset: 'MediaAsset',
   AdminNote: 'AdminNote',
-  RateLimitEntry: 'RateLimitEntry'
+  RateLimitEntry: 'RateLimitEntry',
+  CalendarItem: 'CalendarItem',
+  CalendarItemReminder: 'CalendarItemReminder',
+  CalendarReminderDelivery: 'CalendarReminderDelivery'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -305,6 +308,58 @@ export const RateLimitEntryScalarFieldEnum = {
 } as const
 
 export type RateLimitEntryScalarFieldEnum = (typeof RateLimitEntryScalarFieldEnum)[keyof typeof RateLimitEntryScalarFieldEnum]
+
+
+export const CalendarItemScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  type: 'type',
+  title: 'title',
+  description: 'description',
+  location: 'location',
+  color: 'color',
+  startAt: 'startAt',
+  endAt: 'endAt',
+  allDay: 'allDay',
+  timezone: 'timezone',
+  isCompleted: 'isCompleted',
+  recurrenceRule: 'recurrenceRule',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CalendarItemScalarFieldEnum = (typeof CalendarItemScalarFieldEnum)[keyof typeof CalendarItemScalarFieldEnum]
+
+
+export const CalendarItemReminderScalarFieldEnum = {
+  id: 'id',
+  itemId: 'itemId',
+  minutesBefore: 'minutesBefore',
+  channels: 'channels',
+  nextTriggerAt: 'nextTriggerAt',
+  nextOccurrenceStartAt: 'nextOccurrenceStartAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CalendarItemReminderScalarFieldEnum = (typeof CalendarItemReminderScalarFieldEnum)[keyof typeof CalendarItemReminderScalarFieldEnum]
+
+
+export const CalendarReminderDeliveryScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  itemId: 'itemId',
+  reminderId: 'reminderId',
+  channel: 'channel',
+  occurrenceStartAt: 'occurrenceStartAt',
+  triggeredAt: 'triggeredAt',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CalendarReminderDeliveryScalarFieldEnum = (typeof CalendarReminderDeliveryScalarFieldEnum)[keyof typeof CalendarReminderDeliveryScalarFieldEnum]
 
 
 export const SortOrder = {

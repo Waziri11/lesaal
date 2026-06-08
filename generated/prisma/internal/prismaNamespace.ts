@@ -398,7 +398,10 @@ export const ModelName = {
   EmailOtpCode: 'EmailOtpCode',
   MediaAsset: 'MediaAsset',
   AdminNote: 'AdminNote',
-  RateLimitEntry: 'RateLimitEntry'
+  RateLimitEntry: 'RateLimitEntry',
+  CalendarItem: 'CalendarItem',
+  CalendarItemReminder: 'CalendarItemReminder',
+  CalendarReminderDelivery: 'CalendarReminderDelivery'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset" | "adminNote" | "rateLimitEntry"
+    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset" | "adminNote" | "rateLimitEntry" | "calendarItem" | "calendarItemReminder" | "calendarReminderDelivery"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1528,6 +1531,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CalendarItem: {
+      payload: Prisma.$CalendarItemPayload<ExtArgs>
+      fields: Prisma.CalendarItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CalendarItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CalendarItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload>
+        }
+        findFirst: {
+          args: Prisma.CalendarItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CalendarItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload>
+        }
+        findMany: {
+          args: Prisma.CalendarItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload>[]
+        }
+        create: {
+          args: Prisma.CalendarItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload>
+        }
+        createMany: {
+          args: Prisma.CalendarItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CalendarItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload>[]
+        }
+        delete: {
+          args: Prisma.CalendarItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload>
+        }
+        update: {
+          args: Prisma.CalendarItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.CalendarItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CalendarItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CalendarItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.CalendarItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemPayload>
+        }
+        aggregate: {
+          args: Prisma.CalendarItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCalendarItem>
+        }
+        groupBy: {
+          args: Prisma.CalendarItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CalendarItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CalendarItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CalendarItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    CalendarItemReminder: {
+      payload: Prisma.$CalendarItemReminderPayload<ExtArgs>
+      fields: Prisma.CalendarItemReminderFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CalendarItemReminderFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CalendarItemReminderFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload>
+        }
+        findFirst: {
+          args: Prisma.CalendarItemReminderFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CalendarItemReminderFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload>
+        }
+        findMany: {
+          args: Prisma.CalendarItemReminderFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload>[]
+        }
+        create: {
+          args: Prisma.CalendarItemReminderCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload>
+        }
+        createMany: {
+          args: Prisma.CalendarItemReminderCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CalendarItemReminderCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload>[]
+        }
+        delete: {
+          args: Prisma.CalendarItemReminderDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload>
+        }
+        update: {
+          args: Prisma.CalendarItemReminderUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload>
+        }
+        deleteMany: {
+          args: Prisma.CalendarItemReminderDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CalendarItemReminderUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CalendarItemReminderUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload>[]
+        }
+        upsert: {
+          args: Prisma.CalendarItemReminderUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarItemReminderPayload>
+        }
+        aggregate: {
+          args: Prisma.CalendarItemReminderAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCalendarItemReminder>
+        }
+        groupBy: {
+          args: Prisma.CalendarItemReminderGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CalendarItemReminderGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CalendarItemReminderCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CalendarItemReminderCountAggregateOutputType> | number
+        }
+      }
+    }
+    CalendarReminderDelivery: {
+      payload: Prisma.$CalendarReminderDeliveryPayload<ExtArgs>
+      fields: Prisma.CalendarReminderDeliveryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CalendarReminderDeliveryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CalendarReminderDeliveryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload>
+        }
+        findFirst: {
+          args: Prisma.CalendarReminderDeliveryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CalendarReminderDeliveryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload>
+        }
+        findMany: {
+          args: Prisma.CalendarReminderDeliveryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload>[]
+        }
+        create: {
+          args: Prisma.CalendarReminderDeliveryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload>
+        }
+        createMany: {
+          args: Prisma.CalendarReminderDeliveryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CalendarReminderDeliveryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload>[]
+        }
+        delete: {
+          args: Prisma.CalendarReminderDeliveryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload>
+        }
+        update: {
+          args: Prisma.CalendarReminderDeliveryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload>
+        }
+        deleteMany: {
+          args: Prisma.CalendarReminderDeliveryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CalendarReminderDeliveryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CalendarReminderDeliveryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload>[]
+        }
+        upsert: {
+          args: Prisma.CalendarReminderDeliveryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalendarReminderDeliveryPayload>
+        }
+        aggregate: {
+          args: Prisma.CalendarReminderDeliveryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCalendarReminderDelivery>
+        }
+        groupBy: {
+          args: Prisma.CalendarReminderDeliveryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CalendarReminderDeliveryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CalendarReminderDeliveryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CalendarReminderDeliveryCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1790,6 +2015,58 @@ export const RateLimitEntryScalarFieldEnum = {
 export type RateLimitEntryScalarFieldEnum = (typeof RateLimitEntryScalarFieldEnum)[keyof typeof RateLimitEntryScalarFieldEnum]
 
 
+export const CalendarItemScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  type: 'type',
+  title: 'title',
+  description: 'description',
+  location: 'location',
+  color: 'color',
+  startAt: 'startAt',
+  endAt: 'endAt',
+  allDay: 'allDay',
+  timezone: 'timezone',
+  isCompleted: 'isCompleted',
+  recurrenceRule: 'recurrenceRule',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CalendarItemScalarFieldEnum = (typeof CalendarItemScalarFieldEnum)[keyof typeof CalendarItemScalarFieldEnum]
+
+
+export const CalendarItemReminderScalarFieldEnum = {
+  id: 'id',
+  itemId: 'itemId',
+  minutesBefore: 'minutesBefore',
+  channels: 'channels',
+  nextTriggerAt: 'nextTriggerAt',
+  nextOccurrenceStartAt: 'nextOccurrenceStartAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CalendarItemReminderScalarFieldEnum = (typeof CalendarItemReminderScalarFieldEnum)[keyof typeof CalendarItemReminderScalarFieldEnum]
+
+
+export const CalendarReminderDeliveryScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  itemId: 'itemId',
+  reminderId: 'reminderId',
+  channel: 'channel',
+  occurrenceStartAt: 'occurrenceStartAt',
+  triggeredAt: 'triggeredAt',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CalendarReminderDeliveryScalarFieldEnum = (typeof CalendarReminderDeliveryScalarFieldEnum)[keyof typeof CalendarReminderDeliveryScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1978,6 +2255,48 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
+ * Reference to a field of type 'CalendarItemType'
+ */
+export type EnumCalendarItemTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CalendarItemType'>
+    
+
+
+/**
+ * Reference to a field of type 'CalendarItemType[]'
+ */
+export type ListEnumCalendarItemTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CalendarItemType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CalendarReminderChannel[]'
+ */
+export type ListEnumCalendarReminderChannelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CalendarReminderChannel[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CalendarReminderChannel'
+ */
+export type EnumCalendarReminderChannelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CalendarReminderChannel'>
+    
+
+
+/**
+ * Reference to a field of type 'CalendarReminderDeliveryStatus'
+ */
+export type EnumCalendarReminderDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CalendarReminderDeliveryStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CalendarReminderDeliveryStatus[]'
+ */
+export type ListEnumCalendarReminderDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CalendarReminderDeliveryStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2115,6 +2434,9 @@ export type GlobalOmitConfig = {
   mediaAsset?: Prisma.MediaAssetOmit
   adminNote?: Prisma.AdminNoteOmit
   rateLimitEntry?: Prisma.RateLimitEntryOmit
+  calendarItem?: Prisma.CalendarItemOmit
+  calendarItemReminder?: Prisma.CalendarItemReminderOmit
+  calendarReminderDelivery?: Prisma.CalendarReminderDeliveryOmit
 }
 
 /* Types for Logging */

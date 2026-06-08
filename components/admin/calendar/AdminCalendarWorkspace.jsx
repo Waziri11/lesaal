@@ -118,7 +118,9 @@ function mapItemToEvents(item, rangeStart, rangeEnd) {
 
 function createEditorForm({ startAt, endAt, allDay = false } = {}) {
   const start = startAt ? new Date(startAt) : new Date();
-  const end = endAt ? new Date(endAt) : new Date(start.getTime() + 60 * 60 * 1000);
+  const end = endAt
+    ? new Date(endAt)
+    : new Date(start.getTime() + (allDay ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000));
 
   return {
     id: null,
@@ -129,7 +131,7 @@ function createEditorForm({ startAt, endAt, allDay = false } = {}) {
     color: "",
     allDay,
     startAtValue: allDay ? formatDateInputValue(start) : toDateTimeLocalValue(start),
-    endAtValue: allDay ? formatDateInputValue(end) : toDateTimeLocalValue(end),
+    endAtValue: allDay ? toAllDayEndDateValue(end) : toDateTimeLocalValue(end),
     isCompleted: false,
     recurrence: getDefaultRecurrenceEditorState(),
     reminders: [{ minutesBefore: "10", channels: ["IN_APP", "EMAIL"] }],
@@ -153,7 +155,7 @@ function createEditorFormFromItem(item) {
     color: item.color || "",
     allDay: Boolean(item.allDay),
     startAtValue: item.allDay ? formatDateInputValue(item.startAt) : toDateTimeLocalValue(item.startAt),
-    endAtValue: item.allDay ? formatDateInputValue(item.endAt) : toDateTimeLocalValue(item.endAt),
+    endAtValue: item.allDay ? toAllDayEndDateValue(item.endAt) : toDateTimeLocalValue(item.endAt),
     isCompleted: Boolean(item.isCompleted),
     recurrence: parseRRuleToEditorState(item.recurrenceRule),
     reminders: reminders.length ? reminders : [{ minutesBefore: "10", channels: ["IN_APP", "EMAIL"] }],
@@ -168,6 +170,17 @@ function getDatePart(value) {
   }
 
   return normalized.includes("T") ? normalized.slice(0, 10) : normalized;
+}
+
+function toAllDayEndDateValue(value) {
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "";
+  }
+
+  parsed.setDate(parsed.getDate() - 1);
+  return formatDateInputValue(parsed);
 }
 
 function toIsoFromAllDayDate(value, { endOfDay = false } = {}) {

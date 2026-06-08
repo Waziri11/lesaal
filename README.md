@@ -8,6 +8,7 @@ This project now includes:
 - Campaign form builder and campaign submission inbox persistence
 - Profile security flows (change password, email change with OTP verification)
 - Gmail SMTP integration for OTP and campaign notifications
+- Admin calendar with week/month planning, recurring rules, reminders, and reminder alerts
 - Prisma + PostgreSQL (Prisma Postgres) persistence
 
 ## Run locally
@@ -36,6 +37,7 @@ Create `.env` from `.env.example` and configure:
 - `DATABASE_URL`
 - `ADMIN_EMAIL`, `ADMIN_PASSWORD`
 - `CSRF_SECRET`
+- `CRON_SECRET` (used by Vercel cron Authorization bearer token)
 - `TURNSTILE_SECRET_KEY`, `TURNSTILE_SITE_KEY`
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
 - `NOTIFY_EMAIL`
@@ -49,6 +51,8 @@ For Gmail SMTP, use a Gmail app password (not your normal account password).
 - Set `DATABASE_URL` to your Prisma Postgres connection string.
 - Keep `.env` out of version control.
 - Add `DATABASE_URL` in Vercel Project Settings -> Environment Variables for Production/Preview.
+- Add `CRON_SECRET` in Vercel environment variables. Vercel cron will send `Authorization: Bearer <CRON_SECRET>` to `/api/admin/calendar/reminders/dispatch`.
+- `vercel.json` already schedules reminder dispatch every minute.
 
 ## Useful scripts
 

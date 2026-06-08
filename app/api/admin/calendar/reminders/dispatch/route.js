@@ -197,6 +197,13 @@ function computeNextReminderState(reminder, now) {
 
 export async function POST(request) {
   try {
+    if (!String(process.env.CRON_SECRET || "").trim()) {
+      return NextResponse.json(
+        { error: "CRON_SECRET is not configured." },
+        { status: 503 }
+      );
+    }
+
     if (!isDispatchAuthorized(request)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

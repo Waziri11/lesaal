@@ -217,8 +217,12 @@ export async function GET(request) {
 
     if (isMissingCalendarTableError(error)) {
       return NextResponse.json(
-        { error: "Calendar is unavailable until database migrations are applied." },
-        { status: 503 }
+        {
+          success: true,
+          items: [],
+          warning: "Calendar tables are not initialized yet. Run database migrations to enable calendar data.",
+        },
+        { status: 200 }
       );
     }
 

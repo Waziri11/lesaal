@@ -386,6 +386,9 @@ export default function AdminCalendarWorkspace() {
       }
 
       setItems(Array.isArray(payload.items) ? payload.items : []);
+      if (payload.warning) {
+        setStatusMessage(String(payload.warning));
+      }
     } catch (requestError) {
       setError(requestError.message || "Unable to load calendar items.");
     } finally {
@@ -1065,9 +1068,29 @@ export default function AdminCalendarWorkspace() {
                     selection.view.calendar.unselect();
                   }}
                   datesSet={(arg) => {
-                    setRangeStart(new Date(arg.start));
-                    setRangeEnd(new Date(arg.end));
-                    setFocusedDate(new Date(arg.start));
+                    const nextStart = new Date(arg.start);
+                    const nextEnd = new Date(arg.end);
+
+                    setRangeStart((current) => {
+                      if (current instanceof Date && current.getTime() === nextStart.getTime()) {
+                        return current;
+                      }
+                      return nextStart;
+                    });
+
+                    setRangeEnd((current) => {
+                      if (current instanceof Date && current.getTime() === nextEnd.getTime()) {
+                        return current;
+                      }
+                      return nextEnd;
+                    });
+
+                    setFocusedDate((current) => {
+                      if (current instanceof Date && current.getTime() === nextStart.getTime()) {
+                        return current;
+                      }
+                      return nextStart;
+                    });
                   }}
                   nowIndicator
                   slotMinTime="06:00:00"

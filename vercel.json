@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/admin/calendar/reminders/dispatch",
-      "schedule": "* * * * *"
+      "schedule": "0 5 * * *"
     }
   ]
 }

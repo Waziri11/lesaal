@@ -52,7 +52,8 @@ For Gmail SMTP, use a Gmail app password (not your normal account password).
 - Keep `.env` out of version control.
 - Add `DATABASE_URL` in Vercel Project Settings -> Environment Variables for Production/Preview.
 - Add `CRON_SECRET` in Vercel environment variables. Vercel cron will send `Authorization: Bearer <CRON_SECRET>` to `/api/admin/calendar/reminders/dispatch`.
-- `vercel.json` already schedules reminder dispatch every minute.
+- On Vercel Hobby (free), cron jobs are limited to at most once per day, so `vercel.json` schedules daily dispatch.
+- If you upgrade to Vercel Pro, you can increase cron frequency (for example, every minute) for tighter reminder delivery windows.
 
 ## Useful scripts
 

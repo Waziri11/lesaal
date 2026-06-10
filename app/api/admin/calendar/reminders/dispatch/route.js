@@ -195,7 +195,7 @@ function computeNextReminderState(reminder, now) {
   return next;
 }
 
-export async function POST(request) {
+async function handleDispatchRequest(request) {
   try {
     if (!String(process.env.CRON_SECRET || "").trim()) {
       return NextResponse.json(
@@ -325,4 +325,12 @@ export async function POST(request) {
 
     return NextResponse.json({ error: "Unable to dispatch calendar reminders." }, { status: 500 });
   }
+}
+
+export async function GET(request) {
+  return handleDispatchRequest(request);
+}
+
+export async function POST(request) {
+  return handleDispatchRequest(request);
 }

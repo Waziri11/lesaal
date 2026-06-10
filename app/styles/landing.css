@@ -282,6 +282,11 @@
   font: inherit;
   line-height: inherit;
   letter-spacing: inherit;
+  display: block;
+}
+
+.lp-hero-headline-static {
+  margin-bottom: 0.08em;
 }
 
 .lp-hero-headline-dynamic {
@@ -289,6 +294,20 @@
   min-height: 1em;
   font-weight: inherit;
   text-decoration: none;
+  width: var(--lp-hero-dynamic-width, 18ch);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lp-hero-headline-dynamic .live-editable-text,
+.lp-hero-headline-dynamic .live-editable-input {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lp-hero-headline-dynamic.is-type-active {

@@ -721,6 +721,10 @@ export default function PublicLanding({
             const activeWordIndex = dynamicWordIndex % heroWords.length;
             const currentWord = heroWords[activeWordIndex] || "";
             const displayedDynamicWord = editorMode ? currentWord : typedDynamicWord;
+            const dynamicWordWidthCh = Math.max(
+              8,
+              heroWords.reduce((longest, word) => Math.max(longest, String(word || "").length), 0) + 1
+            );
             const heroStatsItems = (statsBandSection?.items || []).slice().sort((a, b) => a.order - b.order).slice(0, 2);
             const statPrimaryItem = heroStatsItems[0] || null;
             const statSecondaryItem = heroStatsItems[1] || null;
@@ -771,8 +775,10 @@ export default function PublicLanding({
                       onActivate={() => onSelectSection?.(section.id)}
                       onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "staticText", nextValue)}
                     />
-                    {" "}
-                    <span className={`lp-hero-headline-dynamic${editorMode ? "" : " is-type-active"}`}>
+                    <span
+                      className={`lp-hero-headline-dynamic${editorMode ? "" : " is-type-active"}`}
+                      style={{ "--lp-hero-dynamic-width": `${dynamicWordWidthCh}ch` }}
+                    >
                       <EditableText
                         editorMode={editorMode}
                         as="span"

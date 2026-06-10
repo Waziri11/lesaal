@@ -495,7 +495,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                   <h1 className={`lp-hero-headline ${textClass}`}>
                     <span className="lp-hero-headline-static">
                       {settings.staticText || "Let us help you grow your reach through"}
-                    </span>{" "}
+                    </span>
                     <HeroTypewriter
                       className="lp-hero-headline-dynamic is-type-active"
                       words={settings.dynamicWords}

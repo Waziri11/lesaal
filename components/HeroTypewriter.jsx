@@ -22,6 +22,14 @@ export default function HeroTypewriter({ words, fallback = "Social media managem
     const parsed = toStringArray(words);
     return parsed.length ? parsed : [fallback];
   }, [words, fallback]);
+  const maxWordLength = useMemo(
+    () =>
+      rotationWords.reduce((longest, word) => {
+        const length = String(word || "").length;
+        return length > longest ? length : longest;
+      }, String(fallback || "").length),
+    [fallback, rotationWords]
+  );
 
   const [dynamicWordIndex, setDynamicWordIndex] = useState(0);
   const [typedDynamicWord, setTypedDynamicWord] = useState("");
@@ -98,6 +106,11 @@ export default function HeroTypewriter({ words, fallback = "Social media managem
 
   const activeWord = rotationWords[dynamicWordIndex % rotationWords.length] || fallback;
   const displayedWord = typedDynamicWord || activeWord;
+  const dynamicWordWidthCh = Math.max(8, maxWordLength + 1);
 
-  return <span className={className}>{displayedWord}</span>;
+  return (
+    <span className={className} style={{ "--lp-hero-dynamic-width": `${dynamicWordWidthCh}ch` }}>
+      {displayedWord}
+    </span>
+  );
 }

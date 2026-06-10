@@ -91,6 +91,8 @@ function createEmptyQuestion(index = 0, type = "text") {
     tel: { label: "Phone question", placeholder: "+255 700 000 000" },
     textarea: { label: "Paragraph question", placeholder: "Long answer text" },
     select: { label: "Multiple choice question", placeholder: "", options: ["Option 1"] },
+    image: { label: "Upload an image", placeholder: "" },
+    video: { label: "Upload a video", placeholder: "" },
   };
 
   const selectedDefaults = defaults[type] || defaults.text;
@@ -173,10 +175,18 @@ function getQuestionTypeLabel(type) {
       return "Paragraph";
     case "select":
       return "Multiple Choice";
+    case "image":
+      return "Image Upload";
+    case "video":
+      return "Video Upload";
     case "text":
     default:
       return "Short Answer";
   }
+}
+
+function isMediaQuestionType(type) {
+  return type === "image" || type === "video";
 }
 
 function uploadImageFileWithProgress(file, onProgress) {
@@ -227,6 +237,14 @@ function uploadImageFileWithProgress(file, onProgress) {
 
 function renderQuestionPreview(question) {
   const placeholder = question?.placeholder || (question?.type === "textarea" ? "Long answer text" : "Short answer text");
+
+  if (isMediaQuestionType(question?.type)) {
+    return (
+      <div className="rounded-md border border-dashed border-[color:var(--ui-border)] bg-[color:var(--ui-card)] p-4 text-sm text-[color:var(--ui-muted-foreground)]">
+        {question?.type === "video" ? "Video upload input" : "Image upload input"}
+      </div>
+    );
+  }
 
   if (question?.type === "textarea") {
     return <Textarea readOnly value="" placeholder={placeholder} className={`${LIGHT_TEXTAREA_CLASS} pointer-events-none min-h-[96px]`} />;
@@ -1257,19 +1275,27 @@ export default function CampaignBuilderPage() {
                               <SelectItem value="tel">Phone</SelectItem>
                               <SelectItem value="textarea">Paragraph</SelectItem>
                               <SelectItem value="select">Multiple choice</SelectItem>
+                              <SelectItem value="image">Image upload</SelectItem>
+                              <SelectItem value="video">Video upload</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
 
-                      <div className="mt-4 space-y-2">
-                        <Label className="text-[color:var(--ui-foreground)]">Placeholder Text</Label>
-                        <Input
-                          value={question.placeholder || ""}
-                          className={LIGHT_INPUT_CLASS}
-                          onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "placeholder", event.target.value)}
-                        />
-                      </div>
+                      {!isMediaQuestionType(question.type) ? (
+                        <div className="mt-4 space-y-2">
+                          <Label className="text-[color:var(--ui-foreground)]">Placeholder Text</Label>
+                          <Input
+                            value={question.placeholder || ""}
+                            className={LIGHT_INPUT_CLASS}
+                            onChange={(event) => handleQuestionChange(sectionIndex, questionIndex, "placeholder", event.target.value)}
+                          />
+                        </div>
+                      ) : (
+                        <p className="mt-4 text-xs text-[color:var(--ui-muted-foreground)]">
+                          Respondents will upload a {question.type === "video" ? "video" : "single image"} file for this question.
+                        </p>
+                      )}
 
                       {question.type === "select" ? (
                         <div className="mt-4 space-y-3">
@@ -1372,6 +1398,12 @@ export default function CampaignBuilderPage() {
                       </Button>
                       <Button type="button" size="sm" variant="outline" onClick={() => addQuestion(sectionIndex, "select")}>
                         + Multiple choice
+                      </Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => addQuestion(sectionIndex, "image")}>
+                        + Image upload
+                      </Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => addQuestion(sectionIndex, "video")}>
+                        + Video upload
                       </Button>
                     </div>
                   </div>

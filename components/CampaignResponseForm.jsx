@@ -50,6 +50,7 @@ function buildSections(campaign) {
 export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }) {
   const router = useRouter();
   const [formData, setFormData] = useState({});
+  const [mediaFiles, setMediaFiles] = useState({});
   const [honeypotWebsite, setHoneypotWebsite] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaReady, setCaptchaReady] = useState(false);
@@ -57,6 +58,7 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
   const [error, setError] = useState("");
   const captchaRef = useRef(null);
   const widgetIdRef = useRef(null);
+  const mediaInputRefs = useRef({});
 
   const sections = useMemo(() => buildSections(campaign), [campaign]);
   const questions = useMemo(() => sections.flatMap((section) => section.questions), [sections]);
@@ -66,6 +68,20 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
       ...current,
       [key]: value,
     }));
+  }
+
+  function setMediaValue(key, file) {
+    setMediaFiles((current) => {
+      if (!(file instanceof File)) {
+        const { [key]: _removed, ...rest } = current;
+        return rest;
+      }
+
+      return {
+        ...current,
+        [key]: file,
+      };
+    });
   }
 
   useEffect(() => {
@@ -174,12 +190,18 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
     }
 
     try {
+      const submissionPayload = { data: formData, captchaToken, website: honeypotWebsite };
+      const requestBody = new FormData();
+      requestBody.append("payload", JSON.stringify(submissionPayload));
+
+      for (const [questionKey, file] of Object.entries(mediaFiles)) {
+        if (!(file instanceof File)) continue;
+        requestBody.append(`media:${questionKey}`, file);
+      }
+
       const response = await fetch(`/api/public/campaigns/${campaign.slug}/submit`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ data: formData, captchaToken, website: honeypotWebsite }),
+        body: requestBody,
       });
 
       const payload = await response.json();
@@ -189,6 +211,7 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
       }
 
       setFormData({});
+      setMediaFiles({});
       setHoneypotWebsite("");
       setCaptchaToken("");
       if (widgetIdRef.current !== null && window.turnstile?.reset && captchaRef.current && document.body.contains(captchaRef.current)) {
@@ -226,6 +249,7 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
     const value = formData[question.key] || "";
     const options = toOptionsArray(question.options);
     const key = question.id || question.key;
+    const mediaValue = mediaFiles[question.key];
 
     if (question.type === "textarea") {
       return (
@@ -258,6 +282,57 @@ export default function CampaignResponseForm({ campaign, turnstileSiteKey = "" }
               ))}
             </SelectContent>
           </Select>
+        </div>
+      );
+    }
+
+    if (question.type === "image" || question.type === "video") {
+      const acceptedType = question.type === "video" ? "video/*" : "image/*";
+      const helperText =
+        question.type === "video"
+          ? "Accepted: MP4, WEBM, MOV. Max size: 50MB."
+          : "Accepted: JPG, PNG, WEBP, GIF. Max size: 10MB.";
+
+      return (
+        <div key={key} className="space-y-2">
+          <Label htmlFor={key}>{question.label}</Label>
+          <Input
+            id={key}
+            ref={(element) => {
+              if (!element) {
+                delete mediaInputRefs.current[question.key];
+                return;
+              }
+              mediaInputRefs.current[question.key] = element;
+            }}
+            type="file"
+            accept={acceptedType}
+            required={question.required}
+            onChange={(event) => setMediaValue(question.key, event.target.files?.[0] || null)}
+          />
+          {mediaValue ? (
+            <div className="space-y-1">
+              <p className="text-xs text-[color:var(--ui-foreground)]">
+                Selected file: <span className="font-medium">{mediaValue.name}</span>
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setMediaValue(question.key, null);
+                  const inputElement = mediaInputRefs.current[question.key];
+                  if (inputElement) {
+                    inputElement.value = "";
+                  }
+                }}
+              >
+                Remove file
+              </Button>
+            </div>
+          ) : (
+            <p className="text-xs text-[color:var(--ui-muted-foreground)]">{helperText}</p>
+          )}
         </div>
       );
     }

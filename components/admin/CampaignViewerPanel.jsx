@@ -47,6 +47,24 @@ function getAnsweredCount(data) {
   return Object.values(data).filter((value) => String(value ?? "").trim()).length;
 }
 
+function normalizeMediaAnswer(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const mediaType = String(value.mediaType || "").trim().toLowerCase();
+  const url = String(value.url || "").trim();
+
+  if (!url || (mediaType !== "image" && mediaType !== "video")) {
+    return null;
+  }
+
+  return {
+    mediaType,
+    url,
+  };
+}
+
 function stringifyAnswerValue(value) {
   if (value == null || value === "") return "—";
 
@@ -56,6 +74,12 @@ function stringifyAnswerValue(value) {
   }
 
   if (typeof value === "object") {
+    const mediaAnswer = normalizeMediaAnswer(value);
+    if (mediaAnswer) {
+      const label = mediaAnswer.mediaType === "video" ? "Video" : "Image";
+      return `${label}: ${mediaAnswer.url}`;
+    }
+
     const entries = Object.entries(value);
     if (!entries.length) return "—";
     return entries
@@ -123,6 +147,11 @@ function hasMeaningfulValue(value) {
   }
 
   if (typeof value === "object") {
+    const mediaAnswer = normalizeMediaAnswer(value);
+    if (mediaAnswer) {
+      return Boolean(mediaAnswer.url);
+    }
+
     return Object.values(value).some((entry) => String(entry ?? "").trim());
   }
 
@@ -137,6 +166,11 @@ function normalizeExportValue(value) {
   }
 
   if (typeof value === "object") {
+    const mediaAnswer = normalizeMediaAnswer(value);
+    if (mediaAnswer) {
+      return mediaAnswer.url;
+    }
+
     return JSON.stringify(value);
   }
 

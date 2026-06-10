@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getAdminFromApiRequest } from "../../../../../../lib/auth";
-import { getCampaignResponsesForAdmin, isCampaignTableMissingError, toCsvString } from "../../../../../../lib/campaigns";
+import {
+  getCampaignResponsesForAdmin,
+  isCampaignTableMissingError,
+  stringifyCampaignResponseValue,
+  toCsvString,
+} from "../../../../../../lib/campaigns";
 
 const DEFAULT_PAGE_LIMIT = 50;
 const MAX_PAGE_LIMIT = 100;
@@ -20,7 +25,7 @@ function toExportRows(questions, responses) {
     };
 
     for (const question of questions) {
-      row[question.key] = response.data?.[question.key] ?? "";
+      row[question.key] = stringifyCampaignResponseValue(response.data?.[question.key]);
     }
 
     return row;

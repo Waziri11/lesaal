@@ -112,6 +112,11 @@ export type MediaAsset = Prisma.MediaAssetModel
  */
 export type AdminNote = Prisma.AdminNoteModel
 /**
+ * Model AdminProject
+ * 
+ */
+export type AdminProject = Prisma.AdminProjectModel
+/**
  * Model RateLimitEntry
  * 
  */

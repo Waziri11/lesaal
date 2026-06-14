@@ -99,6 +99,7 @@ model AdminUser {
   otpCodes           EmailOtpCode[]
   mediaAssets        MediaAsset[]
   notes              AdminNote[]
+  projects           AdminProject[]
   calendarItems      CalendarItem[]
   calendarDeliveries CalendarReminderDelivery[]
 }
@@ -310,6 +311,21 @@ model AdminNote {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([updatedAt])
+  @@index([adminId, updatedAt, id])
+}
+
+model AdminProject {
+  id          String    @id @default(cuid())
+  adminId     String
+  name        String
+  description String?
+  details     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  admin       AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([adminId])
   @@index([updatedAt])

@@ -398,6 +398,7 @@ export const ModelName = {
   EmailOtpCode: 'EmailOtpCode',
   MediaAsset: 'MediaAsset',
   AdminNote: 'AdminNote',
+  AdminProject: 'AdminProject',
   RateLimitEntry: 'RateLimitEntry',
   CalendarItem: 'CalendarItem',
   CalendarItemReminder: 'CalendarItemReminder',
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset" | "adminNote" | "rateLimitEntry" | "calendarItem" | "calendarItemReminder" | "calendarReminderDelivery"
+    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset" | "adminNote" | "adminProject" | "rateLimitEntry" | "calendarItem" | "calendarItemReminder" | "calendarReminderDelivery"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1457,6 +1458,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdminProject: {
+      payload: Prisma.$AdminProjectPayload<ExtArgs>
+      fields: Prisma.AdminProjectFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminProjectFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminProjectFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload>
+        }
+        findFirst: {
+          args: Prisma.AdminProjectFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminProjectFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload>
+        }
+        findMany: {
+          args: Prisma.AdminProjectFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload>[]
+        }
+        create: {
+          args: Prisma.AdminProjectCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload>
+        }
+        createMany: {
+          args: Prisma.AdminProjectCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminProjectCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload>[]
+        }
+        delete: {
+          args: Prisma.AdminProjectDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload>
+        }
+        update: {
+          args: Prisma.AdminProjectUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminProjectDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminProjectUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminProjectUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminProjectUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminProjectPayload>
+        }
+        aggregate: {
+          args: Prisma.AdminProjectAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminProject>
+        }
+        groupBy: {
+          args: Prisma.AdminProjectGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminProjectGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminProjectCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminProjectCountAggregateOutputType> | number
+        }
+      }
+    }
     RateLimitEntry: {
       payload: Prisma.$RateLimitEntryPayload<ExtArgs>
       fields: Prisma.RateLimitEntryFieldRefs
@@ -2002,6 +2077,19 @@ export const AdminNoteScalarFieldEnum = {
 export type AdminNoteScalarFieldEnum = (typeof AdminNoteScalarFieldEnum)[keyof typeof AdminNoteScalarFieldEnum]
 
 
+export const AdminProjectScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  name: 'name',
+  description: 'description',
+  details: 'details',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminProjectScalarFieldEnum = (typeof AdminProjectScalarFieldEnum)[keyof typeof AdminProjectScalarFieldEnum]
+
+
 export const RateLimitEntryScalarFieldEnum = {
   id: 'id',
   key: 'key',
@@ -2433,6 +2521,7 @@ export type GlobalOmitConfig = {
   emailOtpCode?: Prisma.EmailOtpCodeOmit
   mediaAsset?: Prisma.MediaAssetOmit
   adminNote?: Prisma.AdminNoteOmit
+  adminProject?: Prisma.AdminProjectOmit
   rateLimitEntry?: Prisma.RateLimitEntryOmit
   calendarItem?: Prisma.CalendarItemOmit
   calendarItemReminder?: Prisma.CalendarItemReminderOmit

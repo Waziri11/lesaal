@@ -65,6 +65,7 @@ export const ModelName = {
   EmailOtpCode: 'EmailOtpCode',
   MediaAsset: 'MediaAsset',
   AdminNote: 'AdminNote',
+  AdminProject: 'AdminProject',
   RateLimitEntry: 'RateLimitEntry',
   CalendarItem: 'CalendarItem',
   CalendarItemReminder: 'CalendarItemReminder',
@@ -295,6 +296,19 @@ export const AdminNoteScalarFieldEnum = {
 } as const
 
 export type AdminNoteScalarFieldEnum = (typeof AdminNoteScalarFieldEnum)[keyof typeof AdminNoteScalarFieldEnum]
+
+
+export const AdminProjectScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  name: 'name',
+  description: 'description',
+  details: 'details',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminProjectScalarFieldEnum = (typeof AdminProjectScalarFieldEnum)[keyof typeof AdminProjectScalarFieldEnum]
 
 
 export const RateLimitEntryScalarFieldEnum = {

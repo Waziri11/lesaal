@@ -93,6 +93,11 @@ export type AdminNote = Prisma.AdminNoteModel
  */
 export type AdminProject = Prisma.AdminProjectModel
 /**
+ * Model AdminGoogleDriveConnection
+ * 
+ */
+export type AdminGoogleDriveConnection = Prisma.AdminGoogleDriveConnectionModel
+/**
  * Model RateLimitEntry
  * 
  */

@@ -399,6 +399,7 @@ export const ModelName = {
   MediaAsset: 'MediaAsset',
   AdminNote: 'AdminNote',
   AdminProject: 'AdminProject',
+  AdminGoogleDriveConnection: 'AdminGoogleDriveConnection',
   RateLimitEntry: 'RateLimitEntry',
   CalendarItem: 'CalendarItem',
   CalendarItemReminder: 'CalendarItemReminder',
@@ -418,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset" | "adminNote" | "adminProject" | "rateLimitEntry" | "calendarItem" | "calendarItemReminder" | "calendarReminderDelivery"
+    modelProps: "adminUser" | "adminSession" | "landingPageConfig" | "landingSection" | "sectionItem" | "campaignFormField" | "campaignSubmission" | "campaign" | "campaignQuestion" | "campaignResponse" | "adminNotification" | "emailOtpCode" | "mediaAsset" | "adminNote" | "adminProject" | "adminGoogleDriveConnection" | "rateLimitEntry" | "calendarItem" | "calendarItemReminder" | "calendarReminderDelivery"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1532,6 +1533,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdminGoogleDriveConnection: {
+      payload: Prisma.$AdminGoogleDriveConnectionPayload<ExtArgs>
+      fields: Prisma.AdminGoogleDriveConnectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminGoogleDriveConnectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminGoogleDriveConnectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload>
+        }
+        findFirst: {
+          args: Prisma.AdminGoogleDriveConnectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminGoogleDriveConnectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload>
+        }
+        findMany: {
+          args: Prisma.AdminGoogleDriveConnectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload>[]
+        }
+        create: {
+          args: Prisma.AdminGoogleDriveConnectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload>
+        }
+        createMany: {
+          args: Prisma.AdminGoogleDriveConnectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminGoogleDriveConnectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload>[]
+        }
+        delete: {
+          args: Prisma.AdminGoogleDriveConnectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload>
+        }
+        update: {
+          args: Prisma.AdminGoogleDriveConnectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminGoogleDriveConnectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminGoogleDriveConnectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminGoogleDriveConnectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminGoogleDriveConnectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminGoogleDriveConnectionPayload>
+        }
+        aggregate: {
+          args: Prisma.AdminGoogleDriveConnectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminGoogleDriveConnection>
+        }
+        groupBy: {
+          args: Prisma.AdminGoogleDriveConnectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminGoogleDriveConnectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminGoogleDriveConnectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminGoogleDriveConnectionCountAggregateOutputType> | number
+        }
+      }
+    }
     RateLimitEntry: {
       payload: Prisma.$RateLimitEntryPayload<ExtArgs>
       fields: Prisma.RateLimitEntryFieldRefs
@@ -2083,11 +2158,30 @@ export const AdminProjectScalarFieldEnum = {
   name: 'name',
   description: 'description',
   details: 'details',
+  driveFolderId: 'driveFolderId',
+  driveFolderName: 'driveFolderName',
+  driveFolderUrl: 'driveFolderUrl',
+  driveFolderLinkedAt: 'driveFolderLinkedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type AdminProjectScalarFieldEnum = (typeof AdminProjectScalarFieldEnum)[keyof typeof AdminProjectScalarFieldEnum]
+
+
+export const AdminGoogleDriveConnectionScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  googleUserId: 'googleUserId',
+  googleEmail: 'googleEmail',
+  googleDisplayName: 'googleDisplayName',
+  refreshTokenEncrypted: 'refreshTokenEncrypted',
+  scopes: 'scopes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminGoogleDriveConnectionScalarFieldEnum = (typeof AdminGoogleDriveConnectionScalarFieldEnum)[keyof typeof AdminGoogleDriveConnectionScalarFieldEnum]
 
 
 export const RateLimitEntryScalarFieldEnum = {
@@ -2522,6 +2616,7 @@ export type GlobalOmitConfig = {
   mediaAsset?: Prisma.MediaAssetOmit
   adminNote?: Prisma.AdminNoteOmit
   adminProject?: Prisma.AdminProjectOmit
+  adminGoogleDriveConnection?: Prisma.AdminGoogleDriveConnectionOmit
   rateLimitEntry?: Prisma.RateLimitEntryOmit
   calendarItem?: Prisma.CalendarItemOmit
   calendarItemReminder?: Prisma.CalendarItemReminderOmit

@@ -66,6 +66,7 @@ export const ModelName = {
   MediaAsset: 'MediaAsset',
   AdminNote: 'AdminNote',
   AdminProject: 'AdminProject',
+  AdminGoogleDriveConnection: 'AdminGoogleDriveConnection',
   RateLimitEntry: 'RateLimitEntry',
   CalendarItem: 'CalendarItem',
   CalendarItemReminder: 'CalendarItemReminder',
@@ -304,11 +305,30 @@ export const AdminProjectScalarFieldEnum = {
   name: 'name',
   description: 'description',
   details: 'details',
+  driveFolderId: 'driveFolderId',
+  driveFolderName: 'driveFolderName',
+  driveFolderUrl: 'driveFolderUrl',
+  driveFolderLinkedAt: 'driveFolderLinkedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type AdminProjectScalarFieldEnum = (typeof AdminProjectScalarFieldEnum)[keyof typeof AdminProjectScalarFieldEnum]
+
+
+export const AdminGoogleDriveConnectionScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  googleUserId: 'googleUserId',
+  googleEmail: 'googleEmail',
+  googleDisplayName: 'googleDisplayName',
+  refreshTokenEncrypted: 'refreshTokenEncrypted',
+  scopes: 'scopes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminGoogleDriveConnectionScalarFieldEnum = (typeof AdminGoogleDriveConnectionScalarFieldEnum)[keyof typeof AdminGoogleDriveConnectionScalarFieldEnum]
 
 
 export const RateLimitEntryScalarFieldEnum = {

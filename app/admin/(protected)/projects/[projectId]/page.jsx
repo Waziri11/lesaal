@@ -1,17 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { ArrowLeft, Folder } from "lucide-react";
 import PageState from "../../../../../components/shared/PageState";
+import ProjectRepositoryPanel from "../../../../../components/admin/projects/ProjectRepositoryPanel";
 import { Badge } from "../../../../../components/ui/badge";
 import { Button } from "../../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../../components/ui/card";
-import { Input } from "../../../../../components/ui/input";
-import { Textarea } from "../../../../../components/ui/textarea";
-import { createCsrfHeaders } from "../../../../../lib/csrf-client";
-import Swal from "sweetalert2";
+
+const PROJECT_SECTIONS = [
+  { key: "info", label: "Project Info" },
+  { key: "plan", label: "Project Plan" },
+  { key: "progress", label: "Project Progress" },
+  { key: "repository", label: "Project Repository" },
+];
 
 function formatDateTime(value) {
   if (!value) return "";
@@ -20,23 +24,38 @@ function formatDateTime(value) {
   return parsed.toLocaleString();
 }
 
+function ProjectSectionPlaceholder({ title, description }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="inline-flex w-fit rounded-full border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] px-3 py-1 text-xs font-medium uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">
+          Placeholder
+        </p>
+        <p className="text-sm text-[color:var(--ui-muted-foreground)]">
+          This section is intentionally staged for the next release while repository integration is delivered first.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminProjectDetailsPage() {
   const params = useParams();
-  const router = useRouter();
   const rawProjectId = params?.projectId;
   const projectId = Array.isArray(rawProjectId) ? rawProjectId[0] : String(rawProjectId || "");
-
   const [project, setProject] = useState(null);
   const [loadingProject, setLoadingProject] = useState(true);
-  const [savingProject, setSavingProject] = useState(false);
-  const [deletingProject, setDeletingProject] = useState(false);
   const [statusError, setStatusError] = useState("");
-  const [statusMessage, setStatusMessage] = useState("");
-  const [editorDraft, setEditorDraft] = useState({
-    name: "",
-    description: "",
-    details: "",
-  });
+  const [activeSection, setActiveSection] = useState("repository");
+
+  const selectedSection = useMemo(
+    () => PROJECT_SECTIONS.find((section) => section.key === activeSection) || PROJECT_SECTIONS[0],
+    [activeSection]
+  );
 
   useEffect(() => {
     if (!projectId) {
@@ -45,144 +64,45 @@ export default function AdminProjectDetailsPage() {
       return;
     }
 
+    let isMounted = true;
+
+    async function loadProject(nextProjectId) {
+      setLoadingProject(true);
+      setStatusError("");
+
+      try {
+        const response = await fetch(`/api/admin/projects/${nextProjectId}`, { cache: "no-store" });
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Unable to load project.");
+        }
+
+        if (!isMounted) {
+          return;
+        }
+
+        setProject(payload.project || null);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setProject(null);
+        setStatusError(error.message || "Unable to load project.");
+      } finally {
+        if (isMounted) {
+          setLoadingProject(false);
+        }
+      }
+    }
+
     loadProject(projectId);
+
+    return () => {
+      isMounted = false;
+    };
   }, [projectId]);
-
-  useEffect(() => {
-    if (!project) {
-      setEditorDraft({
-        name: "",
-        description: "",
-        details: "",
-      });
-      return;
-    }
-
-    setEditorDraft({
-      name: project.name || "",
-      description: project.description || "",
-      details: project.details || "",
-    });
-  }, [project]);
-
-  async function loadProject(nextProjectId) {
-    setLoadingProject(true);
-    setStatusError("");
-
-    try {
-      const response = await fetch(`/api/admin/projects/${nextProjectId}`, { cache: "no-store" });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error || "Unable to load project.");
-      }
-
-      setProject(payload.project || null);
-    } catch (error) {
-      setProject(null);
-      setStatusError(error.message || "Unable to load project.");
-    } finally {
-      setLoadingProject(false);
-    }
-  }
-
-  async function handleSaveProject() {
-    if (!project || savingProject) return;
-
-    setSavingProject(true);
-    setStatusError("");
-    setStatusMessage("");
-
-    try {
-      const response = await fetch(`/api/admin/projects/${project.id}`, {
-        method: "PUT",
-        headers: createCsrfHeaders({
-          "Content-Type": "application/json",
-        }),
-        body: JSON.stringify({
-          name: editorDraft.name,
-          description: editorDraft.description,
-          details: editorDraft.details,
-        }),
-      });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error || "Unable to update project.");
-      }
-
-      if (payload.project) {
-        setProject(payload.project);
-      }
-      setStatusMessage("Project saved.");
-      router.refresh();
-    } catch (error) {
-      setStatusError(error.message || "Unable to update project.");
-      await Swal.fire({
-        icon: "error",
-        title: "Save failed",
-        text: error.message || "Unable to update project.",
-      });
-    } finally {
-      setSavingProject(false);
-    }
-  }
-
-  async function handleDeleteProject() {
-    if (!project || deletingProject) return;
-
-    const decision = await Swal.fire({
-      icon: "warning",
-      title: "Delete project?",
-      text: `Delete "${project.name}"?`,
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-      confirmButtonColor: "#dc2626",
-      reverseButtons: true,
-      focusCancel: true,
-    });
-
-    if (!decision.isConfirmed) {
-      return;
-    }
-
-    setDeletingProject(true);
-    setStatusError("");
-    setStatusMessage("");
-
-    try {
-      const response = await fetch(`/api/admin/projects/${project.id}`, {
-        method: "DELETE",
-        headers: createCsrfHeaders(),
-      });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error || "Unable to delete project.");
-      }
-
-      await Swal.fire({
-        icon: "success",
-        title: "Deleted",
-        text: "Project deleted successfully.",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-
-      router.push("/admin/projects");
-      router.refresh();
-    } catch (error) {
-      setStatusError(error.message || "Unable to delete project.");
-      await Swal.fire({
-        icon: "error",
-        title: "Delete failed",
-        text: error.message || "Unable to delete project.",
-      });
-    } finally {
-      setDeletingProject(false);
-    }
-  }
 
   if (loadingProject) {
     return <PageState status="loading" resourceLabel="project" />;
@@ -194,7 +114,6 @@ export default function AdminProjectDetailsPage() {
         status="error"
         resourceLabel="project"
         errorMessage={statusError || "Project not found."}
-        onRetry={() => loadProject(projectId)}
         createAction={
           <Button asChild>
             <Link href="/admin/projects">Back to Projects</Link>
@@ -220,97 +139,59 @@ export default function AdminProjectDetailsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Folder className="h-5 w-5" />
-            {project.name}
+            {project.name || "Untitled project"}
           </CardTitle>
           <CardDescription>
-            Project view for editing and reviewing project information. Additional modules can be added here later.
+            Project workspace is now structured into four sections. Repository sync is fully active in this release.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {statusError ? <p className="text-sm text-[color:var(--ui-destructive)]">{statusError}</p> : null}
-          {statusMessage ? <p className="text-sm text-[color:var(--ui-success)]">{statusMessage}</p> : null}
-        </CardContent>
       </Card>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Edit Project</CardTitle>
-            <CardDescription>Update the project information and save your changes.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Project Name</p>
-              <Input
-                value={editorDraft.name}
-                onChange={(event) => setEditorDraft((current) => ({ ...current, name: event.target.value }))}
-                placeholder="Project name"
-              />
-            </div>
+      <div className="inline-flex max-w-full flex-wrap items-center rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-muted)] p-1">
+        {PROJECT_SECTIONS.map((section) => {
+          const isActive = section.key === selectedSection.key;
 
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Short Description</p>
-              <Textarea
-                value={editorDraft.description}
-                onChange={(event) => setEditorDraft((current) => ({ ...current, description: event.target.value }))}
-                placeholder="What is this project about?"
-                className="min-h-[100px]"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Details</p>
-              <Textarea
-                value={editorDraft.details}
-                onChange={(event) => setEditorDraft((current) => ({ ...current, details: event.target.value }))}
-                placeholder="Notes, goals, milestones, and anything else for this project"
-                className="min-h-[380px]"
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={handleSaveProject} disabled={savingProject || deletingProject}>
-                {savingProject ? "Saving..." : "Save Changes"}
-              </Button>
-              <Button variant="destructive" onClick={handleDeleteProject} disabled={deletingProject || savingProject}>
-                {deletingProject ? "Deleting..." : "Delete Project"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Overview</CardTitle>
-            <CardDescription>Live preview of the current stored project information.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Name</p>
-              <p>{project.name || "Untitled project"}</p>
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Description</p>
-              <p className="whitespace-pre-wrap text-[color:var(--ui-muted-foreground)]">{project.description || "No description yet."}</p>
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Details</p>
-              <p className="max-h-[260px] overflow-auto whitespace-pre-wrap text-[color:var(--ui-muted-foreground)]">
-                {project.details || "No details yet."}
-              </p>
-            </div>
-
-            <div className="space-y-1 border-t border-[color:var(--ui-border)] pt-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Created</p>
-              <p className="text-[color:var(--ui-muted-foreground)]">{formatDateTime(project.createdAt)}</p>
-              <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-[color:var(--ui-muted-foreground)]">Updated</p>
-              <p className="text-[color:var(--ui-muted-foreground)]">{formatDateTime(project.updatedAt)}</p>
-            </div>
-          </CardContent>
-        </Card>
+          return (
+            <button
+              key={section.key}
+              type="button"
+              onClick={() => setActiveSection(section.key)}
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                isActive
+                  ? "bg-[color:var(--ui-surface)] text-[color:var(--ui-foreground)] shadow-sm"
+                  : "text-[color:var(--ui-muted-foreground)] hover:text-[color:var(--ui-foreground)]"
+              }`}
+            >
+              {section.label}
+            </button>
+          );
+        })}
       </div>
+
+      {selectedSection.key === "repository" ? (
+        <ProjectRepositoryPanel projectId={project.id} projectName={project.name} />
+      ) : null}
+
+      {selectedSection.key === "info" ? (
+        <ProjectSectionPlaceholder
+          title="Project Info"
+          description="Project information editor will be connected in a later phase."
+        />
+      ) : null}
+
+      {selectedSection.key === "plan" ? (
+        <ProjectSectionPlaceholder
+          title="Project Plan"
+          description="Planning workflows and milestones are staged for upcoming iterations."
+        />
+      ) : null}
+
+      {selectedSection.key === "progress" ? (
+        <ProjectSectionPlaceholder
+          title="Project Progress"
+          description="Progress tracking metrics and status timelines are coming next."
+        />
+      ) : null}
     </section>
   );
 }

@@ -30,6 +30,10 @@ export type AdminProjectMinAggregateOutputType = {
   name: string | null
   description: string | null
   details: string | null
+  driveFolderId: string | null
+  driveFolderName: string | null
+  driveFolderUrl: string | null
+  driveFolderLinkedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -40,6 +44,10 @@ export type AdminProjectMaxAggregateOutputType = {
   name: string | null
   description: string | null
   details: string | null
+  driveFolderId: string | null
+  driveFolderName: string | null
+  driveFolderUrl: string | null
+  driveFolderLinkedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +58,10 @@ export type AdminProjectCountAggregateOutputType = {
   name: number
   description: number
   details: number
+  driveFolderId: number
+  driveFolderName: number
+  driveFolderUrl: number
+  driveFolderLinkedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -62,6 +74,10 @@ export type AdminProjectMinAggregateInputType = {
   name?: true
   description?: true
   details?: true
+  driveFolderId?: true
+  driveFolderName?: true
+  driveFolderUrl?: true
+  driveFolderLinkedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -72,6 +88,10 @@ export type AdminProjectMaxAggregateInputType = {
   name?: true
   description?: true
   details?: true
+  driveFolderId?: true
+  driveFolderName?: true
+  driveFolderUrl?: true
+  driveFolderLinkedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -82,6 +102,10 @@ export type AdminProjectCountAggregateInputType = {
   name?: true
   description?: true
   details?: true
+  driveFolderId?: true
+  driveFolderName?: true
+  driveFolderUrl?: true
+  driveFolderLinkedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -165,6 +189,10 @@ export type AdminProjectGroupByOutputType = {
   name: string
   description: string | null
   details: string | null
+  driveFolderId: string | null
+  driveFolderName: string | null
+  driveFolderUrl: string | null
+  driveFolderLinkedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: AdminProjectCountAggregateOutputType | null
@@ -196,6 +224,10 @@ export type AdminProjectWhereInput = {
   name?: Prisma.StringFilter<"AdminProject"> | string
   description?: Prisma.StringNullableFilter<"AdminProject"> | string | null
   details?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderId?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderName?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderUrl?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderLinkedAt?: Prisma.DateTimeNullableFilter<"AdminProject"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminProject"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminProject"> | Date | string
   admin?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
@@ -207,6 +239,10 @@ export type AdminProjectOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   details?: Prisma.SortOrderInput | Prisma.SortOrder
+  driveFolderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  driveFolderName?: Prisma.SortOrderInput | Prisma.SortOrder
+  driveFolderUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  driveFolderLinkedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   admin?: Prisma.AdminUserOrderByWithRelationInput
@@ -221,6 +257,10 @@ export type AdminProjectWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"AdminProject"> | string
   description?: Prisma.StringNullableFilter<"AdminProject"> | string | null
   details?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderId?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderName?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderUrl?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderLinkedAt?: Prisma.DateTimeNullableFilter<"AdminProject"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminProject"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminProject"> | Date | string
   admin?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
@@ -232,6 +272,10 @@ export type AdminProjectOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   details?: Prisma.SortOrderInput | Prisma.SortOrder
+  driveFolderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  driveFolderName?: Prisma.SortOrderInput | Prisma.SortOrder
+  driveFolderUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  driveFolderLinkedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AdminProjectCountOrderByAggregateInput
@@ -248,6 +292,10 @@ export type AdminProjectScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"AdminProject"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"AdminProject"> | string | null
   details?: Prisma.StringNullableWithAggregatesFilter<"AdminProject"> | string | null
+  driveFolderId?: Prisma.StringNullableWithAggregatesFilter<"AdminProject"> | string | null
+  driveFolderName?: Prisma.StringNullableWithAggregatesFilter<"AdminProject"> | string | null
+  driveFolderUrl?: Prisma.StringNullableWithAggregatesFilter<"AdminProject"> | string | null
+  driveFolderLinkedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AdminProject"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AdminProject"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AdminProject"> | Date | string
 }
@@ -257,6 +305,10 @@ export type AdminProjectCreateInput = {
   name: string
   description?: string | null
   details?: string | null
+  driveFolderId?: string | null
+  driveFolderName?: string | null
+  driveFolderUrl?: string | null
+  driveFolderLinkedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   admin: Prisma.AdminUserCreateNestedOneWithoutProjectsInput
@@ -268,6 +320,10 @@ export type AdminProjectUncheckedCreateInput = {
   name: string
   description?: string | null
   details?: string | null
+  driveFolderId?: string | null
+  driveFolderName?: string | null
+  driveFolderUrl?: string | null
+  driveFolderLinkedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -277,6 +333,10 @@ export type AdminProjectUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderLinkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   admin?: Prisma.AdminUserUpdateOneRequiredWithoutProjectsNestedInput
@@ -288,6 +348,10 @@ export type AdminProjectUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderLinkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -298,6 +362,10 @@ export type AdminProjectCreateManyInput = {
   name: string
   description?: string | null
   details?: string | null
+  driveFolderId?: string | null
+  driveFolderName?: string | null
+  driveFolderUrl?: string | null
+  driveFolderLinkedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -307,6 +375,10 @@ export type AdminProjectUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderLinkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -317,6 +389,10 @@ export type AdminProjectUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderLinkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -337,6 +413,10 @@ export type AdminProjectCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   details?: Prisma.SortOrder
+  driveFolderId?: Prisma.SortOrder
+  driveFolderName?: Prisma.SortOrder
+  driveFolderUrl?: Prisma.SortOrder
+  driveFolderLinkedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -347,6 +427,10 @@ export type AdminProjectMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   details?: Prisma.SortOrder
+  driveFolderId?: Prisma.SortOrder
+  driveFolderName?: Prisma.SortOrder
+  driveFolderUrl?: Prisma.SortOrder
+  driveFolderLinkedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -357,6 +441,10 @@ export type AdminProjectMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   details?: Prisma.SortOrder
+  driveFolderId?: Prisma.SortOrder
+  driveFolderName?: Prisma.SortOrder
+  driveFolderUrl?: Prisma.SortOrder
+  driveFolderLinkedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -408,6 +496,10 @@ export type AdminProjectCreateWithoutAdminInput = {
   name: string
   description?: string | null
   details?: string | null
+  driveFolderId?: string | null
+  driveFolderName?: string | null
+  driveFolderUrl?: string | null
+  driveFolderLinkedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -417,6 +509,10 @@ export type AdminProjectUncheckedCreateWithoutAdminInput = {
   name: string
   description?: string | null
   details?: string | null
+  driveFolderId?: string | null
+  driveFolderName?: string | null
+  driveFolderUrl?: string | null
+  driveFolderLinkedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -456,6 +552,10 @@ export type AdminProjectScalarWhereInput = {
   name?: Prisma.StringFilter<"AdminProject"> | string
   description?: Prisma.StringNullableFilter<"AdminProject"> | string | null
   details?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderId?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderName?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderUrl?: Prisma.StringNullableFilter<"AdminProject"> | string | null
+  driveFolderLinkedAt?: Prisma.DateTimeNullableFilter<"AdminProject"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminProject"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminProject"> | Date | string
 }
@@ -465,6 +565,10 @@ export type AdminProjectCreateManyAdminInput = {
   name: string
   description?: string | null
   details?: string | null
+  driveFolderId?: string | null
+  driveFolderName?: string | null
+  driveFolderUrl?: string | null
+  driveFolderLinkedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -474,6 +578,10 @@ export type AdminProjectUpdateWithoutAdminInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderLinkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -483,6 +591,10 @@ export type AdminProjectUncheckedUpdateWithoutAdminInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderLinkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -492,6 +604,10 @@ export type AdminProjectUncheckedUpdateManyWithoutAdminInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  driveFolderLinkedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -504,6 +620,10 @@ export type AdminProjectSelect<ExtArgs extends runtime.Types.Extensions.Internal
   name?: boolean
   description?: boolean
   details?: boolean
+  driveFolderId?: boolean
+  driveFolderName?: boolean
+  driveFolderUrl?: boolean
+  driveFolderLinkedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
@@ -515,6 +635,10 @@ export type AdminProjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   name?: boolean
   description?: boolean
   details?: boolean
+  driveFolderId?: boolean
+  driveFolderName?: boolean
+  driveFolderUrl?: boolean
+  driveFolderLinkedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
@@ -526,6 +650,10 @@ export type AdminProjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   name?: boolean
   description?: boolean
   details?: boolean
+  driveFolderId?: boolean
+  driveFolderName?: boolean
+  driveFolderUrl?: boolean
+  driveFolderLinkedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
@@ -537,11 +665,15 @@ export type AdminProjectSelectScalar = {
   name?: boolean
   description?: boolean
   details?: boolean
+  driveFolderId?: boolean
+  driveFolderName?: boolean
+  driveFolderUrl?: boolean
+  driveFolderLinkedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AdminProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminId" | "name" | "description" | "details" | "createdAt" | "updatedAt", ExtArgs["result"]["adminProject"]>
+export type AdminProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminId" | "name" | "description" | "details" | "driveFolderId" | "driveFolderName" | "driveFolderUrl" | "driveFolderLinkedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["adminProject"]>
 export type AdminProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }
@@ -563,6 +695,10 @@ export type $AdminProjectPayload<ExtArgs extends runtime.Types.Extensions.Intern
     name: string
     description: string | null
     details: string | null
+    driveFolderId: string | null
+    driveFolderName: string | null
+    driveFolderUrl: string | null
+    driveFolderLinkedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["adminProject"]>
@@ -994,6 +1130,10 @@ export interface AdminProjectFieldRefs {
   readonly name: Prisma.FieldRef<"AdminProject", 'String'>
   readonly description: Prisma.FieldRef<"AdminProject", 'String'>
   readonly details: Prisma.FieldRef<"AdminProject", 'String'>
+  readonly driveFolderId: Prisma.FieldRef<"AdminProject", 'String'>
+  readonly driveFolderName: Prisma.FieldRef<"AdminProject", 'String'>
+  readonly driveFolderUrl: Prisma.FieldRef<"AdminProject", 'String'>
+  readonly driveFolderLinkedAt: Prisma.FieldRef<"AdminProject", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"AdminProject", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AdminProject", 'DateTime'>
 }

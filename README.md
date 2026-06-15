@@ -43,8 +43,17 @@ Create `.env` from `.env.example` and configure:
 - `NOTIFY_EMAIL`
 - `RATE_LIMIT_WINDOW_MINUTES`, `RATE_LIMIT_MAX_LOGIN_IP`, `RATE_LIMIT_MAX_LOGIN_EMAIL`
 - `RATE_LIMIT_MAX_PUBLIC_IP`, `RATE_LIMIT_MAX_PUBLIC_CAMPAIGN_IP`, `RATE_LIMIT_MAX_OTP_REQUESTS`
+- `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`
+- `GOOGLE_DRIVE_DEVELOPER_KEY`, `GOOGLE_DRIVE_APP_ID`
+- `GOOGLE_DRIVE_TOKEN_ENCRYPTION_KEY` (32-byte key in base64)
 
 For Gmail SMTP, use a Gmail app password (not your normal account password).
+
+Generate a strong Google token encryption key locally:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
 
 ### Vercel deployment note
 

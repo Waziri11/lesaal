@@ -270,6 +270,7 @@ export type AdminUserWhereInput = {
   googleDriveConnection?: Prisma.XOR<Prisma.AdminGoogleDriveConnectionNullableScalarRelationFilter, Prisma.AdminGoogleDriveConnectionWhereInput> | null
   calendarItems?: Prisma.CalendarItemListRelationFilter
   calendarDeliveries?: Prisma.CalendarReminderDeliveryListRelationFilter
+  notifications?: Prisma.AdminNotificationListRelationFilter
 }
 
 export type AdminUserOrderByWithRelationInput = {
@@ -296,6 +297,7 @@ export type AdminUserOrderByWithRelationInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionOrderByWithRelationInput
   calendarItems?: Prisma.CalendarItemOrderByRelationAggregateInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryOrderByRelationAggregateInput
+  notifications?: Prisma.AdminNotificationOrderByRelationAggregateInput
 }
 
 export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
@@ -325,6 +327,7 @@ export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
   googleDriveConnection?: Prisma.XOR<Prisma.AdminGoogleDriveConnectionNullableScalarRelationFilter, Prisma.AdminGoogleDriveConnectionWhereInput> | null
   calendarItems?: Prisma.CalendarItemListRelationFilter
   calendarDeliveries?: Prisma.CalendarReminderDeliveryListRelationFilter
+  notifications?: Prisma.AdminNotificationListRelationFilter
 }, "id" | "email">
 
 export type AdminUserOrderByWithAggregationInput = {
@@ -393,6 +396,7 @@ export type AdminUserCreateInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateInput = {
@@ -419,6 +423,7 @@ export type AdminUserUncheckedCreateInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUpdateInput = {
@@ -445,6 +450,7 @@ export type AdminUserUpdateInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateInput = {
@@ -471,6 +477,7 @@ export type AdminUserUncheckedUpdateInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateManyInput = {
@@ -621,6 +628,20 @@ export type AdminUserUpdateOneRequiredWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AdminUserUpdateToOneWithWhereWithoutSessionsInput, Prisma.AdminUserUpdateWithoutSessionsInput>, Prisma.AdminUserUncheckedUpdateWithoutSessionsInput>
 }
 
+export type AdminUserCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutNotificationsInput, Prisma.AdminUserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+}
+
+export type AdminUserUpdateOneRequiredWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutNotificationsInput, Prisma.AdminUserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.AdminUserUpsertWithoutNotificationsInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdminUserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.AdminUserUpdateWithoutNotificationsInput>, Prisma.AdminUserUncheckedUpdateWithoutNotificationsInput>
+}
+
 export type AdminUserCreateNestedOneWithoutOtpCodesInput = {
   create?: Prisma.XOR<Prisma.AdminUserCreateWithoutOtpCodesInput, Prisma.AdminUserUncheckedCreateWithoutOtpCodesInput>
   connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutOtpCodesInput
@@ -744,6 +765,7 @@ export type AdminUserCreateWithoutSessionsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutSessionsInput = {
@@ -769,6 +791,7 @@ export type AdminUserUncheckedCreateWithoutSessionsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutSessionsInput = {
@@ -810,6 +833,7 @@ export type AdminUserUpdateWithoutSessionsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutSessionsInput = {
@@ -828,6 +852,127 @@ export type AdminUserUncheckedUpdateWithoutSessionsInput = {
   ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
+  mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
+  projects?: Prisma.AdminProjectUncheckedUpdateManyWithoutAdminNestedInput
+  googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedUpdateOneWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput
+}
+
+export type AdminUserCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  profileImageUrl?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AdminSessionCreateNestedManyWithoutAdminInput
+  otpCodes?: Prisma.EmailOtpCodeCreateNestedManyWithoutAdminInput
+  mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteCreateNestedManyWithoutAdminInput
+  projects?: Prisma.AdminProjectCreateNestedManyWithoutAdminInput
+  googleDriveConnection?: Prisma.AdminGoogleDriveConnectionCreateNestedOneWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+}
+
+export type AdminUserUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  firstName?: string | null
+  lastName?: string | null
+  birthDate?: Date | string | null
+  companyName?: string
+  companyDescription?: string | null
+  profileImageUrl?: string | null
+  gender?: string | null
+  region?: string | null
+  district?: string | null
+  ward?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AdminSessionUncheckedCreateNestedManyWithoutAdminInput
+  otpCodes?: Prisma.EmailOtpCodeUncheckedCreateNestedManyWithoutAdminInput
+  mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  notes?: Prisma.AdminNoteUncheckedCreateNestedManyWithoutAdminInput
+  projects?: Prisma.AdminProjectUncheckedCreateNestedManyWithoutAdminInput
+  googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedCreateNestedOneWithoutAdminInput
+  calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+}
+
+export type AdminUserCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.AdminUserWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutNotificationsInput, Prisma.AdminUserUncheckedCreateWithoutNotificationsInput>
+}
+
+export type AdminUserUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.AdminUserUpdateWithoutNotificationsInput, Prisma.AdminUserUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutNotificationsInput, Prisma.AdminUserUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.AdminUserWhereInput
+}
+
+export type AdminUserUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.AdminUserWhereInput
+  data: Prisma.XOR<Prisma.AdminUserUpdateWithoutNotificationsInput, Prisma.AdminUserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type AdminUserUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AdminSessionUpdateManyWithoutAdminNestedInput
+  otpCodes?: Prisma.EmailOtpCodeUpdateManyWithoutAdminNestedInput
+  mediaAssets?: Prisma.MediaAssetUpdateManyWithoutUploadedByNestedInput
+  notes?: Prisma.AdminNoteUpdateManyWithoutAdminNestedInput
+  projects?: Prisma.AdminProjectUpdateManyWithoutAdminNestedInput
+  googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUpdateOneWithoutAdminNestedInput
+  calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
+  calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+}
+
+export type AdminUserUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  companyDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ward?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AdminSessionUncheckedUpdateManyWithoutAdminNestedInput
   otpCodes?: Prisma.EmailOtpCodeUncheckedUpdateManyWithoutAdminNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutUploadedByNestedInput
   notes?: Prisma.AdminNoteUncheckedUpdateManyWithoutAdminNestedInput
@@ -860,6 +1005,7 @@ export type AdminUserCreateWithoutOtpCodesInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutOtpCodesInput = {
@@ -885,6 +1031,7 @@ export type AdminUserUncheckedCreateWithoutOtpCodesInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutOtpCodesInput = {
@@ -926,6 +1073,7 @@ export type AdminUserUpdateWithoutOtpCodesInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutOtpCodesInput = {
@@ -951,6 +1099,7 @@ export type AdminUserUncheckedUpdateWithoutOtpCodesInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutMediaAssetsInput = {
@@ -976,6 +1125,7 @@ export type AdminUserCreateWithoutMediaAssetsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutMediaAssetsInput = {
@@ -1001,6 +1151,7 @@ export type AdminUserUncheckedCreateWithoutMediaAssetsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutMediaAssetsInput = {
@@ -1042,6 +1193,7 @@ export type AdminUserUpdateWithoutMediaAssetsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutMediaAssetsInput = {
@@ -1067,6 +1219,7 @@ export type AdminUserUncheckedUpdateWithoutMediaAssetsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutNotesInput = {
@@ -1092,6 +1245,7 @@ export type AdminUserCreateWithoutNotesInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutNotesInput = {
@@ -1117,6 +1271,7 @@ export type AdminUserUncheckedCreateWithoutNotesInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutNotesInput = {
@@ -1158,6 +1313,7 @@ export type AdminUserUpdateWithoutNotesInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutNotesInput = {
@@ -1183,6 +1339,7 @@ export type AdminUserUncheckedUpdateWithoutNotesInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutProjectsInput = {
@@ -1208,6 +1365,7 @@ export type AdminUserCreateWithoutProjectsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutProjectsInput = {
@@ -1233,6 +1391,7 @@ export type AdminUserUncheckedCreateWithoutProjectsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutProjectsInput = {
@@ -1274,6 +1433,7 @@ export type AdminUserUpdateWithoutProjectsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutProjectsInput = {
@@ -1299,6 +1459,7 @@ export type AdminUserUncheckedUpdateWithoutProjectsInput = {
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutGoogleDriveConnectionInput = {
@@ -1324,6 +1485,7 @@ export type AdminUserCreateWithoutGoogleDriveConnectionInput = {
   projects?: Prisma.AdminProjectCreateNestedManyWithoutAdminInput
   calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutGoogleDriveConnectionInput = {
@@ -1349,6 +1511,7 @@ export type AdminUserUncheckedCreateWithoutGoogleDriveConnectionInput = {
   projects?: Prisma.AdminProjectUncheckedCreateNestedManyWithoutAdminInput
   calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutGoogleDriveConnectionInput = {
@@ -1390,6 +1553,7 @@ export type AdminUserUpdateWithoutGoogleDriveConnectionInput = {
   projects?: Prisma.AdminProjectUpdateManyWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutGoogleDriveConnectionInput = {
@@ -1415,6 +1579,7 @@ export type AdminUserUncheckedUpdateWithoutGoogleDriveConnectionInput = {
   projects?: Prisma.AdminProjectUncheckedUpdateManyWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutCalendarItemsInput = {
@@ -1440,6 +1605,7 @@ export type AdminUserCreateWithoutCalendarItemsInput = {
   projects?: Prisma.AdminProjectCreateNestedManyWithoutAdminInput
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionCreateNestedOneWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutCalendarItemsInput = {
@@ -1465,6 +1631,7 @@ export type AdminUserUncheckedCreateWithoutCalendarItemsInput = {
   projects?: Prisma.AdminProjectUncheckedCreateNestedManyWithoutAdminInput
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedCreateNestedOneWithoutAdminInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutCalendarItemsInput = {
@@ -1506,6 +1673,7 @@ export type AdminUserUpdateWithoutCalendarItemsInput = {
   projects?: Prisma.AdminProjectUpdateManyWithoutAdminNestedInput
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUpdateOneWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutCalendarItemsInput = {
@@ -1531,6 +1699,7 @@ export type AdminUserUncheckedUpdateWithoutCalendarItemsInput = {
   projects?: Prisma.AdminProjectUncheckedUpdateManyWithoutAdminNestedInput
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedUpdateOneWithoutAdminNestedInput
   calendarDeliveries?: Prisma.CalendarReminderDeliveryUncheckedUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserCreateWithoutCalendarDeliveriesInput = {
@@ -1556,6 +1725,7 @@ export type AdminUserCreateWithoutCalendarDeliveriesInput = {
   projects?: Prisma.AdminProjectCreateNestedManyWithoutAdminInput
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserUncheckedCreateWithoutCalendarDeliveriesInput = {
@@ -1581,6 +1751,7 @@ export type AdminUserUncheckedCreateWithoutCalendarDeliveriesInput = {
   projects?: Prisma.AdminProjectUncheckedCreateNestedManyWithoutAdminInput
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedCreateNestedOneWithoutAdminInput
   calendarItems?: Prisma.CalendarItemUncheckedCreateNestedManyWithoutAdminInput
+  notifications?: Prisma.AdminNotificationUncheckedCreateNestedManyWithoutAdminInput
 }
 
 export type AdminUserCreateOrConnectWithoutCalendarDeliveriesInput = {
@@ -1622,6 +1793,7 @@ export type AdminUserUpdateWithoutCalendarDeliveriesInput = {
   projects?: Prisma.AdminProjectUpdateManyWithoutAdminNestedInput
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUpdateManyWithoutAdminNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutCalendarDeliveriesInput = {
@@ -1647,6 +1819,7 @@ export type AdminUserUncheckedUpdateWithoutCalendarDeliveriesInput = {
   projects?: Prisma.AdminProjectUncheckedUpdateManyWithoutAdminNestedInput
   googleDriveConnection?: Prisma.AdminGoogleDriveConnectionUncheckedUpdateOneWithoutAdminNestedInput
   calendarItems?: Prisma.CalendarItemUncheckedUpdateManyWithoutAdminNestedInput
+  notifications?: Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 
@@ -1662,6 +1835,7 @@ export type AdminUserCountOutputType = {
   projects: number
   calendarItems: number
   calendarDeliveries: number
+  notifications: number
 }
 
 export type AdminUserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1672,6 +1846,7 @@ export type AdminUserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   projects?: boolean | AdminUserCountOutputTypeCountProjectsArgs
   calendarItems?: boolean | AdminUserCountOutputTypeCountCalendarItemsArgs
   calendarDeliveries?: boolean | AdminUserCountOutputTypeCountCalendarDeliveriesArgs
+  notifications?: boolean | AdminUserCountOutputTypeCountNotificationsArgs
 }
 
 /**
@@ -1733,6 +1908,13 @@ export type AdminUserCountOutputTypeCountCalendarDeliveriesArgs<ExtArgs extends 
   where?: Prisma.CalendarReminderDeliveryWhereInput
 }
 
+/**
+ * AdminUserCountOutputType without action
+ */
+export type AdminUserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AdminNotificationWhereInput
+}
+
 
 export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1758,6 +1940,7 @@ export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   googleDriveConnection?: boolean | Prisma.AdminUser$googleDriveConnectionArgs<ExtArgs>
   calendarItems?: boolean | Prisma.AdminUser$calendarItemsArgs<ExtArgs>
   calendarDeliveries?: boolean | Prisma.AdminUser$calendarDeliveriesArgs<ExtArgs>
+  notifications?: boolean | Prisma.AdminUser$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.AdminUserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["adminUser"]>
 
@@ -1825,6 +2008,7 @@ export type AdminUserInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   googleDriveConnection?: boolean | Prisma.AdminUser$googleDriveConnectionArgs<ExtArgs>
   calendarItems?: boolean | Prisma.AdminUser$calendarItemsArgs<ExtArgs>
   calendarDeliveries?: boolean | Prisma.AdminUser$calendarDeliveriesArgs<ExtArgs>
+  notifications?: boolean | Prisma.AdminUser$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.AdminUserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AdminUserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1841,6 +2025,7 @@ export type $AdminUserPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     googleDriveConnection: Prisma.$AdminGoogleDriveConnectionPayload<ExtArgs> | null
     calendarItems: Prisma.$CalendarItemPayload<ExtArgs>[]
     calendarDeliveries: Prisma.$CalendarReminderDeliveryPayload<ExtArgs>[]
+    notifications: Prisma.$AdminNotificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2260,6 +2445,7 @@ export interface Prisma__AdminUserClient<T, Null = never, ExtArgs extends runtim
   googleDriveConnection<T extends Prisma.AdminUser$googleDriveConnectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$googleDriveConnectionArgs<ExtArgs>>): Prisma.Prisma__AdminGoogleDriveConnectionClient<runtime.Types.Result.GetResult<Prisma.$AdminGoogleDriveConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   calendarItems<T extends Prisma.AdminUser$calendarItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$calendarItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CalendarItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   calendarDeliveries<T extends Prisma.AdminUser$calendarDeliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$calendarDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CalendarReminderDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.AdminUser$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminNotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2881,6 +3067,30 @@ export type AdminUser$calendarDeliveriesArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.CalendarReminderDeliveryScalarFieldEnum | Prisma.CalendarReminderDeliveryScalarFieldEnum[]
+}
+
+/**
+ * AdminUser.notifications
+ */
+export type AdminUser$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AdminNotification
+   */
+  select?: Prisma.AdminNotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AdminNotification
+   */
+  omit?: Prisma.AdminNotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminNotificationInclude<ExtArgs> | null
+  where?: Prisma.AdminNotificationWhereInput
+  orderBy?: Prisma.AdminNotificationOrderByWithRelationInput | Prisma.AdminNotificationOrderByWithRelationInput[]
+  cursor?: Prisma.AdminNotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AdminNotificationScalarFieldEnum | Prisma.AdminNotificationScalarFieldEnum[]
 }
 
 /**

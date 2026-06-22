@@ -26,6 +26,7 @@ export type AggregateAdminNotification = {
 
 export type AdminNotificationMinAggregateOutputType = {
   id: string | null
+  adminId: string | null
   type: string | null
   title: string | null
   message: string | null
@@ -38,6 +39,7 @@ export type AdminNotificationMinAggregateOutputType = {
 
 export type AdminNotificationMaxAggregateOutputType = {
   id: string | null
+  adminId: string | null
   type: string | null
   title: string | null
   message: string | null
@@ -50,6 +52,7 @@ export type AdminNotificationMaxAggregateOutputType = {
 
 export type AdminNotificationCountAggregateOutputType = {
   id: number
+  adminId: number
   type: number
   title: number
   message: number
@@ -65,6 +68,7 @@ export type AdminNotificationCountAggregateOutputType = {
 
 export type AdminNotificationMinAggregateInputType = {
   id?: true
+  adminId?: true
   type?: true
   title?: true
   message?: true
@@ -77,6 +81,7 @@ export type AdminNotificationMinAggregateInputType = {
 
 export type AdminNotificationMaxAggregateInputType = {
   id?: true
+  adminId?: true
   type?: true
   title?: true
   message?: true
@@ -89,6 +94,7 @@ export type AdminNotificationMaxAggregateInputType = {
 
 export type AdminNotificationCountAggregateInputType = {
   id?: true
+  adminId?: true
   type?: true
   title?: true
   message?: true
@@ -175,6 +181,7 @@ export type AdminNotificationGroupByArgs<ExtArgs extends runtime.Types.Extension
 
 export type AdminNotificationGroupByOutputType = {
   id: string
+  adminId: string
   type: string
   title: string
   message: string
@@ -209,6 +216,7 @@ export type AdminNotificationWhereInput = {
   OR?: Prisma.AdminNotificationWhereInput[]
   NOT?: Prisma.AdminNotificationWhereInput | Prisma.AdminNotificationWhereInput[]
   id?: Prisma.StringFilter<"AdminNotification"> | string
+  adminId?: Prisma.StringFilter<"AdminNotification"> | string
   type?: Prisma.StringFilter<"AdminNotification"> | string
   title?: Prisma.StringFilter<"AdminNotification"> | string
   message?: Prisma.StringFilter<"AdminNotification"> | string
@@ -218,12 +226,14 @@ export type AdminNotificationWhereInput = {
   campaignId?: Prisma.StringNullableFilter<"AdminNotification"> | string | null
   campaignResponseId?: Prisma.StringNullableFilter<"AdminNotification"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminNotification"> | Date | string
+  admin?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
   campaign?: Prisma.XOR<Prisma.CampaignNullableScalarRelationFilter, Prisma.CampaignWhereInput> | null
   campaignResponse?: Prisma.XOR<Prisma.CampaignResponseNullableScalarRelationFilter, Prisma.CampaignResponseWhereInput> | null
 }
 
 export type AdminNotificationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  adminId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
   message?: Prisma.SortOrder
@@ -233,6 +243,7 @@ export type AdminNotificationOrderByWithRelationInput = {
   campaignId?: Prisma.SortOrderInput | Prisma.SortOrder
   campaignResponseId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  admin?: Prisma.AdminUserOrderByWithRelationInput
   campaign?: Prisma.CampaignOrderByWithRelationInput
   campaignResponse?: Prisma.CampaignResponseOrderByWithRelationInput
 }
@@ -242,6 +253,7 @@ export type AdminNotificationWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.AdminNotificationWhereInput | Prisma.AdminNotificationWhereInput[]
   OR?: Prisma.AdminNotificationWhereInput[]
   NOT?: Prisma.AdminNotificationWhereInput | Prisma.AdminNotificationWhereInput[]
+  adminId?: Prisma.StringFilter<"AdminNotification"> | string
   type?: Prisma.StringFilter<"AdminNotification"> | string
   title?: Prisma.StringFilter<"AdminNotification"> | string
   message?: Prisma.StringFilter<"AdminNotification"> | string
@@ -251,12 +263,14 @@ export type AdminNotificationWhereUniqueInput = Prisma.AtLeast<{
   campaignId?: Prisma.StringNullableFilter<"AdminNotification"> | string | null
   campaignResponseId?: Prisma.StringNullableFilter<"AdminNotification"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminNotification"> | Date | string
+  admin?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
   campaign?: Prisma.XOR<Prisma.CampaignNullableScalarRelationFilter, Prisma.CampaignWhereInput> | null
   campaignResponse?: Prisma.XOR<Prisma.CampaignResponseNullableScalarRelationFilter, Prisma.CampaignResponseWhereInput> | null
 }, "id">
 
 export type AdminNotificationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  adminId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
   message?: Prisma.SortOrder
@@ -276,6 +290,7 @@ export type AdminNotificationScalarWhereWithAggregatesInput = {
   OR?: Prisma.AdminNotificationScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AdminNotificationScalarWhereWithAggregatesInput | Prisma.AdminNotificationScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"AdminNotification"> | string
+  adminId?: Prisma.StringWithAggregatesFilter<"AdminNotification"> | string
   type?: Prisma.StringWithAggregatesFilter<"AdminNotification"> | string
   title?: Prisma.StringWithAggregatesFilter<"AdminNotification"> | string
   message?: Prisma.StringWithAggregatesFilter<"AdminNotification"> | string
@@ -296,12 +311,14 @@ export type AdminNotificationCreateInput = {
   readAt?: Date | string | null
   payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  admin: Prisma.AdminUserCreateNestedOneWithoutNotificationsInput
   campaign?: Prisma.CampaignCreateNestedOneWithoutNotificationsInput
   campaignResponse?: Prisma.CampaignResponseCreateNestedOneWithoutNotificationsInput
 }
 
 export type AdminNotificationUncheckedCreateInput = {
   id?: string
+  adminId: string
   type: string
   title: string
   message: string
@@ -322,12 +339,14 @@ export type AdminNotificationUpdateInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  admin?: Prisma.AdminUserUpdateOneRequiredWithoutNotificationsNestedInput
   campaign?: Prisma.CampaignUpdateOneWithoutNotificationsNestedInput
   campaignResponse?: Prisma.CampaignResponseUpdateOneWithoutNotificationsNestedInput
 }
 
 export type AdminNotificationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  adminId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
@@ -341,6 +360,7 @@ export type AdminNotificationUncheckedUpdateInput = {
 
 export type AdminNotificationCreateManyInput = {
   id?: string
+  adminId: string
   type: string
   title: string
   message: string
@@ -365,6 +385,7 @@ export type AdminNotificationUpdateManyMutationInput = {
 
 export type AdminNotificationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  adminId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
@@ -388,6 +409,7 @@ export type AdminNotificationOrderByRelationAggregateInput = {
 
 export type AdminNotificationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  adminId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
   message?: Prisma.SortOrder
@@ -401,6 +423,7 @@ export type AdminNotificationCountOrderByAggregateInput = {
 
 export type AdminNotificationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  adminId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
   message?: Prisma.SortOrder
@@ -413,6 +436,7 @@ export type AdminNotificationMaxOrderByAggregateInput = {
 
 export type AdminNotificationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  adminId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
   message?: Prisma.SortOrder
@@ -421,6 +445,48 @@ export type AdminNotificationMinOrderByAggregateInput = {
   campaignId?: Prisma.SortOrder
   campaignResponseId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type AdminNotificationCreateNestedManyWithoutAdminInput = {
+  create?: Prisma.XOR<Prisma.AdminNotificationCreateWithoutAdminInput, Prisma.AdminNotificationUncheckedCreateWithoutAdminInput> | Prisma.AdminNotificationCreateWithoutAdminInput[] | Prisma.AdminNotificationUncheckedCreateWithoutAdminInput[]
+  connectOrCreate?: Prisma.AdminNotificationCreateOrConnectWithoutAdminInput | Prisma.AdminNotificationCreateOrConnectWithoutAdminInput[]
+  createMany?: Prisma.AdminNotificationCreateManyAdminInputEnvelope
+  connect?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+}
+
+export type AdminNotificationUncheckedCreateNestedManyWithoutAdminInput = {
+  create?: Prisma.XOR<Prisma.AdminNotificationCreateWithoutAdminInput, Prisma.AdminNotificationUncheckedCreateWithoutAdminInput> | Prisma.AdminNotificationCreateWithoutAdminInput[] | Prisma.AdminNotificationUncheckedCreateWithoutAdminInput[]
+  connectOrCreate?: Prisma.AdminNotificationCreateOrConnectWithoutAdminInput | Prisma.AdminNotificationCreateOrConnectWithoutAdminInput[]
+  createMany?: Prisma.AdminNotificationCreateManyAdminInputEnvelope
+  connect?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+}
+
+export type AdminNotificationUpdateManyWithoutAdminNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminNotificationCreateWithoutAdminInput, Prisma.AdminNotificationUncheckedCreateWithoutAdminInput> | Prisma.AdminNotificationCreateWithoutAdminInput[] | Prisma.AdminNotificationUncheckedCreateWithoutAdminInput[]
+  connectOrCreate?: Prisma.AdminNotificationCreateOrConnectWithoutAdminInput | Prisma.AdminNotificationCreateOrConnectWithoutAdminInput[]
+  upsert?: Prisma.AdminNotificationUpsertWithWhereUniqueWithoutAdminInput | Prisma.AdminNotificationUpsertWithWhereUniqueWithoutAdminInput[]
+  createMany?: Prisma.AdminNotificationCreateManyAdminInputEnvelope
+  set?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+  disconnect?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+  delete?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+  connect?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+  update?: Prisma.AdminNotificationUpdateWithWhereUniqueWithoutAdminInput | Prisma.AdminNotificationUpdateWithWhereUniqueWithoutAdminInput[]
+  updateMany?: Prisma.AdminNotificationUpdateManyWithWhereWithoutAdminInput | Prisma.AdminNotificationUpdateManyWithWhereWithoutAdminInput[]
+  deleteMany?: Prisma.AdminNotificationScalarWhereInput | Prisma.AdminNotificationScalarWhereInput[]
+}
+
+export type AdminNotificationUncheckedUpdateManyWithoutAdminNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminNotificationCreateWithoutAdminInput, Prisma.AdminNotificationUncheckedCreateWithoutAdminInput> | Prisma.AdminNotificationCreateWithoutAdminInput[] | Prisma.AdminNotificationUncheckedCreateWithoutAdminInput[]
+  connectOrCreate?: Prisma.AdminNotificationCreateOrConnectWithoutAdminInput | Prisma.AdminNotificationCreateOrConnectWithoutAdminInput[]
+  upsert?: Prisma.AdminNotificationUpsertWithWhereUniqueWithoutAdminInput | Prisma.AdminNotificationUpsertWithWhereUniqueWithoutAdminInput[]
+  createMany?: Prisma.AdminNotificationCreateManyAdminInputEnvelope
+  set?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+  disconnect?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+  delete?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+  connect?: Prisma.AdminNotificationWhereUniqueInput | Prisma.AdminNotificationWhereUniqueInput[]
+  update?: Prisma.AdminNotificationUpdateWithWhereUniqueWithoutAdminInput | Prisma.AdminNotificationUpdateWithWhereUniqueWithoutAdminInput[]
+  updateMany?: Prisma.AdminNotificationUpdateManyWithWhereWithoutAdminInput | Prisma.AdminNotificationUpdateManyWithWhereWithoutAdminInput[]
+  deleteMany?: Prisma.AdminNotificationScalarWhereInput | Prisma.AdminNotificationScalarWhereInput[]
 }
 
 export type AdminNotificationCreateNestedManyWithoutCampaignInput = {
@@ -507,6 +573,75 @@ export type AdminNotificationUncheckedUpdateManyWithoutCampaignResponseNestedInp
   deleteMany?: Prisma.AdminNotificationScalarWhereInput | Prisma.AdminNotificationScalarWhereInput[]
 }
 
+export type AdminNotificationCreateWithoutAdminInput = {
+  id?: string
+  type: string
+  title: string
+  message: string
+  isRead?: boolean
+  readAt?: Date | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  campaign?: Prisma.CampaignCreateNestedOneWithoutNotificationsInput
+  campaignResponse?: Prisma.CampaignResponseCreateNestedOneWithoutNotificationsInput
+}
+
+export type AdminNotificationUncheckedCreateWithoutAdminInput = {
+  id?: string
+  type: string
+  title: string
+  message: string
+  isRead?: boolean
+  readAt?: Date | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  campaignId?: string | null
+  campaignResponseId?: string | null
+  createdAt?: Date | string
+}
+
+export type AdminNotificationCreateOrConnectWithoutAdminInput = {
+  where: Prisma.AdminNotificationWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminNotificationCreateWithoutAdminInput, Prisma.AdminNotificationUncheckedCreateWithoutAdminInput>
+}
+
+export type AdminNotificationCreateManyAdminInputEnvelope = {
+  data: Prisma.AdminNotificationCreateManyAdminInput | Prisma.AdminNotificationCreateManyAdminInput[]
+  skipDuplicates?: boolean
+}
+
+export type AdminNotificationUpsertWithWhereUniqueWithoutAdminInput = {
+  where: Prisma.AdminNotificationWhereUniqueInput
+  update: Prisma.XOR<Prisma.AdminNotificationUpdateWithoutAdminInput, Prisma.AdminNotificationUncheckedUpdateWithoutAdminInput>
+  create: Prisma.XOR<Prisma.AdminNotificationCreateWithoutAdminInput, Prisma.AdminNotificationUncheckedCreateWithoutAdminInput>
+}
+
+export type AdminNotificationUpdateWithWhereUniqueWithoutAdminInput = {
+  where: Prisma.AdminNotificationWhereUniqueInput
+  data: Prisma.XOR<Prisma.AdminNotificationUpdateWithoutAdminInput, Prisma.AdminNotificationUncheckedUpdateWithoutAdminInput>
+}
+
+export type AdminNotificationUpdateManyWithWhereWithoutAdminInput = {
+  where: Prisma.AdminNotificationScalarWhereInput
+  data: Prisma.XOR<Prisma.AdminNotificationUpdateManyMutationInput, Prisma.AdminNotificationUncheckedUpdateManyWithoutAdminInput>
+}
+
+export type AdminNotificationScalarWhereInput = {
+  AND?: Prisma.AdminNotificationScalarWhereInput | Prisma.AdminNotificationScalarWhereInput[]
+  OR?: Prisma.AdminNotificationScalarWhereInput[]
+  NOT?: Prisma.AdminNotificationScalarWhereInput | Prisma.AdminNotificationScalarWhereInput[]
+  id?: Prisma.StringFilter<"AdminNotification"> | string
+  adminId?: Prisma.StringFilter<"AdminNotification"> | string
+  type?: Prisma.StringFilter<"AdminNotification"> | string
+  title?: Prisma.StringFilter<"AdminNotification"> | string
+  message?: Prisma.StringFilter<"AdminNotification"> | string
+  isRead?: Prisma.BoolFilter<"AdminNotification"> | boolean
+  readAt?: Prisma.DateTimeNullableFilter<"AdminNotification"> | Date | string | null
+  payload?: Prisma.JsonNullableFilter<"AdminNotification">
+  campaignId?: Prisma.StringNullableFilter<"AdminNotification"> | string | null
+  campaignResponseId?: Prisma.StringNullableFilter<"AdminNotification"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"AdminNotification"> | Date | string
+}
+
 export type AdminNotificationCreateWithoutCampaignInput = {
   id?: string
   type: string
@@ -516,11 +651,13 @@ export type AdminNotificationCreateWithoutCampaignInput = {
   readAt?: Date | string | null
   payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  admin: Prisma.AdminUserCreateNestedOneWithoutNotificationsInput
   campaignResponse?: Prisma.CampaignResponseCreateNestedOneWithoutNotificationsInput
 }
 
 export type AdminNotificationUncheckedCreateWithoutCampaignInput = {
   id?: string
+  adminId: string
   type: string
   title: string
   message: string
@@ -557,22 +694,6 @@ export type AdminNotificationUpdateManyWithWhereWithoutCampaignInput = {
   data: Prisma.XOR<Prisma.AdminNotificationUpdateManyMutationInput, Prisma.AdminNotificationUncheckedUpdateManyWithoutCampaignInput>
 }
 
-export type AdminNotificationScalarWhereInput = {
-  AND?: Prisma.AdminNotificationScalarWhereInput | Prisma.AdminNotificationScalarWhereInput[]
-  OR?: Prisma.AdminNotificationScalarWhereInput[]
-  NOT?: Prisma.AdminNotificationScalarWhereInput | Prisma.AdminNotificationScalarWhereInput[]
-  id?: Prisma.StringFilter<"AdminNotification"> | string
-  type?: Prisma.StringFilter<"AdminNotification"> | string
-  title?: Prisma.StringFilter<"AdminNotification"> | string
-  message?: Prisma.StringFilter<"AdminNotification"> | string
-  isRead?: Prisma.BoolFilter<"AdminNotification"> | boolean
-  readAt?: Prisma.DateTimeNullableFilter<"AdminNotification"> | Date | string | null
-  payload?: Prisma.JsonNullableFilter<"AdminNotification">
-  campaignId?: Prisma.StringNullableFilter<"AdminNotification"> | string | null
-  campaignResponseId?: Prisma.StringNullableFilter<"AdminNotification"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"AdminNotification"> | Date | string
-}
-
 export type AdminNotificationCreateWithoutCampaignResponseInput = {
   id?: string
   type: string
@@ -582,11 +703,13 @@ export type AdminNotificationCreateWithoutCampaignResponseInput = {
   readAt?: Date | string | null
   payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  admin: Prisma.AdminUserCreateNestedOneWithoutNotificationsInput
   campaign?: Prisma.CampaignCreateNestedOneWithoutNotificationsInput
 }
 
 export type AdminNotificationUncheckedCreateWithoutCampaignResponseInput = {
   id?: string
+  adminId: string
   type: string
   title: string
   message: string
@@ -623,8 +746,61 @@ export type AdminNotificationUpdateManyWithWhereWithoutCampaignResponseInput = {
   data: Prisma.XOR<Prisma.AdminNotificationUpdateManyMutationInput, Prisma.AdminNotificationUncheckedUpdateManyWithoutCampaignResponseInput>
 }
 
+export type AdminNotificationCreateManyAdminInput = {
+  id?: string
+  type: string
+  title: string
+  message: string
+  isRead?: boolean
+  readAt?: Date | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  campaignId?: string | null
+  campaignResponseId?: string | null
+  createdAt?: Date | string
+}
+
+export type AdminNotificationUpdateWithoutAdminInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  message?: Prisma.StringFieldUpdateOperationsInput | string
+  isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  campaign?: Prisma.CampaignUpdateOneWithoutNotificationsNestedInput
+  campaignResponse?: Prisma.CampaignResponseUpdateOneWithoutNotificationsNestedInput
+}
+
+export type AdminNotificationUncheckedUpdateWithoutAdminInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  message?: Prisma.StringFieldUpdateOperationsInput | string
+  isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaignResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AdminNotificationUncheckedUpdateManyWithoutAdminInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  message?: Prisma.StringFieldUpdateOperationsInput | string
+  isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaignResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type AdminNotificationCreateManyCampaignInput = {
   id?: string
+  adminId: string
   type: string
   title: string
   message: string
@@ -644,11 +820,13 @@ export type AdminNotificationUpdateWithoutCampaignInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  admin?: Prisma.AdminUserUpdateOneRequiredWithoutNotificationsNestedInput
   campaignResponse?: Prisma.CampaignResponseUpdateOneWithoutNotificationsNestedInput
 }
 
 export type AdminNotificationUncheckedUpdateWithoutCampaignInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  adminId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
@@ -661,6 +839,7 @@ export type AdminNotificationUncheckedUpdateWithoutCampaignInput = {
 
 export type AdminNotificationUncheckedUpdateManyWithoutCampaignInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  adminId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
@@ -673,6 +852,7 @@ export type AdminNotificationUncheckedUpdateManyWithoutCampaignInput = {
 
 export type AdminNotificationCreateManyCampaignResponseInput = {
   id?: string
+  adminId: string
   type: string
   title: string
   message: string
@@ -692,11 +872,13 @@ export type AdminNotificationUpdateWithoutCampaignResponseInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  admin?: Prisma.AdminUserUpdateOneRequiredWithoutNotificationsNestedInput
   campaign?: Prisma.CampaignUpdateOneWithoutNotificationsNestedInput
 }
 
 export type AdminNotificationUncheckedUpdateWithoutCampaignResponseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  adminId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
@@ -709,6 +891,7 @@ export type AdminNotificationUncheckedUpdateWithoutCampaignResponseInput = {
 
 export type AdminNotificationUncheckedUpdateManyWithoutCampaignResponseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  adminId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.StringFieldUpdateOperationsInput | string
@@ -723,6 +906,7 @@ export type AdminNotificationUncheckedUpdateManyWithoutCampaignResponseInput = {
 
 export type AdminNotificationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  adminId?: boolean
   type?: boolean
   title?: boolean
   message?: boolean
@@ -732,12 +916,14 @@ export type AdminNotificationSelect<ExtArgs extends runtime.Types.Extensions.Int
   campaignId?: boolean
   campaignResponseId?: boolean
   createdAt?: boolean
+  admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
   campaign?: boolean | Prisma.AdminNotification$campaignArgs<ExtArgs>
   campaignResponse?: boolean | Prisma.AdminNotification$campaignResponseArgs<ExtArgs>
 }, ExtArgs["result"]["adminNotification"]>
 
 export type AdminNotificationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  adminId?: boolean
   type?: boolean
   title?: boolean
   message?: boolean
@@ -747,12 +933,14 @@ export type AdminNotificationSelectCreateManyAndReturn<ExtArgs extends runtime.T
   campaignId?: boolean
   campaignResponseId?: boolean
   createdAt?: boolean
+  admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
   campaign?: boolean | Prisma.AdminNotification$campaignArgs<ExtArgs>
   campaignResponse?: boolean | Prisma.AdminNotification$campaignResponseArgs<ExtArgs>
 }, ExtArgs["result"]["adminNotification"]>
 
 export type AdminNotificationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  adminId?: boolean
   type?: boolean
   title?: boolean
   message?: boolean
@@ -762,12 +950,14 @@ export type AdminNotificationSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   campaignId?: boolean
   campaignResponseId?: boolean
   createdAt?: boolean
+  admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
   campaign?: boolean | Prisma.AdminNotification$campaignArgs<ExtArgs>
   campaignResponse?: boolean | Prisma.AdminNotification$campaignResponseArgs<ExtArgs>
 }, ExtArgs["result"]["adminNotification"]>
 
 export type AdminNotificationSelectScalar = {
   id?: boolean
+  adminId?: boolean
   type?: boolean
   title?: boolean
   message?: boolean
@@ -779,16 +969,19 @@ export type AdminNotificationSelectScalar = {
   createdAt?: boolean
 }
 
-export type AdminNotificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "title" | "message" | "isRead" | "readAt" | "payload" | "campaignId" | "campaignResponseId" | "createdAt", ExtArgs["result"]["adminNotification"]>
+export type AdminNotificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminId" | "type" | "title" | "message" | "isRead" | "readAt" | "payload" | "campaignId" | "campaignResponseId" | "createdAt", ExtArgs["result"]["adminNotification"]>
 export type AdminNotificationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
   campaign?: boolean | Prisma.AdminNotification$campaignArgs<ExtArgs>
   campaignResponse?: boolean | Prisma.AdminNotification$campaignResponseArgs<ExtArgs>
 }
 export type AdminNotificationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
   campaign?: boolean | Prisma.AdminNotification$campaignArgs<ExtArgs>
   campaignResponse?: boolean | Prisma.AdminNotification$campaignResponseArgs<ExtArgs>
 }
 export type AdminNotificationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  admin?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
   campaign?: boolean | Prisma.AdminNotification$campaignArgs<ExtArgs>
   campaignResponse?: boolean | Prisma.AdminNotification$campaignResponseArgs<ExtArgs>
 }
@@ -796,11 +989,13 @@ export type AdminNotificationIncludeUpdateManyAndReturn<ExtArgs extends runtime.
 export type $AdminNotificationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AdminNotification"
   objects: {
+    admin: Prisma.$AdminUserPayload<ExtArgs>
     campaign: Prisma.$CampaignPayload<ExtArgs> | null
     campaignResponse: Prisma.$CampaignResponsePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    adminId: string
     type: string
     title: string
     message: string
@@ -1204,6 +1399,7 @@ readonly fields: AdminNotificationFieldRefs;
  */
 export interface Prisma__AdminNotificationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  admin<T extends Prisma.AdminUserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUserDefaultArgs<ExtArgs>>): Prisma.Prisma__AdminUserClient<runtime.Types.Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   campaign<T extends Prisma.AdminNotification$campaignArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminNotification$campaignArgs<ExtArgs>>): Prisma.Prisma__CampaignClient<runtime.Types.Result.GetResult<Prisma.$CampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   campaignResponse<T extends Prisma.AdminNotification$campaignResponseArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminNotification$campaignResponseArgs<ExtArgs>>): Prisma.Prisma__CampaignResponseClient<runtime.Types.Result.GetResult<Prisma.$CampaignResponsePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1236,6 +1432,7 @@ export interface Prisma__AdminNotificationClient<T, Null = never, ExtArgs extend
  */
 export interface AdminNotificationFieldRefs {
   readonly id: Prisma.FieldRef<"AdminNotification", 'String'>
+  readonly adminId: Prisma.FieldRef<"AdminNotification", 'String'>
   readonly type: Prisma.FieldRef<"AdminNotification", 'String'>
   readonly title: Prisma.FieldRef<"AdminNotification", 'String'>
   readonly message: Prisma.FieldRef<"AdminNotification", 'String'>

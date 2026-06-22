@@ -2097,6 +2097,7 @@ export type CampaignResponseScalarFieldEnum = (typeof CampaignResponseScalarFiel
 
 export const AdminNotificationScalarFieldEnum = {
   id: 'id',
+  adminId: 'adminId',
   type: 'type',
   title: 'title',
   message: 'message',

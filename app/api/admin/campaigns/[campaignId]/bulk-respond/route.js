@@ -8,13 +8,44 @@ import {
   PUBLIC_CAMPAIGNS_CACHE_TAG,
 } from "../../../../../../lib/campaigns";
 import { sendCampaignResponseTemplateEmail } from "../../../../../../lib/mailer";
+import { getEnvInteger } from "../../../../../../lib/env";
 import { ensureDatabaseReady, prisma } from "../../../../../../lib/prisma";
 import { validateAdminMutationRequest } from "../../../../../../lib/request-security";
+
+const DEFAULT_BULK_RESPOND_CONCURRENCY = 5;
+const DEFAULT_BULK_RESPOND_MAX_RECIPIENTS = 2000;
+const MAX_BULK_RESPOND_CONCURRENCY = 20;
 
 function normalizeMode(value) {
   return String(value || "")
     .trim()
     .toLowerCase();
+}
+
+function clampPositiveInteger(value, fallback, max = Number.POSITIVE_INFINITY) {
+  const parsed = Number.parseInt(String(value ?? fallback), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+
+  return Math.min(parsed, max);
+}
+
+function getBulkRespondConfig() {
+  const maxRecipients = clampPositiveInteger(
+    getEnvInteger("BULK_RESPOND_MAX_RECIPIENTS", DEFAULT_BULK_RESPOND_MAX_RECIPIENTS),
+    DEFAULT_BULK_RESPOND_MAX_RECIPIENTS
+  );
+  const concurrency = clampPositiveInteger(
+    getEnvInteger("BULK_RESPOND_CONCURRENCY", DEFAULT_BULK_RESPOND_CONCURRENCY),
+    DEFAULT_BULK_RESPOND_CONCURRENCY,
+    MAX_BULK_RESPOND_CONCURRENCY
+  );
+
+  return {
+    maxRecipients,
+    concurrency,
+  };
 }
 
 export async function POST(request, { params }) {
@@ -79,6 +110,8 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "Campaign not found." }, { status: 404 });
     }
 
+    const bulkRespondConfig = getBulkRespondConfig();
+
     let responses = [];
     if (mode === "one_time" || mode === "ongoing") {
       responses = await prisma.campaignResponse.findMany({
@@ -92,17 +125,18 @@ export async function POST(request, { params }) {
       });
     }
 
-    let sentCount = 0;
-    let skippedCount = 0;
-    let failedCount = 0;
-    const failedRecipients = [];
+    const totalResponsesAvailable = responses.length;
+    const responsesToProcess = responses.slice(0, bulkRespondConfig.maxRecipients);
+    const skippedByCap = Math.max(0, totalResponsesAvailable - responsesToProcess.length);
 
-    for (const response of responses) {
+    const deliveryResults = new Array(responsesToProcess.length);
+    let nextIndex = 0;
+
+    async function processResponse(response) {
       const recipientEmail = getCampaignResponseRecipientEmail(campaign.questions, response.data);
 
       if (!recipientEmail) {
-        skippedCount += 1;
-        continue;
+        return { outcome: "skipped", recipientEmail: "" };
       }
 
       try {
@@ -120,20 +154,62 @@ export async function POST(request, { params }) {
         });
 
         if (mailResult?.delivered) {
-          sentCount += 1;
-        } else {
-          failedCount += 1;
-          failedRecipients.push(recipientEmail);
+          return { outcome: "sent", recipientEmail };
         }
+
+        return { outcome: "failed", recipientEmail };
       } catch (mailError) {
-        failedCount += 1;
-        failedRecipients.push(recipientEmail);
         console.error("Failed sending campaign bulk response email", {
           campaignId,
           responseId: response.id,
           recipientEmail,
           error: mailError,
         });
+        return { outcome: "failed", recipientEmail };
+      }
+    }
+
+    async function worker() {
+      while (true) {
+        const currentIndex = nextIndex;
+        nextIndex += 1;
+
+        if (currentIndex >= responsesToProcess.length) {
+          return;
+        }
+
+        deliveryResults[currentIndex] = await processResponse(responsesToProcess[currentIndex]);
+      }
+    }
+
+    if (responsesToProcess.length) {
+      const workerCount = Math.min(bulkRespondConfig.concurrency, responsesToProcess.length);
+      await Promise.all(Array.from({ length: workerCount }, () => worker()));
+    }
+
+    let sentCount = 0;
+    let skippedCount = skippedByCap;
+    let failedCount = 0;
+    const failedRecipients = [];
+
+    for (const result of deliveryResults) {
+      if (!result) {
+        continue;
+      }
+
+      if (result.outcome === "sent") {
+        sentCount += 1;
+        continue;
+      }
+
+      if (result.outcome === "skipped") {
+        skippedCount += 1;
+        continue;
+      }
+
+      failedCount += 1;
+      if (result.recipientEmail) {
+        failedRecipients.push(result.recipientEmail);
       }
     }
 
@@ -150,7 +226,7 @@ export async function POST(request, { params }) {
       revalidateTag(PUBLIC_CAMPAIGNS_CACHE_TAG);
     }
 
-    if (mode === "one_time" && !responses.length) {
+    if (mode === "one_time" && !responsesToProcess.length) {
       return NextResponse.json(
         { error: "This campaign has no responses yet, so there is nothing to send." },
         { status: 400 }
@@ -165,7 +241,12 @@ export async function POST(request, { params }) {
       skippedCount,
       failedCount,
       failedRecipients: failedRecipients.slice(0, 10),
-      totalResponsesConsidered: responses.length,
+      cappedByMaxRecipients: skippedByCap > 0,
+      maxRecipients: bulkRespondConfig.maxRecipients,
+      concurrency: responsesToProcess.length ? Math.min(bulkRespondConfig.concurrency, responsesToProcess.length) : 0,
+      totalResponsesAvailable,
+      totalResponsesConsidered: responsesToProcess.length,
+      totalResponsesSkippedByCap: skippedByCap,
     });
   } catch (error) {
     console.error("Failed to bulk respond to campaign submissions", error);

@@ -5,7 +5,7 @@ import { generateSessionToken, hashToken, verifyPassword } from "../../../../lib
 import { ensureEnvSeededAdminExists } from "../../../../lib/admin-bootstrap";
 import { verifyTurnstileToken } from "../../../../lib/captcha";
 import { consumeRateLimit, clearRateLimit } from "../../../../lib/rate-limit";
-import { getClientIpAddress } from "../../../../lib/request-utils";
+import { getRequestRateLimitIdentity } from "../../../../lib/request-utils";
 import { createRateLimitResponse, validateAdminMutationRequest } from "../../../../lib/request-security";
 import { getSecurityConfig } from "../../../../lib/security-config";
 import { isAdminProfileComplete } from "../../../../lib/admin-profile";
@@ -66,7 +66,8 @@ export async function POST(request) {
       return NextResponse.json({ error: "Email, password, and captcha are required." }, { status: 400 });
     }
 
-    const clientIp = getClientIpAddress(request);
+    const requestIdentity = getRequestRateLimitIdentity(request);
+    const clientIp = requestIdentity.clientIp;
     const {
       rateLimitWindowMinutes,
       rateLimitMaxLoginIp,
@@ -74,8 +75,8 @@ export async function POST(request) {
     } = getSecurityConfig();
     const windowMs = rateLimitWindowMinutes * 60 * 1000;
     const lockMs = 30 * 60 * 1000;
-    const ipKey = `admin-login:ip:${clientIp}`;
-    const emailKey = `admin-login:email:${email}`;
+    const ipKey = `admin-login:identity:${requestIdentity.keyPart}`;
+    const emailKey = `admin-login:email:${email}:identity:${requestIdentity.keyPart}`;
 
     const [ipRateLimit, emailRateLimit] = await Promise.all([
       consumeRateLimit({
@@ -83,12 +84,14 @@ export async function POST(request) {
         limit: rateLimitMaxLoginIp,
         windowMs,
         lockMs,
+        denyOnMissingTable: true,
       }),
       consumeRateLimit({
         key: emailKey,
         limit: rateLimitMaxLoginEmail,
         windowMs,
         lockMs,
+        denyOnMissingTable: true,
       }),
     ]);
 

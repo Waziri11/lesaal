@@ -3,7 +3,7 @@ import { OTP_MAX_ATTEMPTS } from "../../../../../lib/constants";
 import { prisma } from "../../../../../lib/prisma";
 import { verifyTurnstileToken } from "../../../../../lib/captcha";
 import { consumeRateLimit } from "../../../../../lib/rate-limit";
-import { getClientIpAddress } from "../../../../../lib/request-utils";
+import { getRequestRateLimitIdentity } from "../../../../../lib/request-utils";
 import { createRateLimitResponse, validateAdminMutationRequest } from "../../../../../lib/request-security";
 import { getSecurityConfig } from "../../../../../lib/security-config";
 import { hashPassword, hashToken } from "../../../../../lib/security";
@@ -45,12 +45,14 @@ export async function POST(request) {
       );
     }
 
-    const clientIp = getClientIpAddress(request);
+    const requestIdentity = getRequestRateLimitIdentity(request);
+    const clientIp = requestIdentity.clientIp;
     const { rateLimitWindowMinutes } = getSecurityConfig();
     const resetRateLimit = await consumeRateLimit({
-      key: `admin-forgot-password-reset:${email}:${clientIp}`,
+      key: `admin-forgot-password-reset:${email}:identity:${requestIdentity.keyPart}`,
       limit: OTP_MAX_ATTEMPTS,
       windowMs: rateLimitWindowMinutes * 60 * 1000,
+      denyOnMissingTable: true,
     });
 
     if (!resetRateLimit.allowed) {

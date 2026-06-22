@@ -4,7 +4,7 @@ import { getAdminFromApiRequest } from "../../../../../lib/auth";
 import { prisma } from "../../../../../lib/prisma";
 import { hashToken } from "../../../../../lib/security";
 import { consumeRateLimit } from "../../../../../lib/rate-limit";
-import { getClientIpAddress } from "../../../../../lib/request-utils";
+import { getRequestRateLimitIdentity } from "../../../../../lib/request-utils";
 import { createRateLimitResponse, validateAdminMutationRequest } from "../../../../../lib/request-security";
 import { getSecurityConfig } from "../../../../../lib/security-config";
 
@@ -37,12 +37,13 @@ export async function POST(request) {
       return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 });
     }
 
-    const clientIp = getClientIpAddress(request);
+    const requestIdentity = getRequestRateLimitIdentity(request);
     const { rateLimitWindowMinutes } = getSecurityConfig();
     const verifyRateLimit = await consumeRateLimit({
-      key: `admin-otp-verify:${admin.id}:${newEmail}:${clientIp}`,
+      key: `admin-otp-verify:${admin.id}:${newEmail}:identity:${requestIdentity.keyPart}`,
       limit: OTP_MAX_ATTEMPTS,
       windowMs: rateLimitWindowMinutes * 60 * 1000,
+      denyOnMissingTable: true,
     });
 
     if (!verifyRateLimit.allowed) {

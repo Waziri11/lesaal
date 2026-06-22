@@ -3,7 +3,7 @@ import { verifyTurnstileToken } from "../../../../lib/captcha";
 import { getLandingConfig } from "../../../../lib/landing-config";
 import { prisma } from "../../../../lib/prisma";
 import { consumeRateLimit } from "../../../../lib/rate-limit";
-import { getClientIpAddress } from "../../../../lib/request-utils";
+import { getRequestRateLimitIdentity } from "../../../../lib/request-utils";
 import { createRateLimitResponse } from "../../../../lib/request-security";
 import { getSecurityConfig } from "../../../../lib/security-config";
 import { sendCampaignNotification } from "../../../../lib/mailer";
@@ -37,20 +37,23 @@ export async function POST(request) {
     delete submittedData.website;
     delete submittedData.captchaToken;
 
-    const clientIp = getClientIpAddress(request);
+    const requestIdentity = getRequestRateLimitIdentity(request);
+    const clientIp = requestIdentity.clientIp;
     const { rateLimitMaxPublicIp, rateLimitMaxPublicCampaignIp } = getSecurityConfig();
     const windowMs = 60 * 60 * 1000;
 
     const [globalLimit, campaignLimit] = await Promise.all([
       consumeRateLimit({
-        key: `public-submit:ip:${clientIp}`,
+        key: `public-submit:identity:${requestIdentity.keyPart}`,
         limit: rateLimitMaxPublicIp,
         windowMs,
+        denyOnMissingTable: true,
       }),
       consumeRateLimit({
-        key: `public-submit:campaign:legacy:${clientIp}`,
+        key: `public-submit:campaign:legacy:identity:${requestIdentity.keyPart}`,
         limit: rateLimitMaxPublicCampaignIp,
         windowMs,
+        denyOnMissingTable: true,
       }),
     ]);
 

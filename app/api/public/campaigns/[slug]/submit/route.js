@@ -13,7 +13,7 @@ import {
 import { sendCampaignNotification, sendCampaignResponseTemplateEmail } from "../../../../../../lib/mailer";
 import { ensureDatabaseReady, prisma } from "../../../../../../lib/prisma";
 import { consumeRateLimit } from "../../../../../../lib/rate-limit";
-import { getClientIpAddress } from "../../../../../../lib/request-utils";
+import { getRequestRateLimitIdentity } from "../../../../../../lib/request-utils";
 import { createRateLimitResponse } from "../../../../../../lib/request-security";
 import { getSecurityConfig } from "../../../../../../lib/security-config";
 
@@ -329,20 +329,23 @@ export async function POST(request, { params }) {
     delete submittedData.website;
     delete submittedData.captchaToken;
 
-    const clientIp = getClientIpAddress(request);
+    const requestIdentity = getRequestRateLimitIdentity(request);
+    const clientIp = requestIdentity.clientIp;
     const { rateLimitMaxPublicIp, rateLimitMaxPublicCampaignIp } = getSecurityConfig();
     const windowMs = 60 * 60 * 1000;
 
     const [globalLimit, campaignLimit] = await Promise.all([
       consumeRateLimit({
-        key: `public-submit:ip:${clientIp}`,
+        key: `public-submit:identity:${requestIdentity.keyPart}`,
         limit: rateLimitMaxPublicIp,
         windowMs,
+        denyOnMissingTable: true,
       }),
       consumeRateLimit({
-        key: `public-submit:campaign:${slug}:${clientIp}`,
+        key: `public-submit:campaign:${slug}:identity:${requestIdentity.keyPart}`,
         limit: rateLimitMaxPublicCampaignIp,
         windowMs,
+        denyOnMissingTable: true,
       }),
     ]);
 

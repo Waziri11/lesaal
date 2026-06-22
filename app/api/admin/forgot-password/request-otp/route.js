@@ -4,7 +4,7 @@ import { prisma } from "../../../../../lib/prisma";
 import { verifyTurnstileToken } from "../../../../../lib/captcha";
 import { sendPasswordResetOtpEmail } from "../../../../../lib/mailer";
 import { consumeRateLimit } from "../../../../../lib/rate-limit";
-import { getClientIpAddress } from "../../../../../lib/request-utils";
+import { getRequestRateLimitIdentity } from "../../../../../lib/request-utils";
 import { createRateLimitResponse, validateAdminMutationRequest } from "../../../../../lib/request-security";
 import { getSecurityConfig } from "../../../../../lib/security-config";
 import { generateOtpCode, hashToken } from "../../../../../lib/security";
@@ -32,12 +32,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 });
     }
 
-    const clientIp = getClientIpAddress(request);
+    const requestIdentity = getRequestRateLimitIdentity(request);
+    const clientIp = requestIdentity.clientIp;
     const { rateLimitWindowMinutes, rateLimitMaxOtpRequests } = getSecurityConfig();
     const otpRequestRateLimit = await consumeRateLimit({
-      key: `admin-forgot-password-request:${email}:${clientIp}`,
+      key: `admin-forgot-password-request:${email}:identity:${requestIdentity.keyPart}`,
       limit: rateLimitMaxOtpRequests,
       windowMs: rateLimitWindowMinutes * 60 * 1000,
+      denyOnMissingTable: true,
     });
 
     if (!otpRequestRateLimit.allowed) {

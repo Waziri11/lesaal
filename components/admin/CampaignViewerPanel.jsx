@@ -178,14 +178,24 @@ function normalizeExportValue(value) {
 }
 
 function toCsvString(columns, rows) {
-  const escapeCsv = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+  const neutralizeCsvFormula = (value) => {
+    const normalized = String(value ?? "");
+    return /^[=+\-@]/.test(normalized) ? `'${normalized}` : normalized;
+  };
+
+  const escapeCsv = (value) => `"${neutralizeCsvFormula(value).replace(/"/g, '""')}"`;
   const header = columns.map((column) => escapeCsv(column.label)).join(",");
   const body = rows.map((row) => columns.map((column) => escapeCsv(row[column.key])).join(","));
   return [header, ...body].join("\n");
 }
 
 function toExcelTsv(columns, rows) {
-  const escapeTsv = (value) => String(value ?? "").replace(/\t/g, " ").replace(/\r?\n/g, " ");
+  const neutralizeTsvFormula = (value) => {
+    const normalized = String(value ?? "");
+    return /^[=+\-@]/.test(normalized) ? `'${normalized}` : normalized;
+  };
+
+  const escapeTsv = (value) => neutralizeTsvFormula(value).replace(/\t/g, " ").replace(/\r?\n/g, " ");
   const header = columns.map((column) => escapeTsv(column.label)).join("\t");
   const body = rows.map((row) => columns.map((column) => escapeTsv(row[column.key])).join("\t"));
   return [header, ...body].join("\n");

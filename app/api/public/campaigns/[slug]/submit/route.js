@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { verifyTurnstileToken } from "../../../../../../lib/captcha";
+import { resolveNotificationAdminId } from "../../../../../../lib/admin-notifications";
 import {
   buildCampaignResponseTemplateVariables,
   getCampaignResponseRecipientEmail,
@@ -404,16 +405,21 @@ export async function POST(request, { params }) {
         },
       });
 
-      await prisma.adminNotification.create({
-        data: {
-          type: "CAMPAIGN_RESPONSE",
-          title: `New campaign response: ${campaign.title}`,
-          message: `A new response was submitted for ${campaign.title}.`,
-          payload: cleanedData,
-          campaignId: campaign.id,
-          campaignResponseId: response.id,
-        },
-      });
+      const notificationAdminId = await resolveNotificationAdminId();
+
+      if (notificationAdminId) {
+        await prisma.adminNotification.create({
+          data: {
+            adminId: notificationAdminId,
+            type: "CAMPAIGN_RESPONSE",
+            title: `New campaign response: ${campaign.title}`,
+            message: `A new response was submitted for ${campaign.title}.`,
+            payload: cleanedData,
+            campaignId: campaign.id,
+            campaignResponseId: response.id,
+          },
+        });
+      }
     } catch (submissionError) {
       if (!response) {
         await rollbackUploadedMedia(uploadedMedia);

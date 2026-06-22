@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyTurnstileToken } from "../../../../lib/captcha";
+import { resolveNotificationAdminId } from "../../../../lib/admin-notifications";
 import { getLandingConfig } from "../../../../lib/landing-config";
 import { prisma } from "../../../../lib/prisma";
 import { consumeRateLimit } from "../../../../lib/rate-limit";
@@ -116,15 +117,20 @@ export async function POST(request) {
         },
       });
 
-      await prisma.adminNotification.create({
-        data: {
-          type: "CAMPAIGN_RESPONSE",
-          title: "New landing campaign response",
-          message: "A response was submitted from the landing campaign form.",
-          payload: cleanedData,
-          campaignId: matchingCampaign?.id || null,
-        },
-      });
+      const notificationAdminId = await resolveNotificationAdminId();
+
+      if (notificationAdminId) {
+        await prisma.adminNotification.create({
+          data: {
+            adminId: notificationAdminId,
+            type: "CAMPAIGN_RESPONSE",
+            title: "New landing campaign response",
+            message: "A response was submitted from the landing campaign form.",
+            payload: cleanedData,
+            campaignId: matchingCampaign?.id || null,
+          },
+        });
+      }
     } catch (notificationError) {
       console.warn("Unable to create campaign notification for legacy form:", notificationError);
     }

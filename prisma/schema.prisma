@@ -103,6 +103,7 @@ model AdminUser {
   googleDriveConnection AdminGoogleDriveConnection?
   calendarItems      CalendarItem[]
   calendarDeliveries CalendarReminderDelivery[]
+  notifications      AdminNotification[]
 }
 
 model AdminSession {
@@ -253,6 +254,7 @@ model CampaignResponse {
 
 model AdminNotification {
   id                String           @id @default(cuid())
+  adminId           String
   type              String
   title             String
   message           String
@@ -262,13 +264,16 @@ model AdminNotification {
   campaignId        String?
   campaignResponseId String?
   createdAt         DateTime         @default(now())
+  admin             AdminUser        @relation(fields: [adminId], references: [id], onDelete: Cascade)
   campaign          Campaign?        @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   campaignResponse  CampaignResponse? @relation(fields: [campaignResponseId], references: [id], onDelete: SetNull)
 
+  @@index([adminId])
   @@index([isRead])
   @@index([createdAt])
   @@index([campaignId])
   @@index([campaignResponseId])
+  @@index([adminId, createdAt, id])
   @@index([isRead, createdAt, id])
 }
 

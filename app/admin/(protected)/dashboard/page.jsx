@@ -56,6 +56,7 @@ export default async function DashboardPage() {
       }),
       prisma.adminNotification.count({
         where: {
+          adminId: admin.id,
           isRead: false,
         },
       }),

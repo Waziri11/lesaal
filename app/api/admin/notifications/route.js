@@ -42,8 +42,11 @@ function parsePaginationParams(searchParams) {
   return { limit, cursor };
 }
 
-async function loadNotifications({ limit, cursor }) {
+async function loadNotifications({ adminId, limit, cursor }) {
   const pageRows = await prisma.adminNotification.findMany({
+    where: {
+      adminId,
+    },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: limit + 1,
     cursor: cursor ? { id: cursor } : undefined,
@@ -69,7 +72,10 @@ async function loadNotifications({ limit, cursor }) {
   const nextCursor = hasMore ? notifications[notifications.length - 1]?.id || null : null;
 
   const unreadCount = await prisma.adminNotification.count({
-    where: { isRead: false },
+    where: {
+      adminId,
+      isRead: false,
+    },
   });
 
   return {
@@ -91,7 +97,12 @@ export async function GET(request) {
     }
 
     const pagination = parsePaginationParams(request.nextUrl.searchParams);
-    return NextResponse.json(await loadNotifications(pagination));
+    return NextResponse.json(
+      await loadNotifications({
+        adminId: admin.id,
+        ...pagination,
+      })
+    );
   } catch (error) {
     console.error("Failed to load notifications", error);
 
@@ -122,8 +133,11 @@ export async function PATCH(request) {
     const notificationId = body?.notificationId ? String(body.notificationId) : null;
 
     if (notificationId) {
-      await prisma.adminNotification.update({
-        where: { id: notificationId },
+      await prisma.adminNotification.updateMany({
+        where: {
+          id: notificationId,
+          adminId: admin.id,
+        },
         data: {
           isRead: true,
           readAt: new Date(),
@@ -131,7 +145,10 @@ export async function PATCH(request) {
       });
     } else {
       await prisma.adminNotification.updateMany({
-        where: { isRead: false },
+        where: {
+          adminId: admin.id,
+          isRead: false,
+        },
         data: {
           isRead: true,
           readAt: new Date(),
@@ -140,7 +157,10 @@ export async function PATCH(request) {
     }
 
     const unreadCount = await prisma.adminNotification.count({
-      where: { isRead: false },
+      where: {
+        adminId: admin.id,
+        isRead: false,
+      },
     });
 
     return NextResponse.json({ success: true, unreadCount, notificationId: notificationId || null });

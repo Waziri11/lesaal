@@ -41,20 +41,16 @@ export async function GET(request) {
     const startDay = addUtcDays(endDay, -(days - 1));
     const endOfRange = new Date(endDay.getTime() + DAY_MS - 1);
 
-    const rows = await prisma.campaignResponse.findMany({
-      where: {
-        submittedAt: {
-          gte: startDay,
-          lte: endOfRange,
-        },
-      },
-      select: {
-        submittedAt: true,
-      },
-      orderBy: {
-        submittedAt: "asc",
-      },
-    });
+    const rows = await prisma.$queryRaw`
+      SELECT
+        to_char(date_trunc('day', "submittedAt" AT TIME ZONE 'UTC'), 'YYYY-MM-DD') AS "date",
+        COUNT(*)::int AS "count"
+      FROM "CampaignResponse"
+      WHERE "submittedAt" >= ${startDay}
+        AND "submittedAt" <= ${endOfRange}
+      GROUP BY 1
+      ORDER BY 1 ASC
+    `;
 
     const countsByDate = new Map();
 
@@ -64,8 +60,9 @@ export async function GET(request) {
     }
 
     for (const row of rows) {
-      const key = dateKey(startOfUtcDay(row.submittedAt));
-      countsByDate.set(key, Number(countsByDate.get(key) || 0) + 1);
+      const key = String(row?.date || "").trim();
+      if (!key) continue;
+      countsByDate.set(key, Number(row?.count || 0));
     }
 
     const formatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });

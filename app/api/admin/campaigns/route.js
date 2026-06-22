@@ -58,8 +58,13 @@ export async function POST(request) {
       );
     }
 
-    const message = error?.message || "Unable to create campaign.";
-    const status = /required|invalid|not found/i.test(message) ? 400 : 500;
-    return NextResponse.json({ error: message }, { status });
+    const rawMessage = String(error?.message || "").trim();
+    const isValidationError = /required|invalid|not found/i.test(rawMessage);
+
+    if (isValidationError) {
+      return NextResponse.json({ error: rawMessage || "Invalid campaign payload." }, { status: 400 });
+    }
+
+    return NextResponse.json({ error: "Unable to create campaign." }, { status: 500 });
   }
 }

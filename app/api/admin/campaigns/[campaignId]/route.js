@@ -78,9 +78,14 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const message = error?.message || "Unable to update campaign.";
-    const status = /required|invalid|not found/i.test(message) ? 400 : 500;
-    return NextResponse.json({ error: message }, { status });
+    const rawMessage = String(error?.message || "").trim();
+    const isValidationError = /required|invalid|not found/i.test(rawMessage);
+
+    if (isValidationError) {
+      return NextResponse.json({ error: rawMessage || "Invalid campaign payload." }, { status: 400 });
+    }
+
+    return NextResponse.json({ error: "Unable to update campaign." }, { status: 500 });
   }
 }
 
@@ -163,8 +168,13 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    const message = error?.message || "Unable to update campaign publish state.";
-    const status = /required|invalid|not found/i.test(message) ? 400 : 500;
-    return NextResponse.json({ error: message }, { status });
+    const rawMessage = String(error?.message || "").trim();
+    const isValidationError = /required|invalid|not found/i.test(rawMessage);
+
+    if (isValidationError) {
+      return NextResponse.json({ error: rawMessage || "Invalid publish state payload." }, { status: 400 });
+    }
+
+    return NextResponse.json({ error: "Unable to update campaign publish state." }, { status: 500 });
   }
 }

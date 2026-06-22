@@ -473,8 +473,13 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "Campaigns are not available yet." }, { status: 503 });
     }
 
-    const message = error?.message || "Unable to submit response.";
-    const status = /required|invalid|unsupported|exceeds|mismatch|missing/i.test(message) ? 400 : 500;
-    return NextResponse.json({ error: message }, { status });
+    const rawMessage = String(error?.message || "").trim();
+    const isValidationError = /required|invalid|unsupported|exceeds|mismatch|missing/i.test(rawMessage);
+
+    if (isValidationError) {
+      return NextResponse.json({ error: rawMessage || "Invalid response payload." }, { status: 400 });
+    }
+
+    return NextResponse.json({ error: "Unable to submit response." }, { status: 500 });
   }
 }

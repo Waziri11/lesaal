@@ -4,34 +4,48 @@ import {
   getCampaignResponsesForAdmin,
   isCampaignTableMissingError,
   stringifyCampaignResponseValue,
-  toCsvString,
+  toCsvHeaderString,
+  toCsvRowString,
 } from "../../../../../../lib/campaigns";
+import { getEnvInteger } from "../../../../../../lib/env";
+import { prisma } from "../../../../../../lib/prisma";
 
 const DEFAULT_PAGE_LIMIT = 50;
 const MAX_PAGE_LIMIT = 100;
+const DEFAULT_CSV_EXPORT_MAX_ROWS = 10000;
+const CSV_EXPORT_BATCH_SIZE = 200;
 
-function toExportRows(questions, responses) {
-  const columns = [
+function buildExportColumns(questions) {
+  return [
     { key: "submittedAt", label: "Submitted At" },
     ...questions.map((question) => ({
       key: question.key,
       label: question.label,
     })),
   ];
+}
 
-  const rows = responses.map((response) => {
-    const row = {
-      submittedAt: new Date(response.submittedAt).toISOString(),
-    };
+function toExportRow(questions, response) {
+  const row = {
+    submittedAt: new Date(response.submittedAt).toISOString(),
+  };
 
-    for (const question of questions) {
-      row[question.key] = stringifyCampaignResponseValue(response.data?.[question.key]);
-    }
+  for (const question of questions) {
+    row[question.key] = stringifyCampaignResponseValue(response.data?.[question.key]);
+  }
 
-    return row;
-  });
+  return row;
+}
 
-  return { columns, rows };
+function parseCsvExportRowLimit(searchParams) {
+  const configuredMaxRows = Math.max(1, getEnvInteger("CSV_EXPORT_MAX_ROWS", DEFAULT_CSV_EXPORT_MAX_ROWS));
+  const requestedMaxRows = Number.parseInt(String(searchParams.get("maxRows") || ""), 10);
+
+  if (!Number.isFinite(requestedMaxRows) || requestedMaxRows <= 0) {
+    return configuredMaxRows;
+  }
+
+  return Math.min(requestedMaxRows, configuredMaxRows);
 }
 
 function parsePaginationParams(searchParams) {
@@ -41,6 +55,71 @@ function parsePaginationParams(searchParams) {
     : DEFAULT_PAGE_LIMIT;
   const cursor = String(searchParams.get("cursor") || "").trim() || null;
   return { limit, cursor };
+}
+
+async function loadCampaignExportMetadata(campaignId) {
+  return prisma.campaign.findUnique({
+    where: { id: campaignId },
+    select: {
+      id: true,
+      slug: true,
+      questions: {
+        orderBy: { order: "asc" },
+        select: {
+          key: true,
+          label: true,
+        },
+      },
+    },
+  });
+}
+
+function createCsvStream({ campaignId, columns, questions }) {
+  const encoder = new TextEncoder();
+
+  return new ReadableStream({
+    async start(controller) {
+      let cursor = null;
+
+      try {
+        controller.enqueue(encoder.encode(`${toCsvHeaderString(columns)}\n`));
+
+        while (true) {
+          const responses = await prisma.campaignResponse.findMany({
+            where: { campaignId },
+            orderBy: [{ submittedAt: "desc" }, { id: "desc" }],
+            take: CSV_EXPORT_BATCH_SIZE,
+            cursor: cursor ? { id: cursor } : undefined,
+            skip: cursor ? 1 : 0,
+            select: {
+              id: true,
+              submittedAt: true,
+              data: true,
+            },
+          });
+
+          if (!responses.length) {
+            break;
+          }
+
+          for (const response of responses) {
+            const row = toExportRow(questions, response);
+            controller.enqueue(encoder.encode(`${toCsvRowString(columns, row)}\n`));
+          }
+
+          if (responses.length < CSV_EXPORT_BATCH_SIZE) {
+            break;
+          }
+
+          cursor = responses[responses.length - 1]?.id || null;
+        }
+
+        controller.close();
+      } catch (error) {
+        controller.error(error);
+      }
+    },
+  });
 }
 
 export async function GET(request, { params }) {
@@ -56,20 +135,41 @@ export async function GET(request, { params }) {
     const format = request.nextUrl.searchParams.get("format");
 
     if (format === "csv") {
-      const data = await getCampaignResponsesForAdmin(campaignId, { includeAllResponses: true });
+      const campaign = await loadCampaignExportMetadata(campaignId);
 
-      if (!data) {
+      if (!campaign) {
         return NextResponse.json({ error: "Campaign not found." }, { status: 404 });
       }
 
-      const { columns, rows } = toExportRows(data.questions, data.responses);
-      const csv = toCsvString(columns, rows);
+      const maxRows = parseCsvExportRowLimit(request.nextUrl.searchParams);
+      const totalResponses = await prisma.campaignResponse.count({
+        where: { campaignId: campaign.id },
+      });
 
-      return new NextResponse(csv, {
+      if (totalResponses > maxRows) {
+        return NextResponse.json(
+          {
+            error: `Export exceeds the maximum allowed rows (${maxRows}). Narrow your range or increase CSV_EXPORT_MAX_ROWS.`,
+            maxRows,
+            totalResponses,
+          },
+          { status: 413 }
+        );
+      }
+
+      const columns = buildExportColumns(campaign.questions || []);
+      const stream = createCsvStream({
+        campaignId: campaign.id,
+        columns,
+        questions: campaign.questions || [],
+      });
+
+      return new NextResponse(stream, {
         status: 200,
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
-          "Content-Disposition": `attachment; filename="${data.campaign.slug}-responses.csv"`,
+          "Content-Disposition": `attachment; filename="${campaign.slug}-responses.csv"`,
+          "Cache-Control": "no-store",
         },
       });
     }

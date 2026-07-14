@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import HeroEyesScene from "./HeroEyesScene";
+import { useEffect, useMemo, useRef, useState } from "react";
+import HeroMegaphoneScene from "./HeroMegaphoneScene";
 
 const SECTION_ANCHOR_BASES = {
   HERO: "top",
@@ -493,7 +493,7 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                 {...sectionMotion}
                 style={sectionTextVars}
               >
-                <HeroEyesScene className="lp-hero-scene-canvas" />
+                <HeroMegaphoneScene className="lp-hero-scene-canvas" />
 
                 <div className="lp-hero-content">
                   <h1 className={`lp-hero-headline ${textClass}`}>

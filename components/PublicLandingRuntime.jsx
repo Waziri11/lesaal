@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import HeroTypewriter from "./HeroTypewriter";
+import HeroEyesScene from "./HeroEyesScene";
 
 const SECTION_ANCHOR_BASES = {
   HERO: "top",
@@ -224,6 +224,21 @@ function textStyleToCssVars(value) {
 
 function sortItems(items) {
   return (Array.isArray(items) ? items : []).slice().sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+}
+
+function toStringArray(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => String(entry || "").trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(/[\n,]/)
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+  }
+
+  return [];
 }
 
 function shouldUnoptimizeImage(src) {
@@ -467,6 +482,8 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
             const heroStatsItems = sortItems(statsBandSection?.items).slice(0, 2);
             const statPrimaryItem = heroStatsItems[0] || null;
             const statSecondaryItem = heroStatsItems[1] || null;
+            const heroWords = toStringArray(settings.dynamicWords);
+            const heroAccentText = heroWords[0] || "Social media management";
 
             return (
               <motion.section
@@ -476,31 +493,14 @@ export default function PublicLandingRuntime({ config, campaigns = [] }) {
                 {...sectionMotion}
                 style={sectionTextVars}
               >
-                <div className="lp-hero-background">
-                  {settings.imageUrl ? (
-                    <LandingImage
-                      src={settings.imageUrl}
-                      alt="Marketing growth visual"
-                      width={1600}
-                      height={1000}
-                      sizes="100vw"
-                      priority
-                    />
-                  ) : (
-                    <div className="lp-image-placeholder">No image selected</div>
-                  )}
-                </div>
+                <HeroEyesScene className="lp-hero-scene-canvas" />
 
                 <div className="lp-hero-content">
                   <h1 className={`lp-hero-headline ${textClass}`}>
                     <span className="lp-hero-headline-static">
                       {settings.staticText || "Let us help you grow your reach through"}
                     </span>
-                    <HeroTypewriter
-                      className="lp-hero-headline-dynamic is-type-active"
-                      words={settings.dynamicWords}
-                      fallback="Social media management"
-                    />
+                    <span className="lp-hero-headline-dynamic">{heroAccentText}</span>
                   </h1>
 
                   <p className={`lp-hero-description ${textClass}`}>

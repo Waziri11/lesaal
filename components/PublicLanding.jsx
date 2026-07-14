@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
+import HeroEyesScene from "./HeroEyesScene";
 
 const SECTION_ANCHOR_BASES = {
   HERO: "top",
@@ -311,9 +312,6 @@ export default function PublicLanding({
   onItemDragEnd,
 }) {
   const [activeFaqItemId, setActiveFaqItemId] = useState(null);
-  const [dynamicWordIndex, setDynamicWordIndex] = useState(0);
-  const [typedDynamicWord, setTypedDynamicWord] = useState("");
-  const [isDeletingDynamicWord, setIsDeletingDynamicWord] = useState(false);
   const [pricingBillingModes, setPricingBillingModes] = useState({});
   const longPressTimerRef = useRef(null);
 
@@ -325,11 +323,6 @@ export default function PublicLanding({
   const visibleSections = useMemo(
     () => config.sections.filter((section) => section.isVisible).sort((a, b) => a.order - b.order),
     [config.sections]
-  );
-
-  const heroSection = useMemo(
-    () => visibleSections.find((section) => section.type === "HERO") || null,
-    [visibleSections]
   );
 
   const statsBandSection = useMemo(
@@ -391,63 +384,6 @@ export default function PublicLanding({
 
     return links;
   }, [sectionAnchors, visibleSections]);
-
-  const heroDynamicWords = useMemo(
-    () => toStringArray(heroSection?.settings?.dynamicWords),
-    [heroSection]
-  );
-
-  const heroRotationWords = useMemo(() => {
-    const fallbackWords = ["Social media management", "SEO optimization"];
-    return heroDynamicWords.length ? heroDynamicWords : fallbackWords;
-  }, [heroDynamicWords]);
-
-  useEffect(() => {
-    setDynamicWordIndex(0);
-    setTypedDynamicWord("");
-    setIsDeletingDynamicWord(false);
-  }, [heroSection?.id]);
-
-  useEffect(() => {
-    if (!heroRotationWords.length) {
-      setDynamicWordIndex(0);
-      setTypedDynamicWord("");
-      setIsDeletingDynamicWord(false);
-      return undefined;
-    }
-
-    const currentWord = heroRotationWords[dynamicWordIndex % heroRotationWords.length] || "";
-
-    if (editorMode) {
-      setTypedDynamicWord(currentWord);
-      setIsDeletingDynamicWord(false);
-      return undefined;
-    }
-
-    const baseTypingSpeed = isDeletingDynamicWord ? 45 : 85;
-    let timer;
-
-    if (!isDeletingDynamicWord && typedDynamicWord.length < currentWord.length) {
-      timer = setTimeout(() => {
-        setTypedDynamicWord(currentWord.slice(0, typedDynamicWord.length + 1));
-      }, baseTypingSpeed);
-    } else if (!isDeletingDynamicWord && typedDynamicWord.length === currentWord.length) {
-      timer = setTimeout(() => {
-        setIsDeletingDynamicWord(true);
-      }, 950);
-    } else if (isDeletingDynamicWord && typedDynamicWord.length > 0) {
-      timer = setTimeout(() => {
-        setTypedDynamicWord(currentWord.slice(0, typedDynamicWord.length - 1));
-      }, 35);
-    } else {
-      timer = setTimeout(() => {
-        setIsDeletingDynamicWord(false);
-        setDynamicWordIndex((current) => (current + 1) % heroRotationWords.length);
-      }, 220);
-    }
-
-    return () => clearTimeout(timer);
-  }, [dynamicWordIndex, editorMode, heroRotationWords, isDeletingDynamicWord, typedDynamicWord]);
 
   useEffect(() => {
     const faqSection = visibleSections.find((section) => section.type === "FAQ");
@@ -717,14 +653,9 @@ export default function PublicLanding({
           const sectionTextVars = textStyleToCssVars(settings.textStyle);
 
           if (section.type === "HERO") {
-            const heroWords = heroRotationWords.length ? heroRotationWords : ["Social media management"];
-            const activeWordIndex = dynamicWordIndex % heroWords.length;
-            const currentWord = heroWords[activeWordIndex] || "";
-            const displayedDynamicWord = editorMode ? currentWord : typedDynamicWord;
-            const dynamicWordWidthCh = Math.max(
-              8,
-              heroWords.reduce((longest, word) => Math.max(longest, String(word || "").length), 0) + 1
-            );
+            const configuredHeroWords = toStringArray(settings.dynamicWords);
+            const heroWords = configuredHeroWords.length ? configuredHeroWords : ["Social media management"];
+            const highlightedHeroWord = heroWords[0] || "Social media management";
             const heroStatsItems = (statsBandSection?.items || []).slice().sort((a, b) => a.order - b.order).slice(0, 2);
             const statPrimaryItem = heroStatsItems[0] || null;
             const statSecondaryItem = heroStatsItems[1] || null;
@@ -748,20 +679,7 @@ export default function PublicLanding({
                 onTouchMove={sectionProps.onTouchMove}
                 onTouchCancel={sectionProps.onTouchCancel}
               >
-                <div className="lp-hero-background">
-                  {settings.imageUrl ? (
-                    <img src={settings.imageUrl} alt="Marketing growth visual" />
-                  ) : (
-                    <div className="lp-image-placeholder">No image selected</div>
-                  )}
-
-                  {editorMode ? (
-                    <InlineImageUploader
-                      label={settings.imageUrl ? "Replace Image" : "Add Image"}
-                      onUpload={(file) => handleSectionImageUpload(section.id, "imageUrl", file)}
-                    />
-                  ) : null}
-                </div>
+                <HeroEyesScene className="lp-hero-scene-canvas" />
 
                 <div className="lp-hero-content">
                   <h1 className={`lp-hero-headline ${textClass}`}>
@@ -775,26 +693,23 @@ export default function PublicLanding({
                       onActivate={() => onSelectSection?.(section.id)}
                       onCommit={(nextValue) => onUpdateSectionSetting?.(section.id, "staticText", nextValue)}
                     />
-                    <span
-                      className={`lp-hero-headline-dynamic${editorMode ? "" : " is-type-active"}`}
-                      style={{ "--lp-hero-dynamic-width": `${dynamicWordWidthCh}ch` }}
-                    >
+                    <span className="lp-hero-headline-dynamic">
                       <EditableText
                         editorMode={editorMode}
                         as="span"
-                        value={displayedDynamicWord}
+                        value={highlightedHeroWord}
                         fallback="Social media management"
                         onActivate={() => onSelectSection?.(section.id)}
                         onCommit={(nextValue) => {
                           const nextWords = [...heroWords];
-                          nextWords[activeWordIndex] = nextValue;
+                          nextWords[0] = nextValue;
                           onUpdateSectionSetting?.(section.id, "dynamicWords", nextWords);
                         }}
                       />
                     </span>
                   </h1>
 
-                  {editorMode ? <p className="lp-hero-type-indicator">Dynamic text is editable.</p> : null}
+                  {editorMode ? <p className="lp-hero-type-indicator">Highlight text is editable.</p> : null}
 
                   <EditableText
                     editorMode={editorMode}

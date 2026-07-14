@@ -179,13 +179,19 @@ export default function MegaphoneScrollerPage() {
         .fromTo(
           camera.position,
           { x: 3.6, y: -0.04, z: -3.93 },
-          { x: -3.6, y: -0.04, z: -3.93, duration: 3.5, ease: "power2.out" },
+          { x: isMobile ? -3.6 : -2.3, y: -0.04, z: isMobile ? -3.93 : -5.23, duration: 3.5, ease: "power2.out" },
           "-=0.8"
         )
         .fromTo(
           target,
           { x: 3.16, y: -0.13, z: 0.51 },
-          { x: isMobile ? -0.1 : 0.86, y: -0.13, z: 0.51, duration: 3.5, ease: "power2.out" },
+          { x: isMobile ? -0.1 : 2.16, y: -0.13, z: isMobile ? 0.51 : -0.79, duration: 3.5, ease: "power2.out" },
+          "-=3.5"
+        )
+        .fromTo(
+          modelGroup.rotation,
+          { y: 0 },
+          { y: isMobile ? 0 : -1.8, duration: 3.5, ease: "power2.out" },
           "-=3.5"
         )
         .fromTo(
@@ -229,8 +235,9 @@ export default function MegaphoneScrollerPage() {
           renderer.render(scene, camera);
         }
       })
-      .to(camera.position, { x: -2.5, y: 0.2, z: -3.5, ease: "none" })
-      .to(target, { x: isMobile ? 0.1 : -0.6, y: -0.1, z: 0.9, ease: "none" }, "<");
+      .to(camera.position, { x: isMobile ? -2.5 : -3.5, y: isMobile ? 0.2 : 0.3, z: isMobile ? -3.5 : -5.5, ease: "none" })
+      .to(target, { x: isMobile ? 0.1 : -2.2, y: -0.1, z: isMobile ? 0.9 : 0.0, ease: "none" }, "<")
+      .to(modelGroup.rotation, { y: 0, ease: "none" }, "<");
 
       // Section 3 (Power) Camera rotation
       gsap.timeline({

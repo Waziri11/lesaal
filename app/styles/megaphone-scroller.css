@@ -21,7 +21,8 @@
   position: fixed;
   top: 0;
   left: 0;
-  touch-action: none;
+  touch-action: auto;
+  pointer-events: none;
   z-index: 0;
 }
 
@@ -156,7 +157,7 @@
 }
 
 .hero--content {
-  width: 380px;
+  width: 540px;
   position: absolute;
   left: 10%;
   opacity: 0;
@@ -168,7 +169,7 @@
   left: -6px;
   font-style: normal;
   font-weight: 700;
-  font-size: 120px;
+  font-size: clamp(4rem, 10vw, 160px);
   line-height: 1.0;
   letter-spacing: -0.03em;
   color: #181818;
@@ -181,7 +182,7 @@
   margin-left: 5px;
   margin-bottom: 12px;
   font-weight: 500;
-  font-size: 18px;
+  font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #555;
@@ -190,8 +191,8 @@
 .hero--content > p {
   font-style: normal;
   font-weight: 400;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 20px;
+  line-height: 1.65;
   letter-spacing: -0.02em;
   color: #444;
   margin-bottom: 30px;
@@ -271,7 +272,7 @@
 }
 
 .performance--content {
-  width: 380px;
+  width: 540px;
   position: absolute;
   right: 10%;
   opacity: 0;
@@ -279,8 +280,8 @@
 }
 
 .performance--content p {
-  line-height: 1.6;
-  font-size: 16px;
+  line-height: 1.65;
+  font-size: 20px;
   color: #444;
   margin-bottom: 25px;
 }
@@ -288,7 +289,7 @@
 .performance--content > h1 {
   font-style: normal;
   font-weight: 700;
-  font-size: 72px;
+  font-size: clamp(3rem, 7vw, 110px);
   line-height: 1.0;
   letter-spacing: -0.02em;
   color: #be1921;
@@ -298,7 +299,7 @@
 .performance--content > h2 {
   margin-bottom: 12px;
   font-weight: 500;
-  font-size: 18px;
+  font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #555;
@@ -331,7 +332,7 @@
 }
 
 .power--content {
-  width: 420px;
+  width: 540px;
   opacity: 0;
   transform: translateX(-50px);
   pointer-events: auto;
@@ -339,7 +340,7 @@
 
 .power--content > h2 {
   font-weight: 500;
-  font-size: 18px;
+  font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #555;
@@ -349,7 +350,7 @@
 .power--content > h1 {
   font-style: normal;
   font-weight: 700;
-  font-size: 80px;
+  font-size: clamp(3rem, 7vw, 110px);
   line-height: 1.0;
   letter-spacing: -0.02em;
   color: #be1921;
@@ -357,8 +358,8 @@
 }
 
 .power--content > p {
-  line-height: 1.6;
-  font-size: 16px;
+  line-height: 1.65;
+  font-size: 20px;
   color: #444;
 }
 
@@ -394,7 +395,7 @@
   justify-content: center;
   flex-direction: column;
   align-items: center;
-  max-width: 600px;
+  max-width: 840px;
   opacity: 0;
   transform: translateY(50px);
   text-align: center;
@@ -404,7 +405,7 @@
 .autofocus--content > h1 {
   font-style: normal;
   font-weight: 300;
-  font-size: 72px;
+  font-size: clamp(3rem, 7vw, 110px);
   line-height: 1.1;
   letter-spacing: -0.02em;
   margin-bottom: 24px;
@@ -419,8 +420,8 @@
 .autofocus--content p {
   width: 85%;
   text-align: center;
-  line-height: 1.6;
-  font-size: 17px;
+  line-height: 1.65;
+  font-size: 20px;
   color: #444;
 }
 
@@ -447,11 +448,11 @@
 .explore--content > h1 {
   font-style: normal;
   font-weight: 300;
-  font-size: 72px;
+  font-size: clamp(3rem, 7vw, 110px);
   line-height: 1.1;
   letter-spacing: -0.02em;
   margin-bottom: 40px;
-  width: 400px;
+  width: 600px;
   text-align: right;
   color: #181818;
 }
@@ -508,7 +509,7 @@
 }
 
 .connectivity--content {
-  width: 380px;
+  width: 540px;
   position: absolute;
   right: 10%;
   opacity: 0;
@@ -518,7 +519,7 @@
 .connectivity--content > h2 {
   margin-bottom: 12px;
   font-weight: 500;
-  font-size: 18px;
+  font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #555;
@@ -527,7 +528,7 @@
 .connectivity--content > h1 {
   font-style: normal;
   font-weight: 700;
-  font-size: 72px;
+  font-size: clamp(3rem, 7vw, 110px);
   line-height: 1.0;
   letter-spacing: -0.02em;
   color: #be1921;
@@ -535,8 +536,8 @@
 }
 
 .connectivity--content p {
-  line-height: 1.6;
-  font-size: 16px;
+  line-height: 1.65;
+  font-size: 20px;
   color: #444;
 }
 
@@ -550,7 +551,7 @@
 }
 
 .durability--content {
-  width: 380px;
+  width: 540px;
   position: absolute;
   left: 10%;
   opacity: 0;
@@ -560,7 +561,7 @@
 .durability--content > h2 {
   margin-bottom: 12px;
   font-weight: 500;
-  font-size: 18px;
+  font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #555;
@@ -569,7 +570,7 @@
 .durability--content > h1 {
   font-style: normal;
   font-weight: 700;
-  font-size: 72px;
+  font-size: clamp(3rem, 7vw, 110px);
   line-height: 1.0;
   letter-spacing: -0.02em;
   color: #be1921;
@@ -577,8 +578,8 @@
 }
 
 .durability--content p {
-  line-height: 1.6;
-  font-size: 16px;
+  line-height: 1.65;
+  font-size: 20px;
   color: #444;
 }
 
@@ -597,7 +598,7 @@
   justify-content: center;
   flex-direction: column;
   align-items: center;
-  max-width: 600px;
+  max-width: 840px;
   opacity: 0;
   transform: translateY(50px);
   text-align: center;
@@ -607,7 +608,7 @@
 .recording--content > h2 {
   margin-bottom: 12px;
   font-weight: 500;
-  font-size: 18px;
+  font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #555;
@@ -616,7 +617,7 @@
 .recording--content > h1 {
   font-style: normal;
   font-weight: 700;
-  font-size: 72px;
+  font-size: clamp(3rem, 7vw, 110px);
   line-height: 1.0;
   letter-spacing: -0.02em;
   color: #be1921;
@@ -626,8 +627,8 @@
 .recording--content p {
   width: 85%;
   text-align: center;
-  line-height: 1.6;
-  font-size: 16px;
+  line-height: 1.65;
+  font-size: 20px;
   color: #444;
 }
 

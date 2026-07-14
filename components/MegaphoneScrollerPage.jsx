@@ -22,6 +22,11 @@ export default function MegaphoneScrollerPage() {
 
     const isMobile = window.innerWidth <= 768;
 
+    // Disable scroll-behavior: smooth on html to prevent Lenis smooth scroll conflicts
+    const htmlEl = document.documentElement;
+    const oldScrollBehavior = htmlEl.style.scrollBehavior;
+    htmlEl.style.scrollBehavior = "auto";
+
     // Initialize Lenis Smooth Scroll
     const lenis = new Lenis({
       duration: 1.2,
@@ -129,7 +134,7 @@ export default function MegaphoneScrollerPage() {
 
         loadedObject.position.sub(center);
         const longestAxis = Math.max(size.x, size.y, size.z) || 1;
-        const scale = 4.2 / longestAxis;
+        const scale = 2.6 / longestAxis;
         loadedObject.scale.setScalar(scale);
 
         modelGroup.add(loadedObject);
@@ -158,7 +163,12 @@ export default function MegaphoneScrollerPage() {
 
     // 5. Scroll & Interactive Animations
     function introAnimation() {
-      const introTL = gsap.timeline();
+      const introTL = gsap.timeline({
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
+        }
+      });
       introTL
         .to(".loader", {
           x: "150%",
@@ -204,123 +214,277 @@ export default function MegaphoneScrollerPage() {
       const loaderEl = document.querySelector(".loader");
       if (loaderEl) loaderEl.style.display = "none";
 
-      // SECTION 2 (Performance)
+      // --- CAMERA ROTATIONS ON SCROLL ---
+
+      // Section 2 (Performance) Camera rotation
       gsap.timeline({
         scrollTrigger: {
           trigger: ".cam-view-2",
-          start: "top top",
-          end: "+=100%",
+          start: "top bottom",
+          end: "top top",
           scrub: true,
-          pin: true,
-          pinSpacing: true,
+        },
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
         }
       })
       .to(camera.position, { x: -2.5, y: 0.2, z: -3.5, ease: "none" })
-      .to(target, { x: isMobile ? 0.1 : -0.6, y: -0.1, z: 0.9, ease: "none" }, "<")
-      .to(".hero--scroller", { opacity: 0, y: "150%", ease: "none" }, "<")
-      .to(".hero--content", { opacity: 0, xPercent: -100, ease: "none" }, "<")
-      .fromTo(".performance--content", { opacity: 0, x: "110%" }, { opacity: 1, x: "0%", ease: "none" }, "<");
+      .to(target, { x: isMobile ? 0.1 : -0.6, y: -0.1, z: 0.9, ease: "none" }, "<");
 
-      // SECTION 3 (Power)
+      // Section 3 (Power) Camera rotation
       gsap.timeline({
         scrollTrigger: {
           trigger: ".cam-view-3",
-          start: "top top",
-          end: "+=100%",
+          start: "top bottom",
+          end: "top top",
           scrub: true,
-          pin: true,
-          pinSpacing: true,
+        },
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
         }
       })
       .to(camera.position, { x: -0.07, y: isMobile ? 3 : 5.45, z: isMobile ? -1.1 : -3.7, ease: "none" })
-      .to(target, { x: isMobile ? -0.4 : -0.04, y: isMobile ? -3.8 : -0.52, z: 0.61, ease: "none" }, "<")
-      .to(".performance--content", { opacity: 0, ease: "none" }, "<")
-      .fromTo(".power--content", { opacity: 0, x: "-110%" }, { opacity: 1, x: "0%", ease: "none" }, "<")
-      .fromTo(".power--features--img", { opacity: 0, x: "110%" }, { opacity: 1, x: "0%", ease: "none" }, "<");
+      .to(target, { x: isMobile ? -0.4 : -0.04, y: isMobile ? -3.8 : -0.52, z: 0.61, ease: "none" }, "<");
 
-      // SECTION 4 (Projection)
+      // Section 4 (Projection) Camera rotation
       gsap.timeline({
         scrollTrigger: {
           trigger: ".cam-view-4",
-          start: "top top",
-          end: "+=100%",
+          start: "top bottom",
+          end: "top top",
           scrub: true,
-          pin: true,
-          pinSpacing: true,
+        },
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
         }
       })
       .to(camera.position, { x: -5.5, y: 1.7, z: 5, ease: "none" })
-      .to(target, { x: 0.04, y: 0.2, z: 0.6, ease: "none" }, "<")
-      .to(".power--content", { opacity: 0, x: "-110%", ease: "none" }, "<")
-      .to(".power--features--img", { opacity: 0, x: "110%", ease: "none" }, "<")
-      .fromTo(".autofocus--content", { opacity: 0, y: "130%" }, { opacity: 1, y: "0%", ease: "none" }, "<");
+      .to(target, { x: 0.04, y: 0.2, z: 0.6, ease: "none" }, "<");
 
-      // SECTION 5 (Connectivity)
+      // Section 5 (Connectivity) Camera rotation
       gsap.timeline({
         scrollTrigger: {
           trigger: ".cam-view-connectivity",
-          start: "top top",
-          end: "+=100%",
+          start: "top bottom",
+          end: "top top",
           scrub: true,
-          pin: true,
-          pinSpacing: true,
+        },
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
         }
       })
       .to(camera.position, { x: 2.2, y: 0.8, z: -4.5, ease: "none" })
-      .to(target, { x: -0.2, y: -0.1, z: 0.5, ease: "none" }, "<")
-      .to(".autofocus--content", { opacity: 0, y: "130%", ease: "none" }, "<")
-      .fromTo(".connectivity--content", { opacity: 0, x: "110%" }, { opacity: 1, x: "0%", ease: "none" }, "<");
+      .to(target, { x: -0.2, y: -0.1, z: 0.5, ease: "none" }, "<");
 
-      // SECTION 6 (Durability)
+      // Section 6 (Durability) Camera rotation
       gsap.timeline({
         scrollTrigger: {
           trigger: ".cam-view-durability",
-          start: "top top",
-          end: "+=100%",
+          start: "top bottom",
+          end: "top top",
           scrub: true,
-          pin: true,
-          pinSpacing: true,
+        },
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
         }
       })
       .to(camera.position, { x: -1.5, y: -0.4, z: 3.8, ease: "none" })
-      .to(target, { x: 0.3, y: 0.1, z: -0.1, ease: "none" }, "<")
-      .to(".connectivity--content", { opacity: 0, x: "110%", ease: "none" }, "<")
-      .fromTo(".durability--content", { opacity: 0, x: "-110%" }, { opacity: 1, x: "0%", ease: "none" }, "<");
+      .to(target, { x: 0.3, y: 0.1, z: -0.1, ease: "none" }, "<");
 
-      // SECTION 7 (Recording)
+      // Section 7 (Recording) Camera rotation
       gsap.timeline({
         scrollTrigger: {
           trigger: ".cam-view-recording",
-          start: "top top",
-          end: "+=100%",
+          start: "top bottom",
+          end: "top top",
           scrub: true,
-          pin: true,
-          pinSpacing: true,
+        },
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
         }
       })
       .to(camera.position, { x: 4.5, y: -2.2, z: 2.5, ease: "none" })
-      .to(target, { x: -0.5, y: 0.3, z: -0.2, ease: "none" }, "<")
-      .to(".durability--content", { opacity: 0, x: "-110%", ease: "none" }, "<")
-      .fromTo(".recording--content", { opacity: 0, y: "130%" }, { opacity: 1, y: "0%", ease: "none" }, "<");
+      .to(target, { x: -0.5, y: 0.3, z: -0.2, ease: "none" }, "<");
 
-      // SECTION 8 (Explore)
+      // Section 8 (Explore) Camera rotation
       gsap.timeline({
         scrollTrigger: {
           trigger: ".cam-view-5",
-          start: "top top",
-          end: "+=100%",
+          start: "top bottom",
+          end: "top top",
           scrub: true,
-          pin: true,
-          pinSpacing: true,
+        },
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
         }
       })
       .to(camera.position, { x: -0.3, y: -0.3, z: -4.85, ease: "none" })
-      .to(target, { x: isMobile ? -0.1 : -0.9, y: -0.17, z: 0.1, ease: "none" }, "<")
-      .to(".recording--content", { opacity: 0, y: "130%", ease: "none" }, "<")
-      .fromTo(".explore--content", { opacity: 0, x: "130%" }, { opacity: 1, x: "0%", ease: "none" }, "<");
+      .to(target, { x: isMobile ? -0.1 : -0.9, y: -0.17, z: 0.1, ease: "none" }, "<");
+
+
+      // --- CONTENT FADE IN / FADE OUT ON SCROLL ---
+
+      // Fade out Hero content as we scroll down
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-1",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+      .to(".hero--content", { opacity: 0, y: -80, ease: "none" })
+      .to(".hero--scroller", { opacity: 0, y: 80, ease: "none" }, "<");
+
+      // Fade in/out Performance content
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-2",
+          start: "top bottom",
+          end: "top center",
+          scrub: true,
+        }
+      })
+      .fromTo(".performance--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-2",
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+      .to(".performance--content", { opacity: 0, y: -80, ease: "none" });
+
+      // Fade in/out Power content
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-3",
+          start: "top bottom",
+          end: "top center",
+          scrub: true,
+        }
+      })
+      .fromTo(".power--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" })
+      .fromTo(".power--features--img", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" }, "<");
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-3",
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+      .to(".power--content", { opacity: 0, y: -80, ease: "none" })
+      .to(".power--features--img", { opacity: 0, y: -80, ease: "none" }, "<");
+
+      // Fade in/out Projection content
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-4",
+          start: "top bottom",
+          end: "top center",
+          scrub: true,
+        }
+      })
+      .fromTo(".autofocus--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-4",
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+      .to(".autofocus--content", { opacity: 0, y: -80, ease: "none" });
+
+      // Fade in/out Connectivity content
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-connectivity",
+          start: "top bottom",
+          end: "top center",
+          scrub: true,
+        }
+      })
+      .fromTo(".connectivity--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-connectivity",
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+      .to(".connectivity--content", { opacity: 0, y: -80, ease: "none" });
+
+      // Fade in/out Durability content
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-durability",
+          start: "top bottom",
+          end: "top center",
+          scrub: true,
+        }
+      })
+      .fromTo(".durability--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-durability",
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+      .to(".durability--content", { opacity: 0, y: -80, ease: "none" });
+
+      // Fade in/out Recording content
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-recording",
+          start: "top bottom",
+          end: "top center",
+          scrub: true,
+        }
+      })
+      .fromTo(".recording--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-recording",
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+      .to(".recording--content", { opacity: 0, y: -80, ease: "none" });
+
+      // Fade in Explore content
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-5",
+          start: "top bottom",
+          end: "top center",
+          scrub: true,
+        }
+      })
+      .fromTo(".explore--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" });
     }
 
     // explore gallery mode transition
+    let exploreLoopId;
     function startExplore() {
       lenis.stop();
 
@@ -330,14 +494,22 @@ export default function MegaphoneScrollerPage() {
       const header = document.querySelector(".header");
 
       if (exploreView) exploreView.style.pointerEvents = "none";
-      if (canvasView) canvasView.style.pointerEvents = "all";
+      if (canvasView) {
+        canvasView.style.pointerEvents = "all";
+        canvasView.style.touchAction = "none";
+      }
       if (canvasContainer) canvasContainer.style.zIndex = "5";
       if (header) header.style.position = "fixed";
 
       document.body.style.overflowY = "hidden";
       document.body.style.cursor = "grab";
 
-      const tlExplore = gsap.timeline();
+      const tlExplore = gsap.timeline({
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
+        }
+      });
       tlExplore
         .to(camera.position, {
           x: 5,
@@ -370,6 +542,15 @@ export default function MegaphoneScrollerPage() {
               if (exitContainer) exitContainer.style.display = "flex";
               controls.target.copy(target);
               controls.enabled = true;
+
+              // Start on-demand render loop for OrbitControls
+              const exploreLoop = () => {
+                if (!controls.enabled) return;
+                exploreLoopId = requestAnimationFrame(exploreLoop);
+                controls.update();
+                renderer.render(scene, camera);
+              };
+              exploreLoop();
             },
           },
           "-=2.2"
@@ -380,6 +561,8 @@ export default function MegaphoneScrollerPage() {
       lenis.start();
 
       controls.enabled = false;
+      cancelAnimationFrame(exploreLoopId);
+
       const exploreView = document.querySelector(".cam-view-5");
       const canvasView = canvasRef.current;
       const canvasContainer = containerRef.current;
@@ -387,7 +570,10 @@ export default function MegaphoneScrollerPage() {
       const exitContainer = document.querySelector(".exit--container");
 
       if (exploreView) exploreView.style.pointerEvents = "all";
-      if (canvasView) canvasView.style.pointerEvents = "none";
+      if (canvasView) {
+        canvasView.style.pointerEvents = "none";
+        canvasView.style.touchAction = "auto";
+      }
       if (canvasContainer) canvasContainer.style.zIndex = "0";
       if (exitContainer) exitContainer.style.display = "none";
       if (header) header.style.position = "absolute";
@@ -395,7 +581,12 @@ export default function MegaphoneScrollerPage() {
       document.body.style.overflowY = "auto";
       document.body.style.cursor = "default";
 
-      const tlExit = gsap.timeline();
+      const tlExit = gsap.timeline({
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
+        }
+      });
       tlExit
         .to(camera.position, {
           x: -0.3,
@@ -458,38 +649,30 @@ export default function MegaphoneScrollerPage() {
       });
     }
 
-    // 6. Animation loop & Window Resizing
-    let requestID;
-    const animate = () => {
-      requestID = requestAnimationFrame(animate);
-
-      if (controls.enabled) {
-        controls.update();
-      } else {
-        camera.lookAt(target);
-      }
-
-      renderer.render(scene, camera);
-    };
-    animate();
-
+    // 6. Window Resizing
     const handleResize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+      renderer.render(scene, camera);
     };
     window.addEventListener("resize", handleResize);
+
+    // Initial render
+    camera.lookAt(target);
+    renderer.render(scene, camera);
 
     // 7. Cleanup on unmount
     return () => {
       window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(requestID);
       cancelAnimationFrame(lenisRafId);
+      cancelAnimationFrame(exploreLoopId);
       lenis.destroy();
       controls.dispose();
       renderer.dispose();
+      htmlEl.style.scrollBehavior = oldScrollBehavior;
 
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 

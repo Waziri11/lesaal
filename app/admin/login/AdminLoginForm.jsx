@@ -4,12 +4,9 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
 import { Spinner } from "../../../components/ui/spinner";
 import { createCsrfHeaders } from "../../../lib/csrf-client";
+import "../../styles/auth.css";
 
 const MIN_PASSWORD_LENGTH = 8;
 const CAPTCHA_LOAD_ERROR_MESSAGE = "Captcha failed to load. Please disable blockers and refresh the page.";
@@ -460,50 +457,40 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
 
   function renderCaptcha() {
     return (
-      <div className="space-y-2">
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
         <div ref={captchaRef} />
         {!captchaReady ? (
-          <p className="flex items-center gap-2 text-sm text-[color:var(--ui-muted-foreground)]">
+          <p style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", color: "#666", margin: 0 }}>
             <Spinner />
             Loading captcha challenge...
           </p>
         ) : null}
-        {captchaLoadError ? <p className="text-sm text-[color:var(--ui-destructive)]">{captchaLoadError}</p> : null}
+        {captchaLoadError ? <p className="auth--error">{captchaLoadError}</p> : null}
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-2xl items-center px-4 py-8">
-      <Card className="w-full" aria-busy={loading}>
-        <CardHeader className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/">Back to Homepage</Link>
-            </Button>
-            {isForgotMode ? (
-              <Button type="button" variant="ghost" size="sm" onClick={closeForgotMode} disabled={loading}>
+    <div className="auth--page">
+      <div className="auth--container">
+        <div className="auth--header">
+          <Link href="/" className="auth--logo">LESAAL</Link>
+          {isForgotMode ? (
+            <div className="auth--header--nav" style={{ justifyContent: "center" }}>
+              <button type="button" className="button--link-back" onClick={closeForgotMode} disabled={loading}>
                 Back to Login
-              </Button>
-            ) : null}
-          </div>
+              </button>
+            </div>
+          ) : null}
+          <h1>{isForgotMode ? "Forgot Password" : "Sign In"}</h1>
+        </div>
 
-          <div>
-            <CardTitle>{isForgotMode ? "Forgot password" : "Sign in"}</CardTitle>
-            <CardDescription>
-              {isForgotMode
-                ? "Use OTP reset to recover your admin account."
-                : "Sign in with your admin email and password."}
-            </CardDescription>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
+        <div className="auth--content">
           {!isForgotMode ? (
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
+            <form className="auth--form" onSubmit={handleSubmit}>
+              <div className="auth--group">
+                <label htmlFor="email" className="auth--label">Email</label>
+                <input
                   id="email"
                   type="email"
                   value={email}
@@ -511,27 +498,28 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
                   placeholder="admin@example.com"
                   disabled={loading}
                   required
+                  className="auth--input"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Input
+              <div className="auth--group">
+                <label htmlFor="password" className="auth--label">Password</label>
+                <div className="relative-container">
+                  <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="********"
                     disabled={loading}
-                    className="pr-11"
+                    className="auth--input auth--input-password"
                     required
                   />
                   <button
                     type="button"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     aria-pressed={showPassword}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-[color:var(--ui-muted-foreground)] transition hover:text-[color:var(--ui-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ui-ring)]"
+                    className="password-toggle-btn"
                     onClick={() => setShowPassword((current) => !current)}
                     disabled={loading}
                   >
@@ -540,27 +528,28 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
                 </div>
               </div>
 
-              {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
-              {notice ? <p className="text-sm text-[color:var(--ui-success)]">{notice}</p> : null}
+              {error ? <p className="auth--error">{error}</p> : null}
+              {notice ? <p className="auth--notice">{notice}</p> : null}
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <button type="submit" className="button-auth" disabled={loading}>
                 {loading ? "Signing in..." : "Login"}
-              </Button>
+              </button>
+              
               {renderCaptcha()}
 
-              <Button type="button" variant="ghost" className="w-full" onClick={openForgotMode} disabled={loading}>
+              <button type="button" className="button--text-link" onClick={openForgotMode} disabled={loading}>
                 Forgot password? Reset with OTP
-              </Button>
+              </button>
             </form>
           ) : null}
 
           {isForgotMode && forgotStep === "request" ? (
-            <form className="space-y-4" onSubmit={handleRequestOtp}>
-              <p className="text-sm text-[color:var(--ui-muted-foreground)]">Enter your admin email and we will send you a reset OTP.</p>
+            <form className="auth--form" onSubmit={handleRequestOtp}>
+              <p className="auth--desc">Enter your admin email and we will send you a reset OTP.</p>
 
-              <div className="space-y-2">
-                <Label htmlFor="forgot-email">Admin Email</Label>
-                <Input
+              <div className="auth--group">
+                <label htmlFor="forgot-email" className="auth--label">Admin Email</label>
+                <input
                   id="forgot-email"
                   type="email"
                   value={forgotEmail}
@@ -568,26 +557,28 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
                   placeholder="admin@example.com"
                   disabled={loading}
                   required
+                  className="auth--input"
                 />
               </div>
 
-              {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
-              {notice ? <p className="text-sm text-[color:var(--ui-success)]">{notice}</p> : null}
+              {error ? <p className="auth--error">{error}</p> : null}
+              {notice ? <p className="auth--notice">{notice}</p> : null}
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <button type="submit" className="button-auth" disabled={loading}>
                 {loading ? "Sending OTP..." : "Send OTP"}
-              </Button>
+              </button>
+              
               {renderCaptcha()}
             </form>
           ) : null}
 
           {isForgotMode && forgotStep === "reset" ? (
-            <form className="space-y-4" onSubmit={handleResetPassword}>
-              <p className="text-sm text-[color:var(--ui-muted-foreground)]">Enter the OTP from your email, then choose a new password.</p>
+            <form className="auth--form" onSubmit={handleResetPassword}>
+              <p className="auth--desc">Enter the OTP from your email, then choose a new password.</p>
 
-              <div className="space-y-2">
-                <Label htmlFor="reset-email">Admin Email</Label>
-                <Input
+              <div className="auth--group">
+                <label htmlFor="reset-email" className="auth--label">Admin Email</label>
+                <input
                   id="reset-email"
                   type="email"
                   value={forgotEmail}
@@ -595,12 +586,13 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
                   placeholder="admin@example.com"
                   disabled={loading}
                   required
+                  className="auth--input"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="otp">OTP Code</Label>
-                <Input
+              <div className="auth--group">
+                <label htmlFor="otp" className="auth--label">OTP Code</label>
+                <input
                   id="otp"
                   type="text"
                   inputMode="numeric"
@@ -609,12 +601,13 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
                   placeholder="6-digit OTP"
                   disabled={loading}
                   required
+                  className="auth--input"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input
+              <div className="auth--group">
+                <label htmlFor="new-password" className="auth--label">New Password</label>
+                <input
                   id="new-password"
                   type="password"
                   value={forgotPassword}
@@ -622,12 +615,13 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
                   placeholder="New password"
                   disabled={loading}
                   required
+                  className="auth--input"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                <Input
+              <div className="auth--group">
+                <label htmlFor="confirm-password" className="auth--label">Confirm New Password</label>
+                <input
                   id="confirm-password"
                   type="password"
                   value={confirmForgotPassword}
@@ -635,21 +629,22 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
                   placeholder="Confirm new password"
                   disabled={loading}
                   required
+                  className="auth--input"
                 />
               </div>
 
-              {error ? <p className="text-sm text-[color:var(--ui-destructive)]">{error}</p> : null}
-              {notice ? <p className="text-sm text-[color:var(--ui-success)]">{notice}</p> : null}
+              {error ? <p className="auth--error">{error}</p> : null}
+              {notice ? <p className="auth--notice">{notice}</p> : null}
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <button type="submit" className="button-auth" disabled={loading}>
                 {loading ? "Resetting password..." : "Reset password"}
-              </Button>
+              </button>
+              
               {renderCaptcha()}
 
-              <Button
+              <button
                 type="button"
-                variant="ghost"
-                className="w-full"
+                className="button--text-link"
                 onClick={() => {
                   clearMessages();
                   setForgotStep("request");
@@ -660,18 +655,18 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
                 disabled={loading}
               >
                 Request a new OTP
-              </Button>
+              </button>
             </form>
           ) : null}
 
-          <p className="text-sm text-[color:var(--ui-muted-foreground)]">
+          <p className="auth--signup-prompt">
             Don&apos;t have an account yet?{" "}
-            <Link href="/signup" className="font-semibold text-[color:var(--ui-primary)] underline">
+            <Link href="/signup" className="auth--signup-link">
               Sign up
             </Link>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

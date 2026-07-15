@@ -1,40 +1,42 @@
-import Link from "next/link";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
+"use client";
 
-export const metadata = {
-  title: "Lesaal | Sign up",
-  description: "Public sign-up is coming soon.",
-};
+import Link from "next/link";
+import "../styles/auth.css";
 
 export default function SignUpComingSoonPage() {
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-12">
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign up is coming soon</CardTitle>
-          <CardDescription>
+    <div className="auth--page">
+      <title>Lesaal | Sign up</title>
+      <div className="auth--container">
+        <div className="auth--header">
+          <Link href="/" className="auth--logo">LESAAL</Link>
+          <h2>Public accounts coming soon</h2>
+          <h1>Join the Waitlist</h1>
+          <p className="auth--subtitle">
             We are preparing public accounts. Join the waitlist and we will notify you when signup is ready.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <form action="#" className="space-y-3">
-            <Input type="email" placeholder="you@example.com" aria-label="Email address" />
-            <Button type="submit" className="w-full">
-              Join waitlist
-            </Button>
-          </form>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline">
-              <Link href="/">Back to Homepage</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/admin/login">Admin Log in</Link>
-            </Button>
+          </p>
+        </div>
+        
+        <form className="auth--form" action="#" onSubmit={(e) => e.preventDefault()}>
+          <div className="auth--group">
+            <input 
+              type="email" 
+              placeholder="you@example.com" 
+              required 
+              className="auth--input" 
+              aria-label="Email address" 
+            />
           </div>
-        </CardContent>
-      </Card>
+          <button type="submit" className="button-auth">
+            Join waitlist
+          </button>
+        </form>
+
+        <div className="auth--footer">
+          <Link href="/" className="button--link">Back to Homepage</Link>
+          <Link href="/admin/login" className="button--link">Admin Log in</Link>
+        </div>
+      </div>
     </div>
   );
 }

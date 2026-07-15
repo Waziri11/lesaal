@@ -7,9 +7,11 @@ export default function SignUpComingSoonPage() {
   return (
     <div className="auth--page">
       <title>Lesaal | Sign up</title>
+      <div className="auth--page-logo">
+        <Link href="/">LESAAL</Link>
+      </div>
       <div className="auth--container">
         <div className="auth--header">
-          <Link href="/" className="auth--logo">LESAAL</Link>
           <h2>Public accounts coming soon</h2>
           <h1>Join the Waitlist</h1>
           <p className="auth--subtitle">

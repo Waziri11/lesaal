@@ -472,9 +472,11 @@ export default function AdminLoginForm({ turnstileSiteKey, nextPath = "", sessio
 
   return (
     <div className="auth--page">
+      <div className="auth--page-logo">
+        <Link href="/">LESAAL</Link>
+      </div>
       <div className="auth--container">
         <div className="auth--header">
-          <Link href="/" className="auth--logo">LESAAL</Link>
           {isForgotMode ? (
             <div className="auth--header--nav" style={{ justifyContent: "center" }}>
               <button type="button" className="button--link-back" onClick={closeForgotMode} disabled={loading}>

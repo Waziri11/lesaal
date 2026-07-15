@@ -98,32 +98,38 @@ export default function MegaphoneScrollerPage() {
     window.addEventListener("error", errorHandler);
     window.addEventListener("unhandledrejection", rejectionHandler);
 
-    const isMobile = window.innerWidth <= 768;
+    const mobileMedia = window.matchMedia("(max-width: 768px), (pointer: coarse)");
+    const isMobile = mobileMedia.matches;
+    const oldBodyOverflowY = document.body.style.overflowY;
+    const oldBodyCursor = document.body.style.cursor;
 
     // Disable scroll-behavior: smooth on html to prevent Lenis smooth scroll conflicts
     const htmlEl = document.documentElement;
     const oldScrollBehavior = htmlEl.style.scrollBehavior;
     htmlEl.style.scrollBehavior = "auto";
 
-    // Disable body scroll while loading and reset position to top
-    document.body.style.overflowY = "hidden";
+    // Mobile must remain natively scrollable even while the 3D assets are loading.
+    // Desktop retains the cinematic loader, with a timeout safety valve below.
+    document.body.style.overflowY = isMobile ? "auto" : "hidden";
     window.scrollTo(0, 0);
 
-    // Initialize Lenis Smooth Scroll
-    const lenis = new Lenis({
-      duration: 1.2,
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1.3,
-    });
-    lenis.on("scroll", ScrollTrigger.update);
+    // Native scrolling is substantially more reliable on touch devices. Lenis is
+    // desktop-only so it cannot intercept or delay mobile gestures.
+    const lenis = isMobile
+      ? null
+      : new Lenis({
+          duration: 1.2,
+          smoothWheel: true,
+          wheelMultiplier: 0.9,
+        });
+    lenis?.on("scroll", ScrollTrigger.update);
 
     let lenisRafId;
     const lenisRaf = (time) => {
-      lenis.raf(time);
+      lenis?.raf(time);
       lenisRafId = requestAnimationFrame(lenisRaf);
     };
-    lenisRafId = requestAnimationFrame(lenisRaf);
+    if (lenis) lenisRafId = requestAnimationFrame(lenisRaf);
 
     // 1. Scene, Camera, Renderer setup
     const scene = new THREE.Scene();
@@ -141,7 +147,7 @@ export default function MegaphoneScrollerPage() {
       antialias: true,
       powerPreference: "high-performance",
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -352,7 +358,23 @@ export default function MegaphoneScrollerPage() {
     );
 
     // 5. Scroll & Interactive Animations
+    let introStarted = false;
+    let scrollAnimationsReady = false;
+    let loaderSafetyTimer;
+
+    const unlockPage = () => {
+      document.body.style.overflowY = "auto";
+      const loaderEl = document.querySelector(".loader");
+      if (loaderEl) {
+        loaderEl.style.pointerEvents = "none";
+        loaderEl.style.display = "none";
+      }
+    };
+
     function introAnimation() {
+      if (introStarted) return;
+      introStarted = true;
+      window.clearTimeout(loaderSafetyTimer);
       const introTL = gsap.timeline({
         onUpdate: () => {
           camera.lookAt(target);
@@ -405,14 +427,16 @@ export default function MegaphoneScrollerPage() {
     }
 
     function setupScrollAnimation() {
+      if (scrollAnimationsReady) return;
+      scrollAnimationsReady = true;
       // Force scroll to top at start to guarantee page begins on the first slide
-      window.scrollTo(0, 0);
-      lenis.scrollTo(0, { immediate: true });
+      if (!isMobile) {
+        window.scrollTo(0, 0);
+        lenis?.scrollTo(0, { immediate: true });
+      }
 
       // Enable page scrolling
-      document.body.style.overflowY = "auto";
-      const loaderEl = document.querySelector(".loader");
-      if (loaderEl) loaderEl.style.display = "none";
+      unlockPage();
 
       // --- CAMERA ROTATIONS ON SCROLL ---
 
@@ -774,7 +798,7 @@ export default function MegaphoneScrollerPage() {
     // explore gallery mode transition
     let exploreLoopId;
     function startExplore() {
-      lenis.stop();
+      lenis?.stop();
 
       const exploreView = document.querySelector(".cam-view-5");
       const canvasView = canvasRef.current;
@@ -846,7 +870,7 @@ export default function MegaphoneScrollerPage() {
     }
 
     function exitExplore() {
-      lenis.start();
+      lenis?.start();
 
       controls.enabled = false;
       cancelAnimationFrame(exploreLoopId);
@@ -938,15 +962,28 @@ export default function MegaphoneScrollerPage() {
     }
 
     // 6. Window Resizing
+    let resizeRafId;
     const handleResize = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-      renderer.render(scene, camera);
+      cancelAnimationFrame(resizeRafId);
+      resizeRafId = requestAnimationFrame(() => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 2));
+        renderer.setSize(width, height);
+        renderer.render(scene, camera);
+        ScrollTrigger.refresh();
+      });
     };
     window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+
+    // Never leave the page trapped behind a loader if a large model stalls.
+    loaderSafetyTimer = window.setTimeout(() => {
+      unlockPage();
+      introAnimation();
+    }, isMobile ? 2500 : 8000);
 
     // Initial render
     camera.lookAt(target);
@@ -963,12 +1000,17 @@ export default function MegaphoneScrollerPage() {
       overlays.forEach((o) => o.remove());
 
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+      window.clearTimeout(loaderSafetyTimer);
+      cancelAnimationFrame(resizeRafId);
       cancelAnimationFrame(lenisRafId);
       cancelAnimationFrame(exploreLoopId);
-      lenis.destroy();
+      lenis?.destroy();
       controls.dispose();
       renderer.dispose();
       htmlEl.style.scrollBehavior = oldScrollBehavior;
+      document.body.style.overflowY = oldBodyOverflowY;
+      document.body.style.cursor = oldBodyCursor;
 
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 

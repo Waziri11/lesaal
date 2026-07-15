@@ -6,7 +6,10 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 import Lenis from "@studio-freight/lenis";
+import Link from "next/link";
 import "../app/styles/megaphone-scroller.css";
 
 export default function MegaphoneScrollerPage() {
@@ -15,10 +18,85 @@ export default function MegaphoneScrollerPage() {
   const scrollTimelineRef = useRef(null);
 
   useEffect(() => {
-    // Prevent SSR execution
-    if (typeof window === "undefined") return;
-
     gsap.registerPlugin(ScrollTrigger);
+
+    // Temporary overlay log catcher for debugging client-side loader errors
+    const errorHandler = (event) => {
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "debug-error-overlay";
+      errorDiv.style.position = "fixed";
+      errorDiv.style.top = "0";
+      errorDiv.style.left = "0";
+      errorDiv.style.width = "100%";
+      errorDiv.style.backgroundColor = "rgba(255, 0, 0, 0.95)";
+      errorDiv.style.color = "white";
+      errorDiv.style.padding = "20px";
+      errorDiv.style.zIndex = "999999";
+      errorDiv.style.fontFamily = "monospace";
+      errorDiv.style.whiteSpace = "pre-wrap";
+      errorDiv.innerText = `Client Error: ${event.message}\nAt: ${event.filename}:${event.lineno}:${event.colno}\nError object: ${event.error ? event.error.stack : 'None'}`;
+      document.body.appendChild(errorDiv);
+    };
+    const rejectionHandler = (event) => {
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "debug-error-overlay";
+      errorDiv.style.position = "fixed";
+      errorDiv.style.top = "0";
+      errorDiv.style.left = "0";
+      errorDiv.style.width = "100%";
+      errorDiv.style.backgroundColor = "rgba(255, 0, 0, 0.95)";
+      errorDiv.style.color = "white";
+      errorDiv.style.padding = "20px";
+      errorDiv.style.zIndex = "999999";
+      errorDiv.style.fontFamily = "monospace";
+      errorDiv.style.whiteSpace = "pre-wrap";
+      errorDiv.innerText = `Client Unhandled Rejection: ${event.reason}`;
+      document.body.appendChild(errorDiv);
+    };
+
+    const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+
+    console.error = (...args) => {
+      originalConsoleError.apply(console, args);
+      const msg = args.map(a => typeof a === 'object' ? String(a) : String(a)).join(' ');
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "debug-error-overlay";
+      errorDiv.style.position = "fixed";
+      errorDiv.style.top = "0";
+      errorDiv.style.left = "0";
+      errorDiv.style.width = "100%";
+      errorDiv.style.backgroundColor = "rgba(200, 50, 0, 0.95)";
+      errorDiv.style.color = "white";
+      errorDiv.style.padding = "20px";
+      errorDiv.style.zIndex = "999999";
+      errorDiv.style.fontFamily = "monospace";
+      errorDiv.style.whiteSpace = "pre-wrap";
+      errorDiv.innerText = `Console Error: ${msg}`;
+      document.body.appendChild(errorDiv);
+    };
+
+    console.warn = (...args) => {
+      originalConsoleWarn.apply(console, args);
+      const msg = args.map(a => typeof a === 'object' ? String(a) : String(a)).join(' ');
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "debug-error-overlay";
+      errorDiv.style.position = "fixed";
+      errorDiv.style.bottom = "0";
+      errorDiv.style.left = "0";
+      errorDiv.style.width = "100%";
+      errorDiv.style.backgroundColor = "rgba(200, 150, 0, 0.95)";
+      errorDiv.style.color = "white";
+      errorDiv.style.padding = "20px";
+      errorDiv.style.zIndex = "999999";
+      errorDiv.style.fontFamily = "monospace";
+      errorDiv.style.whiteSpace = "pre-wrap";
+      errorDiv.innerText = `Console Warn: ${msg}`;
+      document.body.appendChild(errorDiv);
+    };
+
+    window.addEventListener("error", errorHandler);
+    window.addEventListener("unhandledrejection", rejectionHandler);
 
     const isMobile = window.innerWidth <= 768;
 
@@ -26,6 +104,10 @@ export default function MegaphoneScrollerPage() {
     const htmlEl = document.documentElement;
     const oldScrollBehavior = htmlEl.style.scrollBehavior;
     htmlEl.style.scrollBehavior = "auto";
+
+    // Disable body scroll while loading and reset position to top
+    document.body.style.overflowY = "hidden";
+    window.scrollTo(0, 0);
 
     // Initialize Lenis Smooth Scroll
     const lenis = new Lenis({
@@ -66,14 +148,14 @@ export default function MegaphoneScrollerPage() {
     renderer.toneMappingExposure = 0.92;
 
     // 2. Softer, Low-Contrast Studio Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 1.35);
-    const keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    const ambient = new THREE.AmbientLight(0xffffff, 1.0);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
     keyLight.position.set(5.8, 3.8, 6.8);
 
-    const fillLight = new THREE.DirectionalLight(0xf2f5ff, 0.8);
+    const fillLight = new THREE.DirectionalLight(0xf2f5ff, 1.2);
     fillLight.position.set(-4.2, 2.1, 3.4);
 
-    const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 1.0);
     rimLight.position.set(-6.2, 1.2, -4.8);
 
     scene.add(ambient, keyLight, fillLight, rimLight);
@@ -86,10 +168,18 @@ export default function MegaphoneScrollerPage() {
     controls.maxPolarAngle = Math.PI / 2 + 0.1; // Don't go too far under the model
 
     // 4. Model Loading
-    const modelGroup = new THREE.Group();
-    scene.add(modelGroup);
+    const modelsContainer = new THREE.Group();
+    scene.add(modelsContainer);
+
+    const megaphoneGroup = new THREE.Group();
+    modelsContainer.add(megaphoneGroup);
+
+    const cameraModelGroup = new THREE.Group();
+    modelsContainer.add(cameraModelGroup);
 
     const loader = new GLTFLoader();
+    
+    // Load megaphone
     loader.load(
       "/3d_megaphone/Megaphone_01_4k.gltf",
       (gltf) => {
@@ -132,15 +222,115 @@ export default function MegaphoneScrollerPage() {
         box.getSize(size);
         box.getCenter(center);
 
-        loadedObject.position.sub(center);
         const longestAxis = Math.max(size.x, size.y, size.z) || 1;
         const scale = 2.6 / longestAxis;
         loadedObject.scale.setScalar(scale);
+        loadedObject.position.copy(center).multiplyScalar(-scale);
 
-        modelGroup.add(loadedObject);
+        megaphoneGroup.add(loadedObject);
 
-        // Model is loaded, trigger intro animation
-        introAnimation();
+        loader.load(
+          "/sigma_bf_camera.gltf",
+          (gltfCam) => {
+            const loadedCamObject = gltfCam.scene;
+
+            // Load custom textures for camera body, lens, and glass
+            const textureLoader = new THREE.TextureLoader();
+            
+            const cameraLensTexture = textureLoader.load("/sigma_camera_texture.jpg");
+            cameraLensTexture.colorSpace = THREE.SRGBColorSpace;
+
+            const cameraBodyTexture = textureLoader.load("/sigma_camera_body_texture.jpg");
+            cameraBodyTexture.colorSpace = THREE.SRGBColorSpace;
+
+            const cameraGlassTexture = textureLoader.load("/sigma_camera_glass_texture.png");
+            cameraGlassTexture.colorSpace = THREE.SRGBColorSpace;
+
+            loadedCamObject.traverse((node) => {
+              if (!node.isMesh) return;
+              node.castShadow = false;
+              node.receiveShadow = false;
+
+              if (node.geometry?.attributes?.uv && !node.geometry.attributes.uv2) {
+                node.geometry.setAttribute("uv2", node.geometry.attributes.uv);
+              }
+
+              // Trace parent hierarchy to see if this mesh belongs to the lens assembly or glass
+              let isLens = false;
+              let isGlass = false;
+              let temp = node;
+              while (temp) {
+                const name = (temp.name || "").toLowerCase();
+                if (name.includes("glass")) {
+                  isGlass = true;
+                }
+                if (name.includes("lens") || name.includes("glass")) {
+                  isLens = true;
+                }
+                temp = temp.parent;
+              }
+
+              const materials = Array.isArray(node.material) ? node.material : [node.material];
+              materials.forEach((material) => {
+                if (!material) return;
+                
+                // Map the appropriate texture depending on whether it is glass, lens, or body
+                if (isGlass) {
+                  material.map = cameraGlassTexture;
+                  material.roughness = 0.1; // Extremely glossy
+                  material.metalness = 0.9; // Highly reflective
+                  material.transparent = true;
+                  material.opacity = 0.92; // Slightly translucent to show internal reflection/pattern
+                } else if (isLens) {
+                  material.map = cameraLensTexture;
+                  material.roughness = 0.35;
+                  material.metalness = 0.25;
+                } else {
+                  material.map = cameraBodyTexture;
+                  material.roughness = 0.35;
+                  material.metalness = 0.25;
+                }
+                
+                if (material.emissiveMap) {
+                  material.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+                  material.emissiveMap.needsUpdate = true;
+                }
+                if (material.normalMap) {
+                  material.normalScale = new THREE.Vector2(1.1, 1.1);
+                }
+                material.needsUpdate = true;
+              });
+            });
+
+            // Set rotations to 0 initially since GLTF is Y-up by default
+            loadedCamObject.rotation.set(0, 0, 0);
+
+            // Auto centering and scaling for camera model
+            const boxCam = new THREE.Box3().setFromObject(loadedCamObject);
+            const sizeCam = new THREE.Vector3();
+            const centerCam = new THREE.Vector3();
+            boxCam.getSize(sizeCam);
+            boxCam.getCenter(centerCam);
+
+            const longestAxisCam = Math.max(sizeCam.x, sizeCam.y, sizeCam.z) || 1;
+            const scaleCam = 2.5 / longestAxisCam;
+            loadedCamObject.scale.setScalar(scaleCam);
+            loadedCamObject.position.copy(centerCam).multiplyScalar(-scaleCam);
+
+            cameraModelGroup.add(loadedCamObject);
+            cameraModelGroup.scale.set(0, 0, 0); // Hide initially
+            cameraModelGroup.position.set(0, 8, 0); // Start off-screen
+            cameraModelGroup.rotation.set(0, 0, -Math.PI * 2); // Start with Z rotation offset (a full spin)
+
+            // Both loaded, trigger intro
+            introAnimation();
+          },
+          null,
+          (err) => {
+            console.error("Error loading Camera GLTF model:", err);
+            introAnimation();
+          }
+        );
       },
       (xhr) => {
         const total = xhr.total || 435000;
@@ -156,7 +346,7 @@ export default function MegaphoneScrollerPage() {
         const geom = new THREE.BoxGeometry(2, 2, 2);
         const mat = new THREE.MeshStandardMaterial({ color: 0xbe1921, wireframe: true });
         const mesh = new THREE.Mesh(geom, mat);
-        modelGroup.add(mesh);
+        megaphoneGroup.add(mesh);
         introAnimation();
       }
     );
@@ -189,7 +379,7 @@ export default function MegaphoneScrollerPage() {
           "-=3.5"
         )
         .fromTo(
-          modelGroup.rotation,
+          megaphoneGroup.rotation,
           { y: 0 },
           { y: isMobile ? 0 : -1.8, duration: 3.5, ease: "power2.out" },
           "-=3.5"
@@ -215,6 +405,10 @@ export default function MegaphoneScrollerPage() {
     }
 
     function setupScrollAnimation() {
+      // Force scroll to top at start to guarantee page begins on the first slide
+      window.scrollTo(0, 0);
+      lenis.scrollTo(0, { immediate: true });
+
       // Enable page scrolling
       document.body.style.overflowY = "auto";
       const loaderEl = document.querySelector(".loader");
@@ -237,7 +431,7 @@ export default function MegaphoneScrollerPage() {
       })
       .to(camera.position, { x: isMobile ? -2.5 : -3.5, y: isMobile ? 0.2 : 0.3, z: isMobile ? -3.5 : -5.5, ease: "none" })
       .to(target, { x: isMobile ? 0.1 : -2.2, y: -0.1, z: isMobile ? 0.9 : 0.0, ease: "none" }, "<")
-      .to(modelGroup.rotation, { y: 0, ease: "none" }, "<");
+      .to(megaphoneGroup.rotation, { y: 0, ease: "none" }, "<");
 
       // Section 3 (Power) Camera rotation
       gsap.timeline({
@@ -252,8 +446,13 @@ export default function MegaphoneScrollerPage() {
           renderer.render(scene, camera);
         }
       })
-      .to(camera.position, { x: -0.07, y: isMobile ? 3 : 5.45, z: isMobile ? -1.1 : -3.7, ease: "none" })
-      .to(target, { x: isMobile ? -0.4 : -0.04, y: isMobile ? -3.8 : -0.52, z: 0.61, ease: "none" }, "<");
+      .to(camera.position, { x: isMobile ? 0.0 : 0.4, y: isMobile ? 0.15 : 0.2, z: isMobile ? 4.8 : 4.0, ease: "none" })
+      .to(target, { x: isMobile ? 0.0 : -0.1, y: isMobile ? 0.0 : -0.1, z: 0.0, ease: "none" }, "<")
+      .to(megaphoneGroup.position, { y: -8, ease: "none" }, "<")
+      .to(megaphoneGroup.scale, { x: 0, y: 0, z: 0, ease: "none" }, "<")
+      .to(cameraModelGroup.position, { x: 0, y: 0, z: 0, ease: "none" }, "<")
+      .to(cameraModelGroup.scale, { x: 1, y: 1, z: 1, ease: "none" }, "<")
+      .to(cameraModelGroup.rotation, { z: 0, ease: "none" }, "<");
 
       // Section 4 (Projection) Camera rotation
       gsap.timeline({
@@ -268,8 +467,8 @@ export default function MegaphoneScrollerPage() {
           renderer.render(scene, camera);
         }
       })
-      .to(camera.position, { x: -5.5, y: 1.7, z: 5, ease: "none" })
-      .to(target, { x: 0.04, y: 0.2, z: 0.6, ease: "none" }, "<");
+        .to(camera.position, { x: -3.2, y: 1.25, z: 3.75, ease: "none" })
+        .to(target, { x: 3.3, y: 0.25, z: 0.6, ease: "none" }, "<");
 
       // Section 5 (Connectivity) Camera rotation
       gsap.timeline({
@@ -285,7 +484,9 @@ export default function MegaphoneScrollerPage() {
         }
       })
       .to(camera.position, { x: 2.2, y: 0.8, z: -4.5, ease: "none" })
-      .to(target, { x: -0.2, y: -0.1, z: 0.5, ease: "none" }, "<");
+      .to(target, { x: -0.2, y: -0.1, z: 0.5, ease: "none" }, "<")
+      .to(cameraModelGroup.position, { y: -8, ease: "none" }, "<")
+      .to(cameraModelGroup.scale, { x: 0, y: 0, z: 0, ease: "none" }, "<");
 
       // Section 6 (Durability) Camera rotation
       gsap.timeline({
@@ -319,6 +520,22 @@ export default function MegaphoneScrollerPage() {
       .to(camera.position, { x: 4.5, y: -2.2, z: 2.5, ease: "none" })
       .to(target, { x: -0.5, y: 0.3, z: -0.2, ease: "none" }, "<");
 
+      // Section 7.5 (Clients) Camera rotation (Intermediate camera movement while camera is hidden)
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-clients",
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        },
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
+        }
+      })
+      .to(camera.position, { x: 2.0, y: -1.2, z: -1.0, ease: "none" })
+      .to(target, { x: -0.7, y: -0.1, z: 0.0, ease: "none" }, "<");
+
       // Section 8 (Explore) Camera rotation
       gsap.timeline({
         scrollTrigger: {
@@ -332,8 +549,29 @@ export default function MegaphoneScrollerPage() {
           renderer.render(scene, camera);
         }
       })
-      .to(camera.position, { x: -0.3, y: -0.3, z: -4.85, ease: "none" })
-      .to(target, { x: isMobile ? -0.1 : -0.9, y: -0.17, z: 0.1, ease: "none" }, "<");
+      .to(camera.position, { x: isMobile ? 0.0 : 1.5, y: 0.8, z: isMobile ? -3.5 : -2.5, ease: "none" })
+      .to(target, { x: 0.0, y: 0.0, z: 0.0, ease: "none" }, "<")
+      .to(megaphoneGroup.position, { y: 0, ease: "none" }, "<")
+      .to(megaphoneGroup.scale, { x: 1, y: 1, z: 1, ease: "none" }, "<")
+      .to(megaphoneGroup.rotation, { y: 1.8, ease: "none" }, "<");
+
+      // Section 9 (Contact) Camera rotation (Transition out the megaphone)
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-contact",
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        },
+        onUpdate: () => {
+          camera.lookAt(target);
+          renderer.render(scene, camera);
+        }
+      })
+      .to(camera.position, { x: 0.0, y: 0.0, z: -5.0, ease: "none" })
+      .to(target, { x: 0.0, y: 0.0, z: 0.0, ease: "none" }, "<")
+      .to(megaphoneGroup.position, { y: -8, ease: "none" }, "<")
+      .to(megaphoneGroup.scale, { x: 0, y: 0, z: 0, ease: "none" }, "<");
 
 
       // --- CONTENT FADE IN / FADE OUT ON SCROLL ---
@@ -478,6 +716,27 @@ export default function MegaphoneScrollerPage() {
       })
       .to(".recording--content", { opacity: 0, y: -80, ease: "none" });
 
+      // Fade in/out Clients content
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-clients",
+          start: "top bottom",
+          end: "top center",
+          scrub: true,
+        }
+      })
+      .fromTo(".clients--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-clients",
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+      .to(".clients--content", { opacity: 0, y: -80, ease: "none" });
+
       // Fade in Explore content
       gsap.timeline({
         scrollTrigger: {
@@ -488,6 +747,28 @@ export default function MegaphoneScrollerPage() {
         }
       })
       .fromTo(".explore--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" });
+
+      // Fade out Explore content as we scroll to Contact
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-5",
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: true,
+        }
+      })
+      .to(".explore--content", { opacity: 0, y: -80, ease: "none" });
+
+      // Fade in Contact content
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".cam-view-contact",
+          start: "top bottom",
+          end: "top center",
+          scrub: true,
+        }
+      })
+      .fromTo(".contact--content", { opacity: 0, y: 80 }, { opacity: 1, y: 0, ease: "none" });
     }
 
     // explore gallery mode transition
@@ -596,18 +877,18 @@ export default function MegaphoneScrollerPage() {
       });
       tlExit
         .to(camera.position, {
-          x: -0.3,
-          y: -0.3,
-          z: -4.85,
+          x: isMobile ? 0.0 : 1.5,
+          y: 0.8,
+          z: isMobile ? -3.5 : -2.5,
           duration: 1.2,
           ease: "power4.out",
         })
         .to(
           target,
           {
-            x: isMobile ? -0.1 : -0.9,
-            y: -0.17,
-            z: 0.1,
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
             duration: 1.2,
             ease: "power4.out",
           },
@@ -631,7 +912,7 @@ export default function MegaphoneScrollerPage() {
     let wireframeActive = false;
     function setWireframe(val) {
       wireframeActive = val;
-      modelGroup.traverse((node) => {
+      modelsContainer.traverse((node) => {
         if (!node.isMesh) return;
         const materials = Array.isArray(node.material) ? node.material : [node.material];
         materials.forEach((mat) => {
@@ -673,6 +954,14 @@ export default function MegaphoneScrollerPage() {
 
     // 7. Cleanup on unmount
     return () => {
+      console.error = originalConsoleError;
+      console.warn = originalConsoleWarn;
+
+      window.removeEventListener("error", errorHandler);
+      window.removeEventListener("unhandledrejection", rejectionHandler);
+      const overlays = document.querySelectorAll(".debug-error-overlay");
+      overlays.forEach((o) => o.remove());
+
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(lenisRafId);
       cancelAnimationFrame(exploreLoopId);
@@ -701,7 +990,7 @@ export default function MegaphoneScrollerPage() {
       {/* Loader */}
       <div className="loader">
         <div className="header--brand">LESAAL</div>
-        <p>Loading Megaphone... Please wait</p>
+        <p>Loading LESAAL Agency... Please wait</p>
         <div className="progress" />
       </div>
 
@@ -710,9 +999,14 @@ export default function MegaphoneScrollerPage() {
         <div className="header--container">
           <div className="header--brand">LESAAL</div>
           <ul className="header--menu">
-            <li>Features</li>
-            <li>Experience it</li>
-            <li>Buy now</li>
+            <li>Services</li>
+            <li>Case Studies</li>
+            <li>
+              <Link href="/admin/login">Login</Link>
+            </li>
+            <li>
+              <Link href="/signup">Register</Link>
+            </li>
           </ul>
         </div>
       </section>
@@ -721,10 +1015,10 @@ export default function MegaphoneScrollerPage() {
       <section className="section cam-view-1">
         <div className="hero--container">
           <div className="hero--content">
-            <h2>Always announce like a</h2>
-            <h1>Pro</h1>
-            <p>Discover our most advanced megaphone and audio series yet: blazing fast connectivity, incredible sound projection, superb battery stabilization, sharp audio quality, and so much more.</p>
-            <button className="button button-know-more">Know more</button>
+            <h2>Amplify your brand's</h2>
+            <h1>Voice</h1>
+            <p>Welcome to LESAAL. We are a premier digital marketing and creative agency. Using data-driven strategies and storytelling, we help brands scale their audience, optimize conversions, and drive sustainable growth.</p>
+            <button className="button button-know-more">Our Services</button>
           </div>
         </div>
 
@@ -743,16 +1037,9 @@ export default function MegaphoneScrollerPage() {
       <section className="section cam-view-2">
         <div className="performance--container">
           <div className="performance--content">
-            <h2>Outstanding</h2>
+            <h2>Outreach & Amplification</h2>
             <h1>Performance</h1>
-            <p>The Megaphone 01 is perfect for content creators and presenters looking to take their outreach to the next level. Featuring a high-efficiency 15W amplifier, a 24-hour rechargeable battery, and lightning-fast Bluetooth syncing, the Megaphone 01 brings some of the best features to a sleek, lightweight design.</p>
-            <div className="performance--media">
-              <img src="/images/performance_video.jpg" alt="performance video thumbnail" onError={(e) => { e.target.style.display = "none"; }} />
-              <svg width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ cursor: "pointer" }}>
-                <path d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Z" stroke="#be1921" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="m18 15 14 9-14 9V15Z" stroke="#be1921" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
+            <p>We design campaigns that scale. Our performance marketing strategies amplify your message across search, social, and programmatic channels, blending creative assets with media buying to ensure your brand stands out in a crowded market.</p>
           </div>
         </div>
       </section>
@@ -761,19 +1048,19 @@ export default function MegaphoneScrollerPage() {
       <section className="section cam-view-3">
         <div className="power--container">
           <div className="power--content">
-            <h2>Features that bring you</h2>
-            <h1>Power</h1>
-            <p>The easy-to-carry Megaphone 01 packs advanced features into a lightweight, compact design. Pair with a wireless microphone for a high-performance setup that fits easily and comfortably in your hand.</p>
+            <h2>Aesthetics that bring you</h2>
+            <h1>Vision</h1>
+            <p>We capture your brand's essence. From corporate video production and product photography to UI/UX and full brand identities, our creative studio design setups tell stories that leave a lasting impression.</p>
           </div>
           <div className="power--features--img">
             <div style={{ background: "rgba(255,255,255,0.7)", padding: "24px", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.05)", backdropFilter: "blur(10px)" }}>
-              <h3 style={{ fontWeight: 700, fontSize: "18px", color: "#be1921", marginBottom: "12px" }}>Megaphone 01 specs</h3>
+              <h3 style={{ fontWeight: 700, fontSize: "18px", color: "#be1921", marginBottom: "12px" }}>LESAAL Creative Specs</h3>
               <ul style={{ margin: 0, padding: "0 0 0 16px", listStyleType: "disc", color: "#444", fontSize: "14px", lineHeight: "1.8" }}>
-                <li>15 Watts Max Output Power</li>
-                <li>Bluetooth 5.2 Audio Streaming</li>
-                <li>Built-in Siren and Recording Mode</li>
-                <li>IPX5 Weather Resistant Chassis</li>
-                <li>Lithium-Ion USB-C Rechargeable Battery</li>
+                <li>Full Brand Identity Design & Strategy</li>
+                <li>High-End Video Production & Editing</li>
+                <li>Custom UI/UX & Web App Engineering</li>
+                <li>Social Media & Growth Campaigns</li>
+                <li>Data Analytics & PR Management</li>
               </ul>
             </div>
           </div>
@@ -784,8 +1071,8 @@ export default function MegaphoneScrollerPage() {
       <section className="section cam-view-4">
         <div className="autofocus--container">
           <div className="autofocus--content">
-            <h1>Smart, speedy <strong>voice projection</strong></h1>
-            <p>Our Dual-Cone projection technology with ambient noise control lets you keep your voice clear while it filters out background noise for crystal clear audio projection.</p>
+            <h1>Laser-focused <strong>targeting</strong></h1>
+            <p>Our AI-powered audience segmentation and deep learning let you keep your target prospects in view, dynamically optimizing ad spend to capture high-intent buyers in real time.</p>
           </div>
         </div>
       </section>
@@ -794,9 +1081,9 @@ export default function MegaphoneScrollerPage() {
       <section className="section cam-view-connectivity">
         <div className="connectivity--container">
           <div className="connectivity--content">
-            <h2>Seamless</h2>
-            <h1>Connectivity</h1>
-            <p>Sync with your smartphone, tablet, or wireless microphone in less than a second. With Bluetooth 5.2, project audio directly from your streaming apps, pre-recorded alerts, or voice clips at a range of up to 50 meters.</p>
+            <h2>Omnichannel</h2>
+            <h1>Integration</h1>
+            <p>Connect your entire marketing ecosystem. We integrate CRMs, email marketing flows, ad accounts, and analytics pipelines to ensure you can track the entire customer journey in a single unified dashboard.</p>
           </div>
         </div>
       </section>
@@ -805,9 +1092,9 @@ export default function MegaphoneScrollerPage() {
       <section className="section cam-view-durability">
         <div className="durability--container">
           <div className="durability--content">
-            <h2>Built for the</h2>
-            <h1>Elements</h1>
-            <p>Rain or shine, the Megaphone 01 keeps going. Engineered with an IPX5 water-resistant casing and impact-absorbing bumpers, it is built to survive drops, splashes, and extreme temperatures without losing sound projection.</p>
+            <h2>Built for</h2>
+            <h1>Growth</h1>
+            <p>Our marketing strategies are built to survive changes in algorithms and market trends. We focus on search engine optimization (SEO), brand authority, and community building, creating a durable foundation for long-term growth.</p>
           </div>
         </div>
       </section>
@@ -816,9 +1103,30 @@ export default function MegaphoneScrollerPage() {
       <section className="section cam-view-recording">
         <div className="recording--container">
           <div className="recording--content">
-            <h2>Record &</h2>
-            <h1>Playback</h1>
-            <p>Capture up to 240 seconds of high-fidelity voice memo directly on the internal storage and loop it on repeat. Need immediate attention? Toggle the built-in alert siren with a single tactile button.</p>
+            <h2>Transparent</h2>
+            <h1>Analytics</h1>
+            <p>Know exactly where every dollar goes. With custom real-time reporting dashboards and multi-touch attribution modeling, you can monitor conversions, track client acquisitions, and optimize campaigns instantly.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 7.5 (Our Clients) */}
+      <section className="section cam-view-clients">
+        <div className="clients--container">
+          <div className="clients--content">
+            <h2>Trusted by the best</h2>
+            <h1>Our Clients</h1>
+            <p className="clients--subtitle">We partner with leading brands and enterprises globally to amplify their growth and market share.</p>
+            
+            <div className="clients--grid">
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className="client--card">
+                  <div className="client--logo--placeholder">
+                    <span className="client--logo--text">Client {i + 1}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -827,15 +1135,39 @@ export default function MegaphoneScrollerPage() {
       <section className="section cam-view-5">
         <div className="explore--container">
           <div className="explore--content">
-            <h1>Interactive<strong><br />3D gallery</strong></h1>
+            <h1>Interactive<strong><br />agency tour</strong></h1>
             <button className="button button-explore">Explore</button>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 9 (Contact Us) */}
+      <section className="section cam-view-contact">
+        <div className="contact--container">
+          <div className="contact--content">
+            <h2>Get in Touch</h2>
+            <h1>Contact Us</h1>
+            <p className="contact--subtitle">Ready to grow your brand? Contact LESAAL Agency today and let's discuss your next campaign.</p>
+            
+            <form className="contact--form" onSubmit={(e) => e.preventDefault()}>
+              <div className="form--group">
+                <input type="text" placeholder="Name" required className="form--input" />
+              </div>
+              <div className="form--group">
+                <input type="email" placeholder="Email Address" required className="form--input" />
+              </div>
+              <div className="form--group">
+                <textarea placeholder="Your Message" rows="5" required className="form--input form--textarea"></textarea>
+              </div>
+              <button type="submit" className="button button-contact">Send Message</button>
+            </form>
           </div>
         </div>
       </section>
 
       {/* Exit Container */}
       <div className="exit--container">
-        <button className="button--secondary button--body">View Wireframe</button>
+        <button className="button--secondary button--body">View Abstract Model</button>
         <button className="button--secondary button--exit">Exit</button>
       </div>
 
